@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,6 +22,132 @@ namespace Marten
             var task = (Task)QueryMethodAsync.MakeGenericMethod(type).Invoke(session, new object[] { sql, token, parameters });
             await task.ConfigureAwait(false);
             return (IReadOnlyList<object>)task.GetType().GetProperty("Result").GetValue(task);
+        }
+
+        /// <summary>
+        /// Load or find multiple documents by id
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static IReadOnlyList<T> LoadMany<T>(this IQuerySession session, IEnumerable<string> ids)
+        {
+            return session.LoadMany<T>(ids.ToArray());
+        }
+
+
+
+        /// <summary>
+        /// Load or find multiple documents by id
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static IReadOnlyList<T> LoadMany<T>(this IQuerySession session, IEnumerable<Guid> ids)
+        {
+            return session.LoadMany<T>(ids.ToArray());
+        }
+
+
+        /// <summary>
+        /// Load or find multiple documents by id
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static IReadOnlyList<T> LoadMany<T>(this IQuerySession session, IEnumerable<int> ids)
+        {
+            return session.LoadMany<T>(ids.ToArray());
+        }
+
+        /// <summary>
+        /// Load or find multiple documents by id
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static IReadOnlyList<T> LoadMany<T>(this IQuerySession session, IEnumerable<long> ids)
+        {
+            return session.LoadMany<T>(ids.ToArray());
+        }
+
+
+        /// <summary>
+        /// Load or find multiple documents by id
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static Task<IReadOnlyList<T>> LoadManyAsync<T>(this IQuerySession session, IEnumerable<string> ids)
+        {
+            return session.LoadManyAsync<T>(ids.ToArray());
+        }
+
+        /// <summary>
+        /// Load or find multiple documents by id
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static Task<IReadOnlyList<T>> LoadManyAsync<T>(this IQuerySession session, IEnumerable<Guid> ids)
+        {
+            return session.LoadManyAsync<T>(ids.ToArray());
+        }
+
+
+        /// <summary>
+        /// Load or find multiple documents by id
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static Task<IReadOnlyList<T>> LoadManyAsync<T>(this IQuerySession session, IEnumerable<int> ids)
+        {
+            return session.LoadManyAsync<T>(ids.ToArray());
+        }
+
+        /// <summary>
+        /// Load or find multiple documents by id
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static Task<IReadOnlyList<T>> LoadManyAsync<T>(this IQuerySession session, IEnumerable<long> ids)
+        {
+            return session.LoadManyAsync<T>(ids.ToArray());
+        }
+
+        /// <summary>
+        /// Load or find multiple documents by id
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static Task<IReadOnlyList<T>> LoadManyAsync<T>(IQuerySession session, CancellationToken token, IEnumerable<string> ids)
+        {
+            return session.LoadManyAsync<T>(token, ids.ToArray());
+        }
+
+        /// <summary>
+        /// Load or find multiple documents by id
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static Task<IReadOnlyList<T>> LoadManyAsync<T>(IQuerySession session, CancellationToken token, IEnumerable<Guid> ids)
+        {
+
+            return session.LoadManyAsync<T>(token, ids.ToArray());
+        }
+
+        /// <summary>
+        /// Load or find multiple documents by id
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static Task<IReadOnlyList<T>> LoadManyAsync<T>(IQuerySession session, CancellationToken token, IEnumerable<int> ids)
+        {
+            return session.LoadManyAsync<T>(token, ids.ToArray());
+        }
+
+        /// <summary>
+        /// Load or find multiple documents by id
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static Task<IReadOnlyList<T>> LoadManyAsync<T>(IQuerySession session, CancellationToken token, IEnumerable<long> ids)
+        {
+            return session.LoadManyAsync<T>(token, ids.ToArray());
         }
     }
 }

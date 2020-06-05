@@ -116,23 +116,10 @@ namespace Marten
                 throw new ArgumentNullException(nameof(entities));
 
             if (typeof(T).IsGenericEnumerable())
-                throw new ArgumentOutOfRangeException(typeof(T).Name, "Do not use IEnumerable<T> here as the document type. Either cast entities to an array instead or use the IEnumerable<T> Store() overload instead.");
+            {
+                throw new ArgumentOutOfRangeException(typeof(T).Name, "Do not use IEnumerable<T> here as the document type. You may need to cast entities to an array instead.");
+            }
 
-            store(entities);
-        }
-
-        public void Store<T>(IEnumerable<T> entities)
-        {
-            assertNotDisposed();
-
-            if (entities == null)
-                throw new ArgumentNullException(nameof(entities));
-            
-            store(entities);
-        }
-
-        private void store<T>(IEnumerable<T> entities)
-        {
             if (typeof(T) == typeof(object))
             {
                 StoreObjects(entities.OfType<object>());
@@ -162,16 +149,6 @@ namespace Marten
             }
         }
 
-        public void Store<T>(string tenantId, IEnumerable<T> entities)
-        {
-            assertNotDisposed();
-
-            if (entities == null)
-                throw new ArgumentNullException(nameof(entities));
-            
-            store(tenantId, entities);
-        }
-
         public void Store<T>(string tenantId, params T[] entities)
         {
             assertNotDisposed();
@@ -181,14 +158,9 @@ namespace Marten
 
             if (typeof(T).IsGenericEnumerable())
             {
-                throw new ArgumentOutOfRangeException(typeof(T).Name, "Do not use IEnumerable<T> here as the document type. Cast entities to an array or use the IEnumerable<T> Store() overload instead.");
+                throw new ArgumentOutOfRangeException(typeof(T).Name, "Do not use IEnumerable<T> here as the document type. You may need to cast entities to an array instead.");
             }
 
-            store(tenantId, entities);
-        }
-
-        private void store<T>(string tenantId, IEnumerable<T> entities)
-        {
             if (typeof(T) == typeof(object))
             {
                 throw new ArgumentOutOfRangeException("T", "'object' is not supported here");
