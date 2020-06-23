@@ -6,21 +6,21 @@ using Marten.Util;
 
 namespace Marten.V4Internals
 {
-    public class PersistenceGraph: IPersistenceGraph
+    public class ProviderGraph: IProviderGraph
     {
         private readonly StoreOptions _options;
         private ImHashMap<Type, object> _storage = ImHashMap<Type, object>.Empty;
 
-        public PersistenceGraph(StoreOptions options)
+        public ProviderGraph(StoreOptions options)
         {
             _options = options;
         }
 
-        public DocumentPersistence<T> StorageFor<T>()
+        public DocumentProvider<T> StorageFor<T>()
         {
             if (_storage.TryFind(typeof(T), out var stored))
             {
-                return stored.As<DocumentPersistence<T>>();
+                return stored.As<DocumentProvider<T>>();
             }
 
             var mapping = _options.Storage.FindMapping(typeof(T));
@@ -53,16 +53,16 @@ namespace Marten.V4Internals
 
         private interface ISubClassLoader<T>
         {
-            DocumentPersistence<T> BuildPersistence(IPersistenceGraph graph, SubClassMapping mapping);
+            DocumentProvider<T> BuildPersistence(IProviderGraph graph, SubClassMapping mapping);
         }
 
         private class SubClassLoader<TRoot, T, TId> : ISubClassLoader<T> where T : TRoot
         {
-            public DocumentPersistence<T> BuildPersistence(IPersistenceGraph graph, SubClassMapping mapping)
+            public DocumentProvider<T> BuildPersistence(IProviderGraph graph, SubClassMapping mapping)
             {
                 var inner = graph.StorageFor<TRoot>();
 
-                return new DocumentPersistence<T>()
+                return new DocumentProvider<T>()
                 {
                     QueryOnly = new SubClassDocumentStorage<T, TRoot, TId>((IDocumentStorage<TRoot, TId>) inner.QueryOnly, mapping),
                     Lightweight = new SubClassDocumentStorage<T, TRoot, TId>((IDocumentStorage<TRoot, TId>) inner.Lightweight, mapping),

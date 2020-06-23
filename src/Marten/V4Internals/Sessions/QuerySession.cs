@@ -15,15 +15,15 @@ namespace Marten.V4Internals.Sessions
     public class QuerySession : MartenSessionBase, IQuerySession, IQueryProvider
     {
         public QuerySession(IDocumentStore store, IDatabase database, ISerializer serializer, ITenant tenant,
-            IPersistenceGraph persistence, StoreOptions options) : base(database, serializer, tenant, persistence, options)
+            IProviderGraph provider, StoreOptions options) : base(database, serializer, tenant, provider, options)
         {
             DocumentStore = store;
 
         }
 
-        protected override IDocumentStorage<T> selectStorage<T>(DocumentPersistence<T> persistence)
+        protected override IDocumentStorage<T> selectStorage<T>(DocumentProvider<T> provider)
         {
-            return persistence.QueryOnly;
+            return provider.QueryOnly;
         }
 
 

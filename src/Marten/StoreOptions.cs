@@ -11,6 +11,7 @@ using Marten.Schema.Identity.Sequences;
 using Marten.Services;
 using Marten.Storage;
 using Marten.Transforms;
+using Marten.V4Internals;
 using Npgsql;
 
 namespace Marten
@@ -70,12 +71,16 @@ namespace Marten
 
         public Action<IDatabaseCreationExpressions> CreateDatabases { get; set; }
 
+        public IProviderGraph Providers { get; }
+
         public StoreOptions()
         {
             Events = new EventGraph(this);
             Schema = new MartenRegistry();
             Transforms = new Transforms.Transforms(this);
             Storage = new StorageFeatures(this);
+
+            Providers = new ProviderGraph(this);
         }
 
         /// <summary>

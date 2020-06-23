@@ -15,7 +15,7 @@ namespace Marten.V4Internals.Sessions
 {
     public abstract class MartenSessionBase: IMartenSession, IQueryProvider
     {
-        private readonly IPersistenceGraph _persistence;
+        private readonly IProviderGraph _provider;
         private bool _disposed;
         public VersionTracker Versions { get; } = new VersionTracker();
         public IDatabase Database { get; }
@@ -25,16 +25,16 @@ namespace Marten.V4Internals.Sessions
         public StoreOptions Options { get; }
 
         protected MartenSessionBase(IDatabase database, ISerializer serializer, ITenant tenant,
-            IPersistenceGraph persistence, StoreOptions options)
+            IProviderGraph provider, StoreOptions options)
         {
-            _persistence = persistence;
+            _provider = provider;
             Database = database;
             Serializer = serializer;
             Tenant = tenant;
             Options = options;
         }
 
-        protected abstract IDocumentStorage<T> selectStorage<T>(DocumentPersistence<T> persistence);
+        protected abstract IDocumentStorage<T> selectStorage<T>(DocumentProvider<T> provider);
 
 
         public IDocumentStorage StorageFor(Type documentType)
@@ -66,7 +66,7 @@ namespace Marten.V4Internals.Sessions
 
         protected IDocumentStorage<T> storageFor<T>()
         {
-            return selectStorage(_persistence.StorageFor<T>());
+            return selectStorage(_provider.StorageFor<T>());
         }
 
         IQueryable IQueryProvider.CreateQuery(Expression expression)

@@ -282,7 +282,7 @@ namespace Marten.Testing.V4Internals
             CreateSlot().IdentityMap.Store(new StubMartenSession(), Document, Guid.NewGuid());
         }
 
-        private DocumentPersistence<T> CreateSlot()
+        private DocumentProvider<T> CreateSlot()
         {
             var builder = new DocumentPersistenceBuilder(Mapping, Options);
             return builder.Generate<T>();

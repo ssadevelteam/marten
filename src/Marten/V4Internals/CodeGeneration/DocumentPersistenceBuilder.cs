@@ -19,7 +19,7 @@ namespace Marten.V4Internals
             _options = options;
         }
 
-        public DocumentPersistence<T> Generate<T>()
+        public DocumentProvider<T> Generate<T>()
         {
             var assembly = new GeneratedAssembly(new GenerationRules("Marten.Generated"));
 
@@ -50,7 +50,7 @@ namespace Marten.V4Internals
 
             compiler.Compile(assembly);
 
-            var slot = new DocumentPersistence<T>
+            var slot = new DocumentProvider<T>
             {
                 QueryOnly = (IDocumentStorage<T>)Activator.CreateInstance(queryOnly.CompiledType, _mapping),
                 Lightweight = (IDocumentStorage<T>)Activator.CreateInstance(lightweight.CompiledType, _mapping),

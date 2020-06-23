@@ -4,23 +4,23 @@ using Marten.Util;
 
 namespace Marten.V4Internals
 {
-    public class StorageCheckingPersistenceGraph: IPersistenceGraph
+    public class StorageCheckingProviderGraph: IProviderGraph
     {
         private ImHashMap<Type, object> _storage = ImHashMap<Type, object>.Empty;
         private readonly ITenantStorage _tenant;
-        private readonly IPersistenceGraph _inner;
+        private readonly IProviderGraph _inner;
 
-        public StorageCheckingPersistenceGraph(ITenantStorage tenant, IPersistenceGraph inner)
+        public StorageCheckingProviderGraph(ITenantStorage tenant, IProviderGraph inner)
         {
             _tenant = tenant;
             _inner = inner;
         }
 
-        public DocumentPersistence<T> StorageFor<T>()
+        public DocumentProvider<T> StorageFor<T>()
         {
             if (_storage.TryFind(typeof(T), out var stored))
             {
-                return stored.As<DocumentPersistence<T>>();
+                return stored.As<DocumentProvider<T>>();
             }
 
             _tenant.EnsureStorageExists(typeof(T));
