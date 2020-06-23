@@ -8,13 +8,14 @@ using System.Threading.Tasks;
 using Baseline;
 using Marten.Exceptions;
 using Marten.Schema;
-using Marten.Schema.BulkLoading;
 using Marten.Schema.Identity;
 using Marten.Schema.Identity.Sequences;
 using Marten.Services;
 using Marten.Transforms;
 using Marten.Util;
+using Marten.V4Internals;
 using Npgsql;
+using IDocumentStorage = Marten.Schema.IDocumentStorage;
 
 namespace Marten.Storage
 {
@@ -34,6 +35,10 @@ namespace Marten.Storage
             _factory = factory;
 
             resetSequences();
+
+            Providers = options.AutoCreateSchemaObjects == AutoCreate.None
+                ? options.Providers
+                : new StorageCheckingProviderGraph(this, options.Providers);
         }
 
         private void resetSequences()
@@ -176,10 +181,10 @@ namespace Marten.Storage
 
         public ISequences Sequences => _sequences.Value;
 
-        public IDocumentStorage<T> StorageFor<T>()
+        public Schema.IDocumentStorage<T> StorageFor<T>()
         {
             EnsureStorageExists(typeof(T));
-            return _features.StorageFor(typeof(T)).As<IDocumentStorage<T>>();
+            return _features.StorageFor(typeof(T)).As<Schema.IDocumentStorage<T>>();
         }
 
         private readonly ConcurrentDictionary<Type, object> _identityAssignments =
@@ -203,7 +208,7 @@ namespace Marten.Storage
 
         private readonly ConcurrentDictionary<Type, object> _bulkLoaders = new ConcurrentDictionary<Type, object>();
 
-        public IBulkLoader<T> BulkLoaderFor<T>()
+        public Schema.BulkLoading.IBulkLoader<T> BulkLoaderFor<T>()
         {
             EnsureStorageExists(typeof(T));
             return _bulkLoaders.GetOrAdd(typeof(T), t =>
@@ -213,8 +218,8 @@ namespace Marten.Storage
                 if (!(MappingFor(typeof(T)).Root is DocumentMapping mapping))
                     throw new ArgumentOutOfRangeException("Marten cannot do bulk inserts on documents of type " + typeof(T).FullName);
 
-                return new BulkLoader<T>(_options.Serializer(), mapping, assignment);
-            }).As<IBulkLoader<T>>();
+                return new Schema.BulkLoading.BulkLoader<T>(_options.Serializer(), mapping, assignment);
+            }).As<Schema.BulkLoading.IBulkLoader<T>>();
         }
 
         public void MarkAllFeaturesAsChecked()
@@ -245,6 +250,8 @@ namespace Marten.Storage
         {
             return _factory.Create();
         }
+
+        public IProviderGraph Providers { get; }
 
         /// <summary>
         ///     Set the minimum sequence number for a Hilo sequence for a specific document type

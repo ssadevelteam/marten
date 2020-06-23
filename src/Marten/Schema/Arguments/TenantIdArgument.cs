@@ -5,7 +5,6 @@ using LamarCodeGeneration.Model;
 using Marten.Storage;
 using Marten.V4Internals;
 using NpgsqlTypes;
-using ITenant = Marten.V4Internals.ITenant;
 
 namespace Marten.Schema.Arguments
 {

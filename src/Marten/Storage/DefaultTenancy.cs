@@ -4,12 +4,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using Baseline;
 using Marten.Schema;
-using Marten.Schema.BulkLoading;
 using Marten.Schema.Identity;
 using Marten.Schema.Identity.Sequences;
 using Marten.Services;
 using Marten.Transforms;
+using Marten.V4Internals;
 using Npgsql;
+using IDocumentStorage = Marten.Schema.IDocumentStorage;
 
 namespace Marten.Storage
 {
@@ -62,6 +63,11 @@ namespace Marten.Storage
             return _inner.MappingFor(documentType);
         }
 
+        void ITenantStorage.MarkAllFeaturesAsChecked()
+        {
+            throw new NotImplementedException();
+        }
+
         public void EnsureStorageExists(Type documentType)
         {
             _inner.EnsureStorageExists(documentType);
@@ -69,7 +75,7 @@ namespace Marten.Storage
 
         public ISequences Sequences => _inner.Sequences;
 
-        public IDocumentStorage<T> StorageFor<T>()
+        public Schema.IDocumentStorage<T> StorageFor<T>()
         {
             return _inner.StorageFor<T>();
         }
@@ -89,7 +95,7 @@ namespace Marten.Storage
             _inner.ResetSchemaExistenceChecks();
         }
 
-        public IBulkLoader<T> BulkLoaderFor<T>()
+        public Schema.BulkLoading.IBulkLoader<T> BulkLoaderFor<T>()
         {
             return _inner.BulkLoaderFor<T>();
         }
@@ -137,5 +143,7 @@ namespace Marten.Storage
         {
             return _inner.CreateConnection();
         }
+
+        public IProviderGraph Providers => _inner.Providers;
     }
 }

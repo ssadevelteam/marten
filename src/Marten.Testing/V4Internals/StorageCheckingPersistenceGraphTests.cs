@@ -1,3 +1,4 @@
+using Marten.Storage;
 using Marten.Testing.Documents;
 using Marten.V4Internals;
 using NSubstitute;

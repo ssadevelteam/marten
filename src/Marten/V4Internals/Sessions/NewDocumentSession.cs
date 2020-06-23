@@ -7,6 +7,7 @@ using Marten.Events;
 using Marten.Linq;
 using Marten.Patching;
 using Marten.Services;
+using Marten.Storage;
 
 namespace Marten.V4Internals.Sessions
 {

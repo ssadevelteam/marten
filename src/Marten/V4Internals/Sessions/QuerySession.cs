@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Marten.Linq;
 using Marten.Schema;
 using Marten.Services.BatchQuerying;
+using Marten.Storage;
 using Marten.Util;
 using Marten.V4Internals.Linq;
 using Npgsql;

@@ -131,6 +131,26 @@ namespace Marten
 
         public void BulkInsert<T>(IReadOnlyCollection<T> documents, BulkInsertMode mode = BulkInsertMode.InsertsOnly, int batchSize = 1000)
         {
+            // var loader = Options.Providers.StorageFor<T>().BulkLoader;
+            //
+            // using (var conn = Tenancy.Default.CreateConnection())
+            // {
+            //     conn.Open();
+            //     var tx = conn.BeginTransaction();
+            //
+            //     try
+            //     {
+            //         loader.Load(Tenancy.Default, Options.Serializer(), conn, documents, _writerPool);
+            //
+            //         tx.Commit();
+            //     }
+            //     catch (Exception)
+            //     {
+            //         tx.Rollback();
+            //         throw;
+            //     }
+            // }
+
             var bulkInsertion = new BulkInsertion(Tenancy.Default, Options, _writerPool);
             bulkInsertion.BulkInsert(documents, mode, batchSize);
         }

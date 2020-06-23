@@ -1,3 +1,5 @@
+using Marten.Storage;
+
 namespace Marten.V4Internals.Sessions
 {
     public class LightweightSession: NewDocumentSession

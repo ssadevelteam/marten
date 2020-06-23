@@ -3,23 +3,43 @@ using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
 using Marten.Schema;
-using Marten.Schema.BulkLoading;
 using Marten.Schema.Identity;
 using Marten.Schema.Identity.Sequences;
 using Marten.Services;
 using Marten.Transforms;
+using Marten.V4Internals;
 using Npgsql;
+using IDocumentStorage = Marten.Schema.IDocumentStorage;
 
 namespace Marten.Storage
 {
+    public interface ITenantStorage
+    {
+        /// <summary>
+        /// Directs Marten to disregard any previous schema checks. Useful
+        /// if you change the underlying schema without shutting down the document store
+        /// </summary>
+        void ResetSchemaExistenceChecks();
+
+        void MarkAllFeaturesAsChecked();
+
+        /// <summary>
+        /// Ensures that the IDocumentStorage object for a document type is ready
+        /// and also attempts to update the database schema for any detected changes
+        /// </summary>
+        /// <param name="documentType"></param>
+        void EnsureStorageExists(Type documentType);
+    }
+
     [Obsolete("This gets dramatically thinned down in v4. See the version in the V4 internals")]
-    public interface ITenant
+    public interface ITenant : ITenantStorage
     {
         string TenantId { get; }
 
         /// <summary>
         ///     Query against the actual Postgresql database schema objects
         /// </summary>
+        [Obsolete("Make this a method? Put on Schema?")]
         IDbObjects DbObjects { get; }
 
         /// <summary>
@@ -28,6 +48,7 @@ namespace Marten.Storage
         /// </summary>
         /// <param name="documentType"></param>
         /// <returns></returns>
+        [Obsolete("Goes away in v4")]
         IDocumentStorage StorageFor(Type documentType);
 
         /// <summary>
@@ -36,38 +57,30 @@ namespace Marten.Storage
         /// </summary>
         /// <param name="documentType"></param>
         /// <returns></returns>
+        [Obsolete("Goes away in v4")]
         IDocumentMapping MappingFor(Type documentType);
-
-        /// <summary>
-        /// Ensures that the IDocumentStorage object for a document type is ready
-        /// and also attempts to update the database schema for any detected changes
-        /// </summary>
-        /// <param name="documentType"></param>
-        void EnsureStorageExists(Type documentType);
 
         /// <summary>
         /// Used to create new Hilo sequences
         /// </summary>
+        [Obsolete("Goes away in v4")]
         ISequences Sequences { get; }
 
-        IDocumentStorage<T> StorageFor<T>();
+        [Obsolete("Goes away in v4")]
+        Schema.IDocumentStorage<T> StorageFor<T>();
 
+        [Obsolete("Goes away in v4")]
         IdAssignment<T> IdAssignmentFor<T>();
 
         TransformFunction TransformFor(string name);
-
-        /// <summary>
-        /// Directs Marten to disregard any previous schema checks. Useful
-        /// if you change the underlying schema without shutting down the document store
-        /// </summary>
-        void ResetSchemaExistenceChecks();
 
         /// <summary>
         /// Retrieve a configured IBulkLoader for a document type
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        IBulkLoader<T> BulkLoaderFor<T>();
+        [Obsolete("Goes away in v4")]
+        Schema.BulkLoading.IBulkLoader<T> BulkLoaderFor<T>();
 
         /// <summary>
         ///     Directly open a managed connection to the underlying Postgresql database
@@ -107,5 +120,9 @@ namespace Marten.Storage
         /// </summary>
         /// <returns></returns>
         NpgsqlConnection CreateConnection();
+
+
+
+        IProviderGraph Providers { get; }
     }
 }

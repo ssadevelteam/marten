@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Marten.Services;
+using Marten.Storage;
 using Npgsql;
 
 namespace Marten.V4Internals
