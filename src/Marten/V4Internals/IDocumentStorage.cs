@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Marten.Linq;
 using Marten.Linq.Fields;
+using Marten.Storage;
 using Marten.V4Internals.Linq;
 using Remotion.Linq;
 
@@ -40,7 +41,6 @@ namespace Marten.V4Internals
 
 
         IStorageOperation DeleteForWhere(IWhereFragment where);
-
     }
 
     public interface IDocumentStorage<T, TId> : IDocumentStorage<T>
@@ -53,5 +53,7 @@ namespace Marten.V4Internals
         IReadOnlyList<T> LoadMany(TId[] ids, IMartenSession session);
         Task<IReadOnlyList<T>> LoadManyAsync(TId[] ids, IMartenSession session, CancellationToken token);
 
+
+        TId AssignIdentity(T document, ITenant tenant);
     }
 }

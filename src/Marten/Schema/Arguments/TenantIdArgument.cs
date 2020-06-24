@@ -20,13 +20,6 @@ namespace Marten.Schema.Arguments
             Column = TenantIdColumn.Name;
         }
 
-        public override Expression CompileBulkImporter(DocumentMapping mapping, EnumStorage enumStorage, Expression writer, ParameterExpression document, ParameterExpression alias, ParameterExpression serializer, ParameterExpression textWriter, ParameterExpression tenantId)
-        {
-            var method = writeMethod.MakeGenericMethod(typeof(string));
-            var dbType = Expression.Constant(DbType);
-
-            return Expression.Call(writer, method, tenantId, dbType);
-        }
 
         public override Expression CompileUpdateExpression(EnumStorage enumStorage, ParameterExpression call, ParameterExpression doc,
             ParameterExpression updateBatch, ParameterExpression mapping, ParameterExpression currentVersion,
@@ -38,7 +31,8 @@ namespace Marten.Schema.Arguments
             return Expression.Call(call, _paramMethod, argName, tenantId, dbType);
         }
 
-        public override void GenerateCode(GeneratedMethod method, GeneratedType type, int i, Argument parameters)
+        public override void GenerateCode(GeneratedMethod method, GeneratedType type, int i, Argument parameters,
+            DocumentMapping mapping)
         {
             method.Frames.Code($"{{0}}[{{1}}].Value = {{2}}.{nameof(IMartenSession.Tenant)}.{nameof(ITenant.TenantId)};", parameters, i, Use.Type<IMartenSession>());
             method.Frames.Code("{0}[{1}].NpgsqlDbType = {2};", parameters, i, DbType);

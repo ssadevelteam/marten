@@ -1,16 +1,13 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Baseline;
 using LamarCodeGeneration;
 using LamarCodeGeneration.Model;
 using Marten.Schema;
 using Marten.Schema.Arguments;
-using Marten.Schema.BulkLoading;
 using Marten.Services;
 using Marten.Storage;
 using Marten.Util;
-using Npgsql;
 using NpgsqlTypes;
 using ReflectionExtensions = LamarCodeGeneration.ReflectionExtensions;
 
@@ -19,12 +16,12 @@ namespace Marten.V4Internals
     public class BulkLoaderBuilder
     {
         private readonly DocumentMapping _mapping;
-        private readonly DbObjectName _tempTable;
+        private readonly string _tempTable;
 
         public BulkLoaderBuilder(DocumentMapping mapping)
         {
             _mapping = mapping;
-            _tempTable = new DbObjectName(_mapping.Table.Schema, _mapping.Table.Name + "_temp") ;
+            _tempTable = _mapping.Table.Name + "_temp" ;
         }
 
         public GeneratedType BuildType(GeneratedAssembly assembly)
@@ -35,8 +32,8 @@ namespace Marten.V4Internals
             var arguments = upsertFunction.OrderedArguments().Where(x => !(x is CurrentVersionArgument)).ToArray();
             var columns = arguments.Select(x => $"\\\"{x.Column}\\\"").Join(", ");
 
-            var type = assembly.AddType($"{_mapping.DocumentType.Name}BulkLoader",
-                typeof(BulkLoader<>).MakeGenericType(_mapping.DocumentType));
+            var type = assembly.AddType($"{_mapping.DocumentType.Name.Sanitize()}BulkLoader",
+                typeof(BulkLoader<,>).MakeGenericType(_mapping.DocumentType, _mapping.IdType));
 
             if (_mapping.IsHierarchy())
             {
@@ -47,7 +44,7 @@ namespace Marten.V4Internals
                 .Return($"COPY {_mapping.Table.QualifiedName}({columns}) FROM STDIN BINARY");
 
             type.MethodFor("TempLoaderSql").Frames
-                .Return($"COPY {_tempTable.QualifiedName}({columns}) FROM STDIN BINARY");
+                .Return($"COPY {_tempTable}({columns}) FROM STDIN BINARY");
 
             type.MethodFor(nameof(CopyNewDocumentsFromTempTable))
                 .Frames.Return(CopyNewDocumentsFromTempTable());
@@ -96,67 +93,5 @@ namespace Marten.V4Internals
         }
 
 
-    }
-
-    public interface IBulkLoader<T>
-    {
-        void Load(ITenant tenant, ISerializer serializer, NpgsqlConnection conn, IEnumerable<T> documents, CharArrayTextWriter pool);
-
-        string CreateTempTableForCopying();
-
-        void LoadIntoTempTable(ITenant tenant, ISerializer serializer, NpgsqlConnection conn, IEnumerable<T> documents, CharArrayTextWriter pool);
-
-        string CopyNewDocumentsFromTempTable();
-
-        string OverwriteDuplicatesFromTempTable();
-    }
-
-
-    public abstract class BulkLoader<T>: IBulkLoader<T>
-    {
-        public void Load(ITenant tenant, ISerializer serializer, NpgsqlConnection conn, IEnumerable<T> documents,
-            CharArrayTextWriter pool)
-        {
-            using (var writer = conn.BeginBinaryImport(MainLoaderSql()))
-            {
-                foreach (var document in documents)
-                {
-                    writer.StartRow();
-                    LoadRow(writer, document, tenant, serializer, pool);
-                }
-
-                writer.Complete();
-            }
-        }
-
-        public abstract void LoadRow(NpgsqlBinaryImporter writer, T document, ITenant tenant, ISerializer serializer,
-            CharArrayTextWriter pool);
-
-
-        public abstract string MainLoaderSql();
-        public abstract string TempLoaderSql();
-
-
-
-        public abstract string CreateTempTableForCopying();
-
-        public void LoadIntoTempTable(ITenant tenant, ISerializer serializer, NpgsqlConnection conn, IEnumerable<T> documents,
-            CharArrayTextWriter pool)
-        {
-            using (var writer = conn.BeginBinaryImport(TempLoaderSql()))
-            {
-                foreach (var document in documents)
-                {
-                    writer.StartRow();
-                    LoadRow(writer, document, tenant, serializer, pool);
-                }
-
-                writer.Complete();
-            }
-        }
-
-        public abstract string CopyNewDocumentsFromTempTable();
-
-        public abstract string OverwriteDuplicatesFromTempTable();
     }
 }

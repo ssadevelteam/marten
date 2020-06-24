@@ -95,11 +95,6 @@ namespace Marten.Storage
             _inner.ResetSchemaExistenceChecks();
         }
 
-        public Schema.BulkLoading.IBulkLoader<T> BulkLoaderFor<T>()
-        {
-            return _inner.BulkLoaderFor<T>();
-        }
-
         public IManagedConnection OpenConnection(CommandRunnerMode mode = CommandRunnerMode.AutoCommit,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted, int? timeout = null)
         {

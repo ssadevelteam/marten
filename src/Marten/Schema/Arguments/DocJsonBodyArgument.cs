@@ -54,16 +54,6 @@ namespace Marten.Schema.Arguments
             }
         }
 
-        public override Expression CompileBulkImporter(DocumentMapping mapping, EnumStorage enumStorage, Expression writer, ParameterExpression document, ParameterExpression alias, ParameterExpression serializer, ParameterExpression textWriter, ParameterExpression tenantId)
-        {
-            var method = writeMethod.MakeGenericMethod(typeof(ArraySegment<char>));
-            var dbType = Expression.Constant(DbType);
-
-            return Expression.Block(
-                Expression.Call(serializer, _tojsonWithWriter, document, textWriter),
-                Expression.Call(writer, method, Expression.Call(textWriter, _toSegment), dbType)
-                );
-        }
 
         public override void GenerateBulkWriterCode(GeneratedType type, GeneratedMethod load, DocumentMapping mapping)
         {
@@ -73,7 +63,8 @@ namespace Marten.Schema.Arguments
                 NpgsqlDbType.Jsonb);
         }
 
-        public override void GenerateCode(GeneratedMethod method, GeneratedType type, int i, Argument parameters)
+        public override void GenerateCode(GeneratedMethod method, GeneratedType type, int i, Argument parameters,
+            DocumentMapping mapping)
         {
             method.Frames.Code($"{parameters.Usage}[{i}].NpgsqlDbType = {{0}};", NpgsqlDbType.Jsonb);
             method.Frames.Code($"{parameters.Usage}[{i}].Value = {{0}}.Serializer.ToJson(_document);", Use.Type<IMartenSession>());

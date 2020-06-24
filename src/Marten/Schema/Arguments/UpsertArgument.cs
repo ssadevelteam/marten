@@ -55,31 +55,13 @@ namespace Marten.Schema.Arguments
             }
         }
 
+        public Type DotNetType => _members?.LastOrDefault()?.GetMemberType();
+
         public NpgsqlDbType DbType { get; set; }
 
         public string ArgumentDeclaration()
         {
             return $"{Arg} {PostgresType}";
-        }
-
-        [Obsolete("Will go away in v4")]
-        public virtual Expression CompileBulkImporter(DocumentMapping mapping, EnumStorage enumStorage, Expression writer, ParameterExpression document, ParameterExpression alias, ParameterExpression serializer, ParameterExpression textWriter, ParameterExpression tenantId)
-        {
-            var memberType = Members.Last().GetMemberType();
-
-            var value = LambdaBuilder.ToExpression(mapping.EnumStorage, Members, document);
-
-            if (memberType.IsEnum)
-            {
-                memberType = mapping.EnumStorage == EnumStorage.AsString ? typeof(string) : typeof(int);
-                value = LambdaBuilder.ToExpression(mapping.EnumStorage, Members, document);
-            }
-
-            var method = writeMethod.MakeGenericMethod(memberType);
-
-            var dbType = Expression.Constant(DbType);
-
-            return Expression.Call(writer, method, value, dbType);
         }
 
         [Obsolete("Will go away in v4")]
@@ -97,17 +79,47 @@ namespace Marten.Schema.Arguments
             return Expression.Call(call, _paramMethod, argName, body, Expression.Constant(DbType));
         }
 
-        public virtual void GenerateCode(GeneratedMethod method, GeneratedType type, int i, Argument parameters)
+        public virtual void GenerateCode(GeneratedMethod method, GeneratedType type, int i, Argument parameters,
+            DocumentMapping mapping)
         {
-            // TODO -- watch enums here
-            method.Frames.Code($"{parameters.Usage}[{i}].{nameof(NpgsqlParameter.NpgsqlDbType)} = {{0}};", DbType);
-            method.Frames.Code($"{parameters.Usage}[{i}].{nameof(NpgsqlParameter.Value)} = document.{_members.Last().Name};");
+            if (DotNetType.IsEnum)
+            {
+                if (mapping.EnumStorage == EnumStorage.AsInteger)
+                {
+                    method.Frames.Code($"{parameters.Usage}[{i}].{nameof(NpgsqlParameter.NpgsqlDbType)} = {{0}};", NpgsqlDbType.Integer);
+                    method.Frames.Code($"{parameters.Usage}[{i}].{nameof(NpgsqlParameter.Value)} = (int)document.{_members.Last().Name};");
+                }
+                else
+                {
+                    method.Frames.Code($"{parameters.Usage}[{i}].{nameof(NpgsqlParameter.NpgsqlDbType)} = {{0}};", NpgsqlDbType.Varchar);
+                    method.Frames.Code($"{parameters.Usage}[{i}].{nameof(NpgsqlParameter.Value)} = document.{_members.Last().Name}?.ToString();");
+                }
+            }
+            else
+            {
+                method.Frames.Code($"{parameters.Usage}[{i}].{nameof(NpgsqlParameter.NpgsqlDbType)} = {{0}};", DbType);
+                method.Frames.Code($"{parameters.Usage}[{i}].{nameof(NpgsqlParameter.Value)} = document.{_members.Last().Name};");
+            }
         }
 
         public virtual void GenerateBulkWriterCode(GeneratedType type, GeneratedMethod load, DocumentMapping mapping)
         {
-            // TODO -- watch enums here
-            load.Frames.Code($"writer.Write(document.{_members.Last().Name}, {{0}});", DbType);
+            if (DotNetType.IsEnum)
+            {
+                if (mapping.EnumStorage == EnumStorage.AsInteger)
+                {
+                    load.Frames.Code($"writer.Write((int)document.{_members.Last().Name}, {{0}});", NpgsqlDbType.Integer);
+                }
+                else
+                {
+                    load.Frames.Code($"writer.Write(document.{_members.Last().Name}?.ToString(), {{0}});", NpgsqlDbType.Varchar);
+                }
+            }
+            else
+            {
+                load.Frames.Code($"writer.Write(document.{_members.Last().Name}, {{0}});", DbType);
+            }
+
         }
     }
 }

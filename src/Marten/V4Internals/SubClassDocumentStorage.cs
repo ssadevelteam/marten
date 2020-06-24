@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Marten.Linq;
 using Marten.Linq.Fields;
 using Marten.Schema;
+using Marten.Storage;
 using Marten.Util;
 using Marten.V4Internals.Linq;
 using Remotion.Linq;
@@ -140,6 +141,11 @@ namespace Marten.V4Internals
         public async Task<IReadOnlyList<T>> LoadManyAsync(TId[] ids, IMartenSession session, CancellationToken token)
         {
             return (await _parent.LoadManyAsync(ids, session, token)).OfType<T>().ToList();
+        }
+
+        public TId AssignIdentity(T document, ITenant tenant)
+        {
+            return _parent.AssignIdentity(document, tenant);
         }
     }
 }

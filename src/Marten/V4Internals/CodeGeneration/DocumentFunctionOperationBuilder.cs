@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using Baseline;
+using ImTools;
 using LamarCodeGeneration;
 using LamarCodeGeneration.Frames;
 using LamarCodeGeneration.Model;
@@ -13,6 +15,15 @@ using TypeMappings = Marten.Util.TypeMappings;
 
 namespace Marten.V4Internals
 {
+
+    public static class StringExtensions
+    {
+        public static string Sanitize(this string value)
+        {
+            return Regex.Replace(value, @"[\#\<\>\,\.\]\[\`\+\-]", "_").Replace(" ", "");
+        }
+    }
+
     public class DocumentFunctionOperationBuilder
     {
         private readonly UpsertFunction _function;
@@ -27,7 +38,7 @@ namespace Marten.V4Internals
             CommandText = $"select {_function.Identifier}({_function.OrderedArguments().Select(x => "?").Join(", ")})";
 
             ClassName =
-                $"{function.GetType().Name.Replace("Function", "")}{mapping.DocumentType.NameInCode()}Operation";
+                $"{function.GetType().Name.Replace("Function", "")}{mapping.DocumentType.NameInCode().Sanitize()}Operation";
 
             _mapping = mapping;
         }
@@ -105,7 +116,7 @@ namespace Marten.V4Internals
             for (var i = 0; i < arguments.Length; i++)
             {
                 var argument = arguments[i];
-                argument.GenerateCode(method, type, i, parameters);
+                argument.GenerateCode(method, type, i, parameters, _mapping);
             }
         }
     }

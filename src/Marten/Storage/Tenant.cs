@@ -73,6 +73,10 @@ namespace Marten.Storage
         {
             _checks.Clear();
             resetSequences();
+            if (Providers is StorageCheckingProviderGraph)
+            {
+                Providers = new StorageCheckingProviderGraph(this, _options.Providers);
+            }
         }
 
         public void EnsureStorageExists(Type featureType)
@@ -208,20 +212,6 @@ namespace Marten.Storage
 
         private readonly ConcurrentDictionary<Type, object> _bulkLoaders = new ConcurrentDictionary<Type, object>();
 
-        public Schema.BulkLoading.IBulkLoader<T> BulkLoaderFor<T>()
-        {
-            EnsureStorageExists(typeof(T));
-            return _bulkLoaders.GetOrAdd(typeof(T), t =>
-            {
-                var assignment = IdAssignmentFor<T>();
-
-                if (!(MappingFor(typeof(T)).Root is DocumentMapping mapping))
-                    throw new ArgumentOutOfRangeException("Marten cannot do bulk inserts on documents of type " + typeof(T).FullName);
-
-                return new Schema.BulkLoading.BulkLoader<T>(_options.Serializer(), mapping, assignment);
-            }).As<Schema.BulkLoading.IBulkLoader<T>>();
-        }
-
         public void MarkAllFeaturesAsChecked()
         {
             foreach (var feature in _features.AllActiveFeatures(this))
@@ -251,7 +241,7 @@ namespace Marten.Storage
             return _factory.Create();
         }
 
-        public IProviderGraph Providers { get; }
+        public IProviderGraph Providers { get; private set; }
 
         /// <summary>
         ///     Set the minimum sequence number for a Hilo sequence for a specific document type

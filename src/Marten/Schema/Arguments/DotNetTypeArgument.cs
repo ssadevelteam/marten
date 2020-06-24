@@ -23,17 +23,6 @@ namespace Marten.Schema.Arguments
             PostgresType = "varchar";
         }
 
-        public override Expression CompileBulkImporter(DocumentMapping mapping, EnumStorage enumStorage, Expression writer, ParameterExpression document, ParameterExpression alias, ParameterExpression serializer, ParameterExpression textWriter, ParameterExpression tenantId)
-        {
-            var getType = Expression.Call(document, _getType);
-            var getName = Expression.Call(getType, _fullName);
-
-            var method = writeMethod.MakeGenericMethod(typeof(string));
-
-            var dbType = Expression.Constant(DbType);
-
-            return Expression.Call(writer, method, getName, dbType);
-        }
 
         public override Expression CompileUpdateExpression(EnumStorage enumStorage, ParameterExpression call, ParameterExpression doc, ParameterExpression updateBatch, ParameterExpression mapping, ParameterExpression currentVersion, ParameterExpression newVersion, ParameterExpression tenantId, bool useCharBufferPooling)
         {
@@ -46,7 +35,8 @@ namespace Marten.Schema.Arguments
             return Expression.Call(call, _paramMethod, argName, getName, dbType);
         }
 
-        public override void GenerateCode(GeneratedMethod method, GeneratedType type, int i, Argument parameters)
+        public override void GenerateCode(GeneratedMethod method, GeneratedType type, int i, Argument parameters,
+            DocumentMapping mapping)
         {
             var version = type.AllInjectedFields[0];
 

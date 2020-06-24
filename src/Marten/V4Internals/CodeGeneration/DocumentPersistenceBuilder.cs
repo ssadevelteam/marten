@@ -3,6 +3,7 @@ using LamarCodeGeneration;
 using LamarCompiler;
 using Marten.Schema;
 using Marten.Schema.Arguments;
+using Marten.Schema.BulkLoading;
 using Marten.Util;
 using Npgsql;
 
@@ -55,9 +56,13 @@ namespace Marten.V4Internals
                 QueryOnly = (IDocumentStorage<T>)Activator.CreateInstance(queryOnly.CompiledType, _mapping),
                 Lightweight = (IDocumentStorage<T>)Activator.CreateInstance(lightweight.CompiledType, _mapping),
                 IdentityMap = (IDocumentStorage<T>)Activator.CreateInstance(identityMap.CompiledType, _mapping),
-                DirtyTracking = (IDocumentStorage<T>)Activator.CreateInstance(dirtyTracking.CompiledType, _mapping),
-                BulkLoader = _mapping.IsHierarchy() ? (IBulkLoader<T>)Activator.CreateInstance(bulkWriterType.CompiledType, _mapping) : (IBulkLoader<T>)Activator.CreateInstance(bulkWriterType.CompiledType)
+                DirtyTracking = (IDocumentStorage<T>)Activator.CreateInstance(dirtyTracking.CompiledType, _mapping)
+
             };
+
+            slot.BulkLoader = _mapping.IsHierarchy()
+                ? (IBulkLoader<T>)Activator.CreateInstance(bulkWriterType.CompiledType, slot.QueryOnly, _mapping)
+                : (IBulkLoader<T>)Activator.CreateInstance(bulkWriterType.CompiledType, slot.QueryOnly);
 
             return slot;
         }

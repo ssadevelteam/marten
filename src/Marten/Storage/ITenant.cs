@@ -74,13 +74,6 @@ namespace Marten.Storage
 
         TransformFunction TransformFor(string name);
 
-        /// <summary>
-        /// Retrieve a configured IBulkLoader for a document type
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        [Obsolete("Goes away in v4")]
-        Schema.BulkLoading.IBulkLoader<T> BulkLoaderFor<T>();
 
         /// <summary>
         ///     Directly open a managed connection to the underlying Postgresql database

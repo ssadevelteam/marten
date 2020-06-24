@@ -19,7 +19,7 @@ namespace Marten.V4Internals
 
         public GeneratedType BuildType(GeneratedAssembly assembly)
         {
-            var typeName = $"{_style}{_mapping.DocumentType.Name}Selector";
+            var typeName = $"{_style}{_mapping.DocumentType.Name.Sanitize()}Selector";
 
 
             var baseType = determineBaseType();

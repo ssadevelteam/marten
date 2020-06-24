@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Marten.Schema.BulkLoading;
 using Marten.Services;
 using Marten.Storage;
 using Npgsql;
@@ -15,10 +16,9 @@ namespace Marten.V4Internals
             _inner = inner;
         }
 
-        public void Load(ITenant tenant, ISerializer serializer, NpgsqlConnection conn, IEnumerable<T> documents,
-            CharArrayTextWriter pool)
+        public void Load(ITenant tenant, ISerializer serializer, NpgsqlConnection conn, IEnumerable<T> documents)
         {
-            _inner.Load(tenant, serializer, conn, documents.OfType<TRoot>(), pool);
+            _inner.Load(tenant, serializer, conn, documents.OfType<TRoot>());
         }
 
         public string CreateTempTableForCopying()
@@ -26,10 +26,10 @@ namespace Marten.V4Internals
             return _inner.CreateTempTableForCopying();
         }
 
-        public void LoadIntoTempTable(ITenant tenant, ISerializer serializer, NpgsqlConnection conn, IEnumerable<T> documents,
-            CharArrayTextWriter pool)
+        public void LoadIntoTempTable(ITenant tenant, ISerializer serializer, NpgsqlConnection conn,
+            IEnumerable<T> documents)
         {
-            _inner.LoadIntoTempTable(tenant, serializer, conn, documents.OfType<TRoot>(), pool);
+            _inner.LoadIntoTempTable(tenant, serializer, conn, documents.OfType<TRoot>());
         }
 
         public string CopyNewDocumentsFromTempTable()
