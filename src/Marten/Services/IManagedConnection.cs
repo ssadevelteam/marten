@@ -1,11 +1,12 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Marten.V4Internals;
 using Npgsql;
 
 namespace Marten.Services
 {
-    public interface IManagedConnection: IDisposable
+    public interface IManagedConnection: IDisposable, IDatabase
     {
         void Execute(NpgsqlCommand cmd, Action<NpgsqlCommand> action = null);
 

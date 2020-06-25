@@ -13,10 +13,10 @@ using Npgsql;
 
 namespace Marten.V4Internals.Sessions
 {
-    public class QuerySession : MartenSessionBase, IQuerySession, IQueryProvider
+    public class QuerySession : MartenSessionBase, IQuerySession
     {
         public QuerySession(IDocumentStore store, IDatabase database, ISerializer serializer, ITenant tenant,
-            IProviderGraph provider, StoreOptions options) : base(database, serializer, tenant, provider, options)
+            StoreOptions options) : base(database, serializer, tenant, options)
         {
             DocumentStore = store;
 
@@ -277,7 +277,6 @@ namespace Marten.V4Internals.Sessions
 
 
         public IJsonLoader Json => throw new NotImplementedException();
-        public Storage.ITenant Tenant => throw new NotImplementedException();
         public Guid? VersionFor<TDoc>(TDoc entity)
         {
             return storageFor<TDoc>().VersionFor(entity, this);

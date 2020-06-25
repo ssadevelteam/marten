@@ -305,13 +305,8 @@ namespace Marten
                 throw new DefaultTenantUsageDisabledException();
             }
 
-            var parser = new MartenQueryParser();
-
             var connection = buildManagedConnection(options, tenant, CommandRunnerMode.ReadOnly, _retryPolicy);
-
-            var session = new QuerySession(this,
-                connection, parser,
-                new NulloIdentityMap(Serializer, Options.Listeners), tenant);
+            var session = new V4Internals.Sessions.QuerySession(this, connection, Serializer, tenant, Options);
 
             connection.BeginSession();
 
@@ -334,13 +329,10 @@ namespace Marten
                 throw new DefaultTenantUsageDisabledException();
             }
 
-            var parser = new MartenQueryParser();
 
             var connection = tenant.OpenConnection(CommandRunnerMode.ReadOnly);
 
-            var session = new QuerySession(this,
-                connection, parser,
-                new NulloIdentityMap(Serializer, Options.Listeners), tenant);
+            var session = new V4Internals.Sessions.QuerySession(this, connection, Serializer, tenant, Options);
 
             connection.BeginSession();
 

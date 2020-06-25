@@ -10,7 +10,7 @@ using Npgsql;
 
 namespace Marten.Services
 {
-    public class ManagedConnection: IManagedConnection, IDatabase
+    public class ManagedConnection: IManagedConnection
     {
         private readonly IConnectionFactory _factory;
         private readonly CommandRunnerMode _mode;
