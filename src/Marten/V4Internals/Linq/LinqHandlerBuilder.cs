@@ -8,6 +8,7 @@ using Marten.Linq;
 using Marten.V4Internals.Linq.QueryHandlers;
 using Remotion.Linq;
 using Remotion.Linq.Clauses;
+using Remotion.Linq.Clauses.Expressions;
 using Remotion.Linq.Clauses.ResultOperators;
 
 namespace Marten.V4Internals.Linq
@@ -36,19 +37,30 @@ namespace Marten.V4Internals.Linq
                     break;
             }
 
-            for (var i = 0; i < Model.BodyClauses.Count; i++)
+            // TODO -- this probably needs to get fancier later
+            if (Model.MainFromClause.FromExpression is SubQueryExpression sub)
             {
-                var clause = Model.BodyClauses[i];
+                processQueryModel(sub.QueryModel, storage);
+            }
+
+            processQueryModel(Model, storage);
+        }
+
+        private void processQueryModel(QueryModel queryModel, IDocumentStorage storage)
+        {
+            for (var i = 0; i < queryModel.BodyClauses.Count; i++)
+            {
+                var clause = queryModel.BodyClauses[i];
                 switch (clause)
                 {
                     case WhereClause where:
-                        CurrentStatement.WhereClauses.Add(where);
+                        CurrentStatement.WhereClauses.Add(@where);
                         break;
                     case OrderByClause orderBy:
                         CurrentStatement.Orderings.AddRange(orderBy.Orderings);
                         break;
                     case AdditionalFromClause additional:
-                        var isComplex = Model.BodyClauses.Count > i + 1;
+                        var isComplex = queryModel.BodyClauses.Count > i + 1;
                         var elementType = additional.ItemType;
 
                         var collectionField = storage.Fields.FieldFor(additional.FromExpression);
@@ -61,10 +73,13 @@ namespace Marten.V4Internals.Linq
                 }
             }
 
-            foreach (var resultOperator in Model.ResultOperators) AddResultOperator(resultOperator);
+            foreach (var resultOperator in queryModel.ResultOperators)
+            {
+                AddResultOperator(resultOperator);
+            }
         }
 
-        public Statement CurrentStatement { get; }
+        public Statement CurrentStatement { get; set; }
 
         public Statement TopStatement { get; }
 

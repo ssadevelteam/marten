@@ -471,7 +471,7 @@ namespace Marten.Testing.V4Internals
             using var newSession = BuildQuerySession();
 
             // .Where(x => x.Color == Colors.Blue)
-            var numbers = newSession.Query<Target>().Select(x => x.Number).ToList();
+            var numbers = newSession.Query<Target>().Select(x => x.Number).Take(1).ToList();
             numbers.ShouldNotBeNull();
         }
 
