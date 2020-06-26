@@ -5,6 +5,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Baseline;
 using Marten.Exceptions;
+using Marten.Schema.Arguments;
+using Marten.Util;
 using Marten.V4Internals;
 using Npgsql;
 

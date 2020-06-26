@@ -91,10 +91,14 @@ namespace Marten.V4Internals.Linq
             {
                 sql.Append("\n)\n");
             }
+
+
         }
 
         public int Offset { get; set; }
-        public int Limit { get; set; }
+        public int
+
+            Limit { get; set; }
 
         protected void writeOrderByFragment(CommandBuilder sql, Ordering clause)
         {

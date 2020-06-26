@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Baseline;
 using Marten.Linq;
+using Marten.Schema.Arguments;
 using Marten.Services;
 using Marten.Storage;
 using Marten.Util;
@@ -134,6 +135,12 @@ namespace Marten.V4Internals.Sessions
 
             cmd.CommandText = builder.ToString();
 
+            // TODO -- Like this to be temporary
+            if (cmd.CommandText.Contains(CommandBuilder.TenantIdArg))
+            {
+                cmd.AddNamedParameter(TenantIdArgument.ArgName, Tenant.TenantId);
+            }
+
             using (var reader = await Database.ExecuteReaderAsync(cmd, token).ConfigureAwait(false))
             {
                 return await handler.HandleAsync(reader, this, stats, token).ConfigureAwait(false);
@@ -147,6 +154,12 @@ namespace Marten.V4Internals.Sessions
             handler.ConfigureCommand(builder, this);
 
             cmd.CommandText = builder.ToString();
+
+            // TODO -- Like this to be temporary
+            if (cmd.CommandText.Contains(CommandBuilder.TenantIdArg))
+            {
+                cmd.AddNamedParameter(TenantIdArgument.ArgName, Tenant.TenantId);
+            }
 
             using (var reader = Database.ExecuteReader(cmd))
             {
