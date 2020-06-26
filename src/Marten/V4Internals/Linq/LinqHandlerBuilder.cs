@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using Baseline;
 using LamarCodeGeneration;
 using Marten.Linq;
+using Marten.Util;
 using Marten.V4Internals.Linq.QueryHandlers;
 using Remotion.Linq;
 using Remotion.Linq.Clauses;
@@ -170,6 +171,29 @@ namespace Marten.V4Internals.Linq
             }
 
             throw new NotSupportedException("Marten does not know how to use result type " + typeof(TResult).FullNameInCode());
+        }
+
+        public void BuildDiagnosticCommand(FetchType fetchType, CommandBuilder sql)
+        {
+            switch (fetchType)
+            {
+                case FetchType.Any:
+                    CurrentStatement.ToAny();
+                    break;
+
+                case FetchType.Count:
+                    CurrentStatement.ToCount<long>();
+                    break;
+
+                case FetchType.FetchOne:
+                    CurrentStatement.Limit = 1;
+                    break;
+            }
+
+            // Use a flyweight for MartenExpressionParser
+            TopStatement.CompileStructure(new MartenExpressionParser(_session.Serializer, _session.Options));
+
+            TopStatement.Configure(sql, false);
         }
     }
 }
