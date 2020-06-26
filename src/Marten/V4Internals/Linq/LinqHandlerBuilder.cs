@@ -33,6 +33,7 @@ namespace Marten.V4Internals.Linq
                     CurrentStatement.ToScalar(Model.SelectClause.Selector);
                     break;
 
+                case ExpressionType.MemberInit:
                 case ExpressionType.New:
                     CurrentStatement.ToSelectTransform(Model.SelectClause);
                     break;
