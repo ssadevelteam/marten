@@ -6,8 +6,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using Marten.Linq;
 using Marten.Linq.Model;
+using Marten.Services;
 using Marten.Services.Includes;
+using Marten.Util;
 using Marten.V4Internals.Sessions;
+using Npgsql;
 using Remotion.Linq;
 using Remotion.Linq.Clauses.ResultOperators;
 
@@ -105,7 +108,19 @@ namespace Marten.V4Internals.Linq
 
         public QueryPlan Explain(FetchType fetchType = FetchType.FetchMany, Action<IConfigureExplainExpressions> configureExplain = null)
         {
-            throw new NotImplementedException();
+            var command = ToPreviewCommand(fetchType);
+
+            return _session.Database.ExplainQuery(command, configureExplain);
+        }
+
+        public NpgsqlCommand ToPreviewCommand(FetchType fetchType)
+        {
+            var builder = new LinqHandlerBuilder(_session, Expression);
+            var command = new NpgsqlCommand();
+            var sql = new CommandBuilder(command);
+            builder.BuildDiagnosticCommand(fetchType, sql);
+            command.CommandText = sql.ToString();
+            return command;
         }
 
         public IQueryable<TDoc> TransformTo<TDoc>(string transformName)

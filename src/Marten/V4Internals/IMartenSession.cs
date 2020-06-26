@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Marten.Services;
 using Marten.Storage;
 using Marten.Util;
 using Npgsql;
@@ -19,7 +20,7 @@ namespace Marten.V4Internals
 
         VersionTracker Versions { get; }
 
-        IDatabase Database { get; }
+        IManagedConnection Database { get; }
         IDocumentStorage StorageFor(Type documentType);
 
         StoreOptions Options { get; }

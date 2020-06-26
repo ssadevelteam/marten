@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Marten.Linq;
 using Marten.Schema;
+using Marten.Services;
 using Marten.Services.BatchQuerying;
 using Marten.Storage;
 using Marten.Util;
@@ -15,7 +16,7 @@ namespace Marten.V4Internals.Sessions
 {
     public class QuerySession : MartenSessionBase, IQuerySession
     {
-        public QuerySession(IDocumentStore store, IDatabase database, ISerializer serializer, ITenant tenant,
+        public QuerySession(IDocumentStore store, IManagedConnection database, ISerializer serializer, ITenant tenant,
             StoreOptions options) : base(database, serializer, tenant, options)
         {
             DocumentStore = store;

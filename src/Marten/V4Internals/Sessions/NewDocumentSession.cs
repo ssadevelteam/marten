@@ -16,7 +16,7 @@ namespace Marten.V4Internals.Sessions
         private readonly IList<IStorageOperation> _pendingOperations = new List<IStorageOperation>();
 
 
-        protected NewDocumentSession(IDocumentStore store, IDatabase database, ISerializer serializer, ITenant tenant,
+        protected NewDocumentSession(IDocumentStore store, IManagedConnection database, ISerializer serializer, ITenant tenant,
             StoreOptions options) : base(store, database, serializer, tenant, options)
         {
         }

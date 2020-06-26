@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Baseline;
 using Marten.Linq;
+using Marten.Services;
 using Marten.Storage;
 using Marten.Util;
 using Marten.V4Internals.Linq;
@@ -19,13 +20,13 @@ namespace Marten.V4Internals.Sessions
         private readonly IProviderGraph _providers;
         private bool _disposed;
         public VersionTracker Versions { get; } = new VersionTracker();
-        public IDatabase Database { get; }
+        public IManagedConnection Database { get; }
         public ISerializer Serializer { get; }
         public Dictionary<Type, object> ItemMap { get; } = new Dictionary<Type, object>();
         public ITenant Tenant { get; }
         public StoreOptions Options { get; }
 
-        protected MartenSessionBase(IDatabase database, ISerializer serializer, ITenant tenant,
+        protected MartenSessionBase(IManagedConnection database, ISerializer serializer, ITenant tenant,
             StoreOptions options)
         {
             _providers = tenant.Providers ?? throw new ArgumentNullException(nameof(ITenant.Providers));

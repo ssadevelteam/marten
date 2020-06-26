@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Baseline;
 using Marten.Linq;
 using Marten.Services.Includes;
+using Marten.V4Internals.Linq;
 using Npgsql;
 
 namespace Marten
@@ -266,14 +267,18 @@ namespace Marten
 
         public static NpgsqlCommand ToCommand<T>(this IQueryable<T> queryable, FetchType fetchType = FetchType.FetchMany)
         {
-            var q = queryable as MartenQueryable<T>;
-
-            if (q == null)
+            if (queryable is V4Queryable<T> q1)
             {
-                throw new InvalidOperationException($"{nameof(ToCommand)} is only valid on Marten IQueryable objects");
+                return q1.ToPreviewCommand(fetchType);
             }
 
-            return q.BuildCommand(fetchType);
+            if (queryable is MartenQueryable<T> q)
+            {
+                return q.BuildCommand(fetchType);
+
+            }
+
+            throw new InvalidOperationException($"{nameof(ToCommand)} is only valid on Marten IQueryable objects");
         }
 
         public static IMartenQueryable<T> Include<T, TInclude>(this IQueryable<T> queryable, Expression<Func<T, object>> idSource,

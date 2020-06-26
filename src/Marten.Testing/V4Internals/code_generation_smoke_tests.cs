@@ -77,7 +77,7 @@ namespace Marten.Testing.V4Internals
         public Dictionary<Type, object> ItemMap { get; } = new Dictionary<Type, object>();
         public ITenant Tenant { get; } = Substitute.For<ITenant>();
         public VersionTracker Versions { get; } = new VersionTracker();
-        public IDatabase Database { get; }
+        public IManagedConnection Database { get; }
         public IDocumentStorage StorageFor(Type documentType)
         {
             throw new NotImplementedException();

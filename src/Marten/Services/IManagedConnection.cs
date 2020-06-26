@@ -1,4 +1,5 @@
 using System;
+using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
 using Marten.V4Internals;
@@ -6,7 +7,7 @@ using Npgsql;
 
 namespace Marten.Services
 {
-    public interface IManagedConnection: IDisposable, IDatabase
+    public interface IManagedConnection: IDisposable
     {
         void Execute(NpgsqlCommand cmd, Action<NpgsqlCommand> action = null);
 
@@ -43,5 +44,8 @@ namespace Marten.Services
         Task RollbackAsync(CancellationToken token);
 
         void BeginSession();
+
+        DbDataReader ExecuteReader(NpgsqlCommand command);
+        Task<DbDataReader> ExecuteReaderAsync(NpgsqlCommand command, CancellationToken token);
     }
 }
