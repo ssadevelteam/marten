@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Baseline;
 using Marten.Linq;
 using Marten.Schema;
 using Marten.Services;
@@ -99,7 +100,19 @@ namespace Marten.V4Internals.Sessions
         }
 
         public NpgsqlConnection Connection => Database.Connection;
-        public IMartenSessionLogger Logger { get; set; }
+
+        public IMartenSessionLogger Logger
+        {
+            get
+            {
+                return Database.As<ManagedConnection>().Logger;
+            }
+            set
+            {
+                Database.As<ManagedConnection>().Logger = value;
+            }
+        }
+
         public int RequestCount => Database.RequestCount;
         public IDocumentStore DocumentStore { get; }
 

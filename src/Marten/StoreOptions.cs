@@ -11,6 +11,7 @@ using Marten.Schema.Identity.Sequences;
 using Marten.Services;
 using Marten.Storage;
 using Marten.Transforms;
+using Marten.Util;
 using Marten.V4Internals;
 using Npgsql;
 
@@ -365,6 +366,28 @@ namespace Marten
         /// Option to enable or disable usage of default tenant when using multi-tenanted documents
         /// </summary>
         public bool DefaultTenantUsageEnabled { get; set; } = true;
+
+        private ImHashMap<Type, IFieldMapping> _childFieldMappings = ImHashMap<Type, IFieldMapping>.Empty;
+
+        /// <summary>
+        /// These mappings should only be used for Linq querying within the SelectMany() body
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        internal IFieldMapping ChildTypeMappingFor(Type type)
+        {
+            if (_childFieldMappings.TryFind(type, out var mapping))
+            {
+                return mapping;
+            }
+
+            mapping = new FieldMapping("d.data", type, this);
+
+            _childFieldMappings = _childFieldMappings.AddOrUpdate(type, mapping);
+
+            return mapping;
+
+        }
 
         public class PoliciesExpression
         {

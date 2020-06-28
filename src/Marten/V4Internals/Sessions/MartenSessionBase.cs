@@ -109,8 +109,7 @@ namespace Marten.V4Internals.Sessions
 
         public TResult Execute<TResult>(Expression expression, ResultOperatorBase op)
         {
-            var builder = new LinqHandlerBuilder(this, expression);
-            builder.AddResultOperator(op);
+            var builder = new LinqHandlerBuilder(this, expression, op);
             var handler = builder.BuildHandler<TResult>();
 
             // TODO -- worry about QueryStatistics later
@@ -119,8 +118,7 @@ namespace Marten.V4Internals.Sessions
 
         public Task<TResult> ExecuteAsync<TResult>(Expression expression, CancellationToken token, ResultOperatorBase op)
         {
-            var builder = new LinqHandlerBuilder(this, expression);
-            builder.AddResultOperator(op);
+            var builder = new LinqHandlerBuilder(this, expression, op);
             var handler = builder.BuildHandler<TResult>();
 
             // TODO -- worry about QueryStatistics later

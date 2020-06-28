@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Baseline;
 using Marten.Linq;
@@ -10,11 +9,14 @@ using Marten.Testing.Harness;
 using Marten.Transforms;
 using Shouldly;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Marten.Testing.Linq
 {
     public class query_with_select_many : IntegrationContext
     {
+        private readonly ITestOutputHelper _output;
+
         // SAMPLE: can_do_simple_select_many_against_simple_array
         [Fact]
         public void can_do_simple_select_many_against_simple_array()
@@ -191,6 +193,9 @@ namespace Marten.Testing.Linq
 
             using (var query = theStore.QuerySession())
             {
+                var logger = new TestOutputMartenLogger(_output);
+                query.Logger = logger;
+
                 var distinct = query.Query<ProductWithNumbers>().SelectMany(x => x.Tags).Distinct().ToList();
 
                 distinct.OrderBy(x => x).ShouldHaveTheSameElementsAs(1, 2, 3, 4, 5);
@@ -246,6 +251,8 @@ namespace Marten.Testing.Linq
 
             using (var query = theStore.QuerySession())
             {
+                query.Logger = new TestOutputMartenLogger(_output);
+
                 query.Query<Product>().SelectMany(x => x.Tags)
                     .Any().ShouldBeTrue();
 
@@ -257,6 +264,8 @@ namespace Marten.Testing.Linq
         [Fact]
         public async Task select_many_with_any_async()
         {
+            theStore.Advanced.Clean.CompletelyRemove(typeof(Target));
+
             var product1 = new Product {Tags = new[] {"a", "b", "c"}};
             var product2 = new Product {Tags = new[] {"b", "c", "d"}};
             var product3 = new Product {Tags = new[] {"d", "e", "f"}};
@@ -273,6 +282,8 @@ namespace Marten.Testing.Linq
 
             using (var query = theStore.QuerySession())
             {
+                query.Logger = new TestOutputMartenLogger(_output);
+
                 (await query.Query<Product>().SelectMany(x => x.Tags)
                     .AnyAsync()).ShouldBeTrue();
 
@@ -324,6 +335,8 @@ namespace Marten.Testing.Linq
 
             using (var query = theStore.QuerySession())
             {
+                query.Logger = new TestOutputMartenLogger(_output);
+
                 var expected = targets
                     .SelectMany(x => x.Children)
                     .Where(x => x.Flag)
@@ -567,8 +580,9 @@ namespace Marten.Testing.Linq
             }
         }
 
-        public query_with_select_many(DefaultStoreFixture fixture) : base(fixture)
+        public query_with_select_many(DefaultStoreFixture fixture, ITestOutputHelper output) : base(fixture)
         {
+            _output = output;
         }
     }
 

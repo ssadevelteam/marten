@@ -18,6 +18,11 @@ namespace Marten.V4Internals.Linq
         private static readonly string NullResultMessage = $"The cast to value type '{typeof(T).FullNameInCode()}' failed because the materialized value is null. Either the result type's generic parameter or the query must use a nullable type.";
         private string _locator;
 
+        public ScalarSelectClause(string field, string from)
+        {
+            FromObject = from;
+            _locator = field;
+        }
 
         public ScalarSelectClause(IField field, string from)
         {
