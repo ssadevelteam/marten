@@ -31,9 +31,9 @@ namespace Marten.V4Internals
         }
 
         public string FromObject { get; }
-        public void WriteSelectClause(CommandBuilder sql, bool withStatistics)
+        public void WriteSelectClause(CommandBuilder sql)
         {
-            _parent.WriteSelectClause(sql, withStatistics);
+            _parent.WriteSelectClause(sql);
         }
 
         public string[] SelectFields()
@@ -52,6 +52,11 @@ namespace Marten.V4Internals
             var selector = (ISelector<T>)BuildSelector(session);
 
             return LinqHandlerBuilder.BuildHandler<T, TResult>(selector, statement);
+        }
+
+        public ISelectClause UseStatistics(QueryStatistics statistics)
+        {
+            return new StatsSelectClause<T>(this, statistics);
         }
 
         public Type SourceType => typeof(TRoot);

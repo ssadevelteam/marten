@@ -446,8 +446,7 @@ namespace Marten.Testing.V4Internals
 
             using var database =  new ManagedConnection(new ConnectionFactory(ConnectionSource.ConnectionString), new NulloRetryPolicy());
 
-            var persistence = new ProviderGraph(theStore.Options);
-            using var session = new LightweightSession(theStore, database, new JsonNetSerializer(), theStore.Tenancy.Default, persistence, theStore.Options);
+            using var session = new LightweightSession(theStore, database, new JsonNetSerializer(), theStore.Tenancy.Default, theStore.Options);
 
             session.Store(target1, target2, target3);
             session.SaveChanges();

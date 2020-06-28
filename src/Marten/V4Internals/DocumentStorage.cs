@@ -122,9 +122,8 @@ namespace Marten.V4Internals
         public abstract TId Identity(T document);
 
 
-        public void WriteSelectClause(CommandBuilder sql, bool withStatistics)
+        public void WriteSelectClause(CommandBuilder sql)
         {
-            if (withStatistics) throw new NotImplementedException("Come back to this");
             sql.Append(_selectClause);
         }
 
@@ -140,6 +139,11 @@ namespace Marten.V4Internals
             var selector = (ISelector<T>)BuildSelector(session);
 
             return LinqHandlerBuilder.BuildHandler<T, TResult>(selector, statement);
+        }
+
+        public ISelectClause UseStatistics(QueryStatistics statistics)
+        {
+            return new StatsSelectClause<T>(this, statistics);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

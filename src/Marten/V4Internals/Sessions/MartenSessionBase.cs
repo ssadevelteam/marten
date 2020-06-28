@@ -16,7 +16,7 @@ using Remotion.Linq.Clauses;
 
 namespace Marten.V4Internals.Sessions
 {
-    public abstract class MartenSessionBase: IMartenSession, IQueryProvider
+    public abstract class MartenSessionBase: IMartenSession
     {
         private readonly IProviderGraph _providers;
         private bool _disposed;
@@ -73,97 +73,7 @@ namespace Marten.V4Internals.Sessions
             return selectStorage(_providers.StorageFor<T>());
         }
 
-        IQueryable IQueryProvider.CreateQuery(Expression expression)
-        {
-            throw new NotImplementedException();
-        }
 
-        IQueryable<TElement> IQueryProvider.CreateQuery<TElement>(Expression expression)
-        {
-            return new V4Queryable<TElement>(this, expression);
-        }
-
-        object IQueryProvider.Execute(Expression expression)
-        {
-
-            throw new NotImplementedException();
-        }
-
-        public TResult Execute<TResult>(Expression expression)
-        {
-            var builder = new LinqHandlerBuilder(this, expression);
-            var handler = builder.BuildHandler<TResult>();
-
-            // TODO -- worry about QueryStatistics later
-            return executeHandler(handler, null);
-        }
-
-        public Task<TResult> ExecuteAsync<TResult>(Expression expression, CancellationToken token)
-        {
-            var builder = new LinqHandlerBuilder(this, expression);
-            var handler = builder.BuildHandler<TResult>();
-
-            // TODO -- worry about QueryStatistics later
-            return executeHandlerAsync(handler, null, token);
-        }
-
-        public TResult Execute<TResult>(Expression expression, ResultOperatorBase op)
-        {
-            var builder = new LinqHandlerBuilder(this, expression, op);
-            var handler = builder.BuildHandler<TResult>();
-
-            // TODO -- worry about QueryStatistics later
-            return executeHandler(handler, null);
-        }
-
-        public Task<TResult> ExecuteAsync<TResult>(Expression expression, CancellationToken token, ResultOperatorBase op)
-        {
-            var builder = new LinqHandlerBuilder(this, expression, op);
-            var handler = builder.BuildHandler<TResult>();
-
-            // TODO -- worry about QueryStatistics later
-            return executeHandlerAsync(handler, null, token);
-        }
-
-        protected async Task<T> executeHandlerAsync<T>(IQueryHandler<T> handler, QueryStatistics stats, CancellationToken token)
-        {
-            var cmd = new NpgsqlCommand();
-            var builder = new CommandBuilder(cmd);
-            handler.ConfigureCommand(builder, this);
-
-            cmd.CommandText = builder.ToString();
-
-            // TODO -- Like this to be temporary
-            if (cmd.CommandText.Contains(CommandBuilder.TenantIdArg))
-            {
-                cmd.AddNamedParameter(TenantIdArgument.ArgName, Tenant.TenantId);
-            }
-
-            using (var reader = await Database.ExecuteReaderAsync(cmd, token).ConfigureAwait(false))
-            {
-                return await handler.HandleAsync(reader, this, stats, token).ConfigureAwait(false);
-            }
-        }
-
-        protected T executeHandler<T>(IQueryHandler<T> handler, QueryStatistics stats)
-        {
-            var cmd = new NpgsqlCommand();
-            var builder = new CommandBuilder(cmd);
-            handler.ConfigureCommand(builder, this);
-
-            cmd.CommandText = builder.ToString();
-
-            // TODO -- Like this to be temporary
-            if (cmd.CommandText.Contains(CommandBuilder.TenantIdArg))
-            {
-                cmd.AddNamedParameter(TenantIdArgument.ArgName, Tenant.TenantId);
-            }
-
-            using (var reader = Database.ExecuteReader(cmd))
-            {
-                return handler.Handle(reader, this, stats);
-            }
-        }
 
 
         public void Dispose()

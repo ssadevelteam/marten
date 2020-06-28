@@ -22,9 +22,9 @@ namespace Marten.V4Internals
 
     public interface IQueryHandler<T> : IQueryHandler
     {
-        T Handle(DbDataReader reader, IMartenSession session, QueryStatistics stats);
+        T Handle(DbDataReader reader, IMartenSession session);
 
-        Task<T> HandleAsync(DbDataReader reader, IMartenSession session, QueryStatistics stats, CancellationToken token);
+        Task<T> HandleAsync(DbDataReader reader, IMartenSession session, CancellationToken token);
     }
 
 

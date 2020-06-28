@@ -1,4 +1,5 @@
 using System;
+using Marten.Linq;
 using Marten.Util;
 
 namespace Marten.V4Internals.Linq
@@ -19,7 +20,7 @@ namespace Marten.V4Internals.Linq
         public string SelectionText { get; protected set; } = "select d.data from ";
 
         public string FromObject { get; }
-        public void WriteSelectClause(CommandBuilder sql, bool withStatistics)
+        public void WriteSelectClause(CommandBuilder sql)
         {
             sql.Append(SelectionText);
             sql.Append(FromObject);
@@ -43,5 +44,9 @@ namespace Marten.V4Internals.Linq
             return LinqHandlerBuilder.BuildHandler<T, TResult>(selector, statement);
         }
 
+        public ISelectClause UseStatistics(QueryStatistics statistics)
+        {
+            return new StatsSelectClause<T>(this, statistics);
+        }
     }
 }

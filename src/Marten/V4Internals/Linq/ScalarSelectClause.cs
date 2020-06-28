@@ -3,6 +3,7 @@ using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
 using LamarCodeGeneration;
+using Marten.Linq;
 using Marten.Linq.Fields;
 using Marten.Util;
 
@@ -32,7 +33,7 @@ namespace Marten.V4Internals.Linq
         }
 
         public string FromObject { get; }
-        public void WriteSelectClause(CommandBuilder sql, bool withStatistics)
+        public void WriteSelectClause(CommandBuilder sql)
         {
             sql.Append("select ");
             sql.Append(_locator);
@@ -56,6 +57,11 @@ namespace Marten.V4Internals.Linq
             var selector = (ISelector<T>)BuildSelector(session);
 
             return LinqHandlerBuilder.BuildHandler<T, TResult>(selector, statement);
+        }
+
+        public ISelectClause UseStatistics(QueryStatistics statistics)
+        {
+            return new StatsSelectClause<T>(this, statistics);
         }
 
         public T Resolve(DbDataReader reader)

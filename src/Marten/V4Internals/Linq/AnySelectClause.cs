@@ -18,7 +18,7 @@ namespace Marten.V4Internals.Linq
 
         public string FromObject { get; }
 
-        public void WriteSelectClause(CommandBuilder sql, bool withStatistics)
+        public void WriteSelectClause(CommandBuilder sql)
         {
             sql.Append("select (count(*) > 0) as result");
             sql.Append(" from ");
@@ -42,12 +42,17 @@ namespace Marten.V4Internals.Linq
             return (IQueryHandler<T>) this;
         }
 
-        public void ConfigureCommand(CommandBuilder builder, IMartenSession session)
+        public ISelectClause UseStatistics(QueryStatistics statistics)
         {
-            _topStatement.Configure(builder, false);
+            throw new NotSupportedException("QueryStatistics is not valid with Any()/AnyAsync() queries");
         }
 
-        public bool Handle(DbDataReader reader, IMartenSession session, QueryStatistics stats)
+        public void ConfigureCommand(CommandBuilder builder, IMartenSession session)
+        {
+            _topStatement.Configure(builder);
+        }
+
+        public bool Handle(DbDataReader reader, IMartenSession session)
         {
             if (!reader.Read())
                 return false;
@@ -55,7 +60,7 @@ namespace Marten.V4Internals.Linq
             return !reader.IsDBNull(0) && reader.GetBoolean(0);
         }
 
-        public async Task<bool> HandleAsync(DbDataReader reader, IMartenSession session, QueryStatistics stats, CancellationToken token)
+        public async Task<bool> HandleAsync(DbDataReader reader, IMartenSession session, CancellationToken token)
         {
             var hasRow = await reader.ReadAsync(token).ConfigureAwait(false);
 

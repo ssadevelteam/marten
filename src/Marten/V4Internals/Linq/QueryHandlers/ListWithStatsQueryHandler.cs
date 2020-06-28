@@ -2,19 +2,24 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
+using Marten.Linq;
 using Marten.Util;
 
 namespace Marten.V4Internals.Linq.QueryHandlers
 {
-    public class ListQueryHandler<T> : IQueryHandler<IReadOnlyList<T>>, IQueryHandler<IEnumerable<T>>
+    public class ListWithStatsQueryHandler<T>: IQueryHandler<IReadOnlyList<T>>, IQueryHandler<IEnumerable<T>>
     {
+        private readonly int _countIndex;
         private readonly Statement _statement;
         private readonly ISelector<T> _selector;
+        private readonly QueryStatistics _statistics;
 
-        public ListQueryHandler(Statement statement, ISelector<T> selector)
+        public ListWithStatsQueryHandler(int countIndex, Statement statement, ISelector<T> selector, QueryStatistics statistics)
         {
+            _countIndex = countIndex;
             _statement = statement;
             _selector = selector;
+            _statistics = statistics;
         }
 
         public void ConfigureCommand(CommandBuilder builder, IMartenSession session)
@@ -26,6 +31,20 @@ namespace Marten.V4Internals.Linq.QueryHandlers
         {
             var list = new List<T>();
 
+            if (reader.Read())
+            {
+                _statistics.TotalResults = reader.GetFieldValue<int>(_countIndex);
+                var item = _selector.Resolve(reader);
+                list.Add(item);
+            }
+            else
+            {
+                // no data
+                _statistics.TotalResults = 0;
+                return list;
+            }
+
+            // Get the rest of the data
             while (reader.Read())
             {
                 var item = _selector.Resolve(reader);
@@ -50,6 +69,20 @@ namespace Marten.V4Internals.Linq.QueryHandlers
         {
             var list = new List<T>();
 
+            if (await reader.ReadAsync(token).ConfigureAwait(false))
+            {
+                _statistics.TotalResults = await reader.GetFieldValueAsync<int>(_countIndex, token).ConfigureAwait(false);
+                var item = await _selector.ResolveAsync(reader, token).ConfigureAwait(false);
+                list.Add(item);
+            }
+            else
+            {
+                // no data
+                _statistics.TotalResults = 0;
+                return list;
+            }
+
+            // Get the rest of the data
             while (await reader.ReadAsync(token).ConfigureAwait(false))
             {
                 var item = await _selector.ResolveAsync(reader, token).ConfigureAwait(false);
@@ -59,5 +92,4 @@ namespace Marten.V4Internals.Linq.QueryHandlers
             return list;
         }
     }
-
 }

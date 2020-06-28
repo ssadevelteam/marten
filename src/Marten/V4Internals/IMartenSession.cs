@@ -24,11 +24,7 @@ namespace Marten.V4Internals
         IDocumentStorage StorageFor(Type documentType);
 
         StoreOptions Options { get; }
-        TResult Execute<TResult>(Expression expression);
-        Task<TResult> ExecuteAsync<TResult>(Expression expression, CancellationToken token);
 
-        TResult Execute<TResult>(Expression expression, ResultOperatorBase op);
-        Task<TResult> ExecuteAsync<TResult>(Expression expression, CancellationToken token, ResultOperatorBase op);
     }
 
     internal static class MartenSessionExtensions

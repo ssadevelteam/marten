@@ -27,10 +27,10 @@ namespace Marten.V4Internals.Linq.QueryHandlers
 
         public void ConfigureCommand(CommandBuilder builder, IMartenSession session)
         {
-            _statement.Configure(builder, false);
+            _statement.Configure(builder);
         }
 
-        public T Handle(DbDataReader reader, IMartenSession session, QueryStatistics stats)
+        public T Handle(DbDataReader reader, IMartenSession session)
         {
             var hasResult = reader.Read();
             if (!hasResult)
@@ -49,7 +49,7 @@ namespace Marten.V4Internals.Linq.QueryHandlers
             return result;
         }
 
-        public async Task<T> HandleAsync(DbDataReader reader, IMartenSession session, QueryStatistics stats,
+        public async Task<T> HandleAsync(DbDataReader reader, IMartenSession session,
             CancellationToken token)
         {
             var hasResult = await reader.ReadAsync(token).ConfigureAwait(false);

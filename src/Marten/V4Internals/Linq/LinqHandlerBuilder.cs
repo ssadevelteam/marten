@@ -168,8 +168,13 @@ namespace Marten.V4Internals.Linq
             }
         }
 
-        public IQueryHandler<TResult> BuildHandler<TResult>()
+        public IQueryHandler<TResult> BuildHandler<TResult>(QueryStatistics statistics)
         {
+            if (statistics != null)
+            {
+                CurrentStatement.UseStatistics(statistics);
+            }
+
             // TODO -- expression parser should be a singleton somehow to avoid
             // the object allocations
             TopStatement.CompileStructure(new MartenExpressionParser(_session.Serializer, _session.Options));
@@ -214,7 +219,7 @@ namespace Marten.V4Internals.Linq
             // Use a flyweight for MartenExpressionParser
             TopStatement.CompileStructure(new MartenExpressionParser(_session.Serializer, _session.Options));
 
-            TopStatement.Configure(sql, false);
+            TopStatement.Configure(sql);
         }
     }
 }

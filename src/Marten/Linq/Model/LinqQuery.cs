@@ -12,6 +12,7 @@ using Remotion.Linq.Clauses.ResultOperators;
 
 namespace Marten.Linq.Model
 {
+    [Obsolete("Goes away in v4")]
     public class LinqQuery<T>: ILinqQuery
     {
         private readonly DocumentStore _store;

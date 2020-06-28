@@ -37,13 +37,13 @@ namespace Marten.V4Internals.Linq
         /// </summary>
         public string ExportName { get; protected set; }
 
-        public void Configure(CommandBuilder sql, bool withStatistics)
+        public void Configure(CommandBuilder sql)
         {
-            configure(sql, withStatistics);
+            configure(sql);
             if (Next != null)
             {
                 sql.Append(" ");
-                Next.Configure(sql, withStatistics);
+                Next.Configure(sql);
             }
         }
 
@@ -53,7 +53,7 @@ namespace Marten.V4Internals.Linq
 
         public IList<WhereClause> WhereClauses { get; } = new List<WhereClause>();
 
-        protected virtual void configure(CommandBuilder sql, bool withStatistics)
+        protected virtual void configure(CommandBuilder sql)
         {
             if (Mode == StatementMode.CommonTableExpression)
             {
@@ -63,7 +63,7 @@ namespace Marten.V4Internals.Linq
                 sql.Append(" as (\n");
             }
 
-            SelectClause.WriteSelectClause(sql, withStatistics);
+            SelectClause.WriteSelectClause(sql);
 
             if (Where != null)
             {
@@ -244,5 +244,9 @@ namespace Marten.V4Internals.Linq
         }
 
 
+        public void UseStatistics(QueryStatistics statistics)
+        {
+            SelectClause = SelectClause.UseStatistics(statistics);
+        }
     }
 }
