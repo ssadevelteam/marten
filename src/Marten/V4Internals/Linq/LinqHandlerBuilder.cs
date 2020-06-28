@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using Baseline;
@@ -18,13 +19,32 @@ namespace Marten.V4Internals.Linq
     {
         private readonly IMartenSession _session;
 
-        public LinqHandlerBuilder(IMartenSession session, Expression expression)
+        public LinqHandlerBuilder(IMartenSession session, Expression expression, ResultOperatorBase additionalOperator = null)
         {
             _session = session;
             Model = MartenQueryParser.Flyweight.GetParsedQuery(expression);
+            if (additionalOperator != null) Model.ResultOperators.Add(additionalOperator);
+
             var storage = session.StorageFor(Model.SourceType());
             TopStatement = CurrentStatement = new DocumentStatement(storage);
 
+
+            // TODO -- this probably needs to get fancier later
+            if (Model.MainFromClause.FromExpression is SubQueryExpression sub)
+            {
+                processQueryModel(sub.QueryModel, storage, true);
+                processQueryModel(Model, storage, false);
+            }
+            else
+            {
+                processQueryModel(Model, storage, true);
+            }
+
+
+        }
+
+        private void handleSelector()
+        {
             // Important to deal with the selector first before you go into
             // the result operators
             switch (Model.SelectClause.Selector.NodeType)
@@ -38,17 +58,9 @@ namespace Marten.V4Internals.Linq
                     CurrentStatement.ToSelectTransform(Model.SelectClause);
                     break;
             }
-
-            // TODO -- this probably needs to get fancier later
-            if (Model.MainFromClause.FromExpression is SubQueryExpression sub)
-            {
-                processQueryModel(sub.QueryModel, storage);
-            }
-
-            processQueryModel(Model, storage);
         }
 
-        private void processQueryModel(QueryModel queryModel, IDocumentStorage storage)
+        private void processQueryModel(QueryModel queryModel, IDocumentStorage storage, bool considerSelectors)
         {
             for (var i = 0; i < queryModel.BodyClauses.Count; i++)
             {
@@ -62,17 +74,22 @@ namespace Marten.V4Internals.Linq
                         CurrentStatement.Orderings.AddRange(orderBy.Orderings);
                         break;
                     case AdditionalFromClause additional:
-                        var isComplex = queryModel.BodyClauses.Count > i + 1;
+                        var isComplex = queryModel.BodyClauses.Count > i + 1 || queryModel.ResultOperators.Any();
                         var elementType = additional.ItemType;
-
                         var collectionField = storage.Fields.FieldFor(additional.FromExpression);
 
-                        var childFields = _session.Options.Storage.MappingFor(elementType);
-                        CurrentStatement = CurrentStatement.ToSelectMany(collectionField, childFields, isComplex);
+                        CurrentStatement = CurrentStatement.ToSelectMany(collectionField, _session, isComplex, elementType);
+
+
                         break;
                     default:
                         throw new NotSupportedException();
                 }
+            }
+
+            if (considerSelectors)
+            {
+                handleSelector();
             }
 
             foreach (var resultOperator in queryModel.ResultOperators)
@@ -88,16 +105,16 @@ namespace Marten.V4Internals.Linq
 
         public QueryModel Model { get; }
 
-        public void AddResultOperator(ResultOperatorBase resultOperator)
+        private void AddResultOperator(ResultOperatorBase resultOperator)
         {
             switch (resultOperator)
             {
                 case TakeResultOperator take:
-                    TopStatement.Limit = (int)take.Count.Value();
+                    CurrentStatement.Limit = (int)take.Count.Value();
                     break;
 
                 case SkipResultOperator skip:
-                    TopStatement.Offset = (int)skip.Count.Value();
+                    CurrentStatement.Offset = (int)skip.Count.Value();
                     break;
 
                 case AnyResultOperator _:
@@ -158,7 +175,10 @@ namespace Marten.V4Internals.Linq
             TopStatement.CompileStructure(new MartenExpressionParser(_session.Serializer, _session.Options));
 
             if (CurrentStatement.SingleValue)
+            {
                 return CurrentStatement.BuildSingleResultHandler<TResult>(_session);
+            }
+
             return CurrentStatement.SelectClause.BuildHandler<TResult>(_session, TopStatement);
         }
 

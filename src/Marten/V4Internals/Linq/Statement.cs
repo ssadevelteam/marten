@@ -6,6 +6,7 @@ using Baseline;
 using Marten.Linq;
 using Marten.Linq.Fields;
 using Marten.Schema;
+using Marten.Storage;
 using Marten.Util;
 using Marten.V4Internals.Linq.QueryHandlers;
 using Remotion.Linq.Clauses;
@@ -96,9 +97,7 @@ namespace Marten.V4Internals.Linq
         }
 
         public int Offset { get; set; }
-        public int
-
-            Limit { get; set; }
+        public int Limit { get; set; }
 
         protected void writeOrderByFragment(CommandBuilder sql, Ordering clause)
         {
@@ -113,6 +112,8 @@ namespace Marten.V4Internals.Linq
 
         protected virtual IWhereFragment buildWhereFragment(MartenExpressionParser parser)
         {
+            if (!WhereClauses.Any()) return null;
+
             return WhereClauses.Count == 1
                 ? parser.ParseWhereFragment(Fields, WhereClauses.Single().Predicate)
                 : new CompoundWhereFragment(parser, Fields, "and", WhereClauses);
@@ -165,18 +166,36 @@ namespace Marten.V4Internals.Linq
             SelectClause = typeof(ScalarSelectClause<>).CloseAndBuildAs<ISelectClause>(field, SelectClause.FromObject, field.FieldType);
         }
 
-        public Statement ToSelectMany(IField collectionField, DocumentMapping childFields, bool isComplex)
+        public Statement ToSelectMany(IField collectionField, IMartenSession session, bool isComplex,
+            Type elementType)
         {
+            if (elementType.IsSimple())
+            {
+                var selection = $"select jsonb_array_elements_text({collectionField.JSONBLocator}) as data from ";
+
+                SelectClause = typeof(DataSelectClause<>).CloseAndBuildAs<ISelectClause>(SelectClause.FromObject, selection,
+                    elementType);
+
+                Mode = StatementMode.CommonTableExpression;
+                ExportName = elementType.Name.Sanitize() + "CTE";
+
+                Next = typeof(ScalarSelectManyStatement<>).CloseAndBuildAs<Statement>(this, session.Serializer, elementType);
+
+                return Next;
+            }
+
+            var childFields = session.Options.ChildTypeMappingFor(elementType);
+
             if (isComplex)
             {
                 var selection = $"select jsonb_array_elements({collectionField.JSONBLocator}) as data from ";
                 SelectClause = typeof(DataSelectClause<>).CloseAndBuildAs<ISelectClause>(SelectClause.FromObject, selection,
-                    childFields.DocumentType);
+                    elementType);
 
                 Mode = StatementMode.CommonTableExpression;
-                ExportName = childFields.DocumentType.Name + "CTE";
+                ExportName = elementType.Name + "CTE";
 
-                var statement = new JsonStatement(childFields.DocumentType, childFields, this)
+                var statement = new JsonStatement(elementType, childFields, this)
                 {
                     Previous = this
                 };
@@ -190,7 +209,7 @@ namespace Marten.V4Internals.Linq
             {
                 var selection = $"select jsonb_array_elements_text({collectionField.JSONBLocator}) as data from ";
                 SelectClause = typeof(DataSelectClause<>).CloseAndBuildAs<ISelectClause>(SelectClause.FromObject, selection,
-                    childFields.DocumentType);
+                    elementType);
 
                 return this;
             }
@@ -223,5 +242,7 @@ namespace Marten.V4Internals.Linq
             var selectionText = $"select {transformField} from ";
             SelectClause = typeof(DataSelectClause<>).CloseAndBuildAs<ISelectClause>(SelectClause.FromObject, selectionText, select.Selector.Type);
         }
+
+
     }
 }
