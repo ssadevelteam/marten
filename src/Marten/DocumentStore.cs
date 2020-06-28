@@ -12,6 +12,7 @@ using Marten.Schema;
 using Marten.Services;
 using Marten.Storage;
 using Marten.Transforms;
+using Marten.V4Internals.Sessions;
 using Remotion.Linq.Parsing.Structure;
 using IsolationLevel = System.Data.IsolationLevel;
 
@@ -192,13 +193,24 @@ namespace Marten
                 throw new DefaultTenantUsageDisabledException();
             }
 
+            var connection = buildManagedConnection(options, tenant, CommandRunnerMode.Transactional, _retryPolicy);
+            connection.BeginSession();
+
+            switch (options.Tracking)
+            {
+                case DocumentTracking.None:
+                    return new LightweightSession(this, connection, Serializer, tenant, Options);
+
+                // TODO -- switch over more things!
+            }
+
             var sessionPool = CreateWriterPool();
             var map = createMap(options.Tracking, sessionPool, options.Listeners);
 
-            var connection = buildManagedConnection(options, tenant, CommandRunnerMode.Transactional, _retryPolicy);
+
 
             var session = new DocumentSession(this, connection, _parser, map, tenant, options.ConcurrencyChecks, options.Listeners);
-            connection.BeginSession();
+
 
             session.Logger = _logger.StartSession(session);
 
