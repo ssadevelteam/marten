@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,10 +9,12 @@ using Marten.Linq;
 using Marten.Patching;
 using Marten.Services;
 using Marten.Storage;
+using Marten.Util;
+using Npgsql;
 
 namespace Marten.V4Internals.Sessions
 {
-    public abstract class NewDocumentSession: QuerySession, IDocumentSession
+    public abstract class NewDocumentSession: QuerySession, IDocumentSession, IUnitOfWork
     {
         private readonly IList<IStorageOperation> _pendingOperations = new List<IStorageOperation>();
 
@@ -24,51 +27,130 @@ namespace Marten.V4Internals.Sessions
 
         public void Delete<T>(T entity)
         {
-            throw new NotImplementedException();
+            assertNotDisposed();
+            var deletion = storageFor<T>().DeleteForDocument(entity);
+            _pendingOperations.Add(deletion);
         }
 
         public void Delete<T>(int id)
         {
-            throw new NotImplementedException();
+            assertNotDisposed();
+            var deletion = storageFor<T, int>().DeleteForId(id);
+            _pendingOperations.Add(deletion);
         }
 
         public void Delete<T>(long id)
         {
-            throw new NotImplementedException();
+            assertNotDisposed();
+            var deletion = storageFor<T, long>().DeleteForId(id);
+            _pendingOperations.Add(deletion);
         }
 
         public void Delete<T>(Guid id)
         {
-            throw new NotImplementedException();
+            assertNotDisposed();
+            var deletion = storageFor<T, Guid>().DeleteForId(id);
+            _pendingOperations.Add(deletion);
         }
 
         public void Delete<T>(string id)
         {
-            throw new NotImplementedException();
+            assertNotDisposed();
+            var deletion = storageFor<T, string>().DeleteForId(id);
+            _pendingOperations.Add(deletion);
         }
 
         public void DeleteWhere<T>(Expression<Func<T, bool>> expression)
         {
-            throw new NotImplementedException();
+            assertNotDisposed();
+
+            // TODO -- memoize the parser
+            var parser = new MartenExpressionParser(Options.Serializer(), Options);
+
+            // TODO -- this could be cleaner maybe?
+            var documentStorage = storageFor<T>();
+            var @where = parser.ParseWhereFragment(documentStorage.Fields, expression);
+            var deletion = documentStorage.DeleteForWhere(@where);
+            _pendingOperations.Add(deletion);
         }
 
         public void SaveChanges()
         {
-            this.RunOperations(_pendingOperations);
+            var command = new NpgsqlCommand();
+            var builder = new CommandBuilder(command);
+            foreach (var operation in _pendingOperations)
+            {
+                operation.ConfigureCommand(builder, this);
+                builder.Append(";");
+            }
+
+            var exceptions = new List<Exception>();
+
+            // TODO -- hokey!
+            command.CommandText = builder.ToString();
+            using (var reader = Database.ExecuteReader(command))
+            {
+                _pendingOperations[0].Postprocess(reader, exceptions);
+                for (int i = 1; i < _pendingOperations.Count; i++)
+                {
+                    reader.NextResult();
+                    _pendingOperations[i].Postprocess(reader, exceptions);
+                }
+            }
+
+            if (exceptions.Any())
+            {
+                throw new AggregateException(exceptions);
+            }
         }
 
-        public Task SaveChangesAsync(CancellationToken token = default)
+        public async Task SaveChangesAsync(CancellationToken token = default)
         {
-            throw new NotImplementedException();
+            var command = new NpgsqlCommand();
+            var builder = new CommandBuilder(command);
+            foreach (var operation in _pendingOperations)
+            {
+                operation.ConfigureCommand(builder, this);
+                builder.Append(";");
+            }
+
+            var exceptions = new List<Exception>();
+
+            // TODO -- hokey!
+            command.CommandText = builder.ToString();
+            using (var reader = await Database.ExecuteReaderAsync(command, token).ConfigureAwait(false))
+            {
+                await _pendingOperations[0].PostprocessAsync(reader, exceptions, token).ConfigureAwait(false);
+                for (var i = 1; i < _pendingOperations.Count; i++)
+                {
+                    await reader.NextResultAsync(token).ConfigureAwait(false);
+                    await _pendingOperations[i].PostprocessAsync(reader, exceptions, token).ConfigureAwait(false);
+                }
+            }
+
+            if (exceptions.Any())
+            {
+                throw new AggregateException(exceptions);
+            }
         }
 
         public void Store<T>(IEnumerable<T> entities)
         {
-            throw new NotImplementedException();
+            assertNotDisposed();
+
+            var storage = storageFor<T>();
+            foreach (var entity in entities)
+            {
+                storage.Store(this, entity);
+                var op = storage.Upsert(entity, this);
+                _pendingOperations.Add(op);
+            }
         }
 
         public void Store<T>(params T[] entities)
         {
+            assertNotDisposed();
+
             var storage = storageFor<T>();
             foreach (var entity in entities)
             {
@@ -90,27 +172,64 @@ namespace Marten.V4Internals.Sessions
 
         public void Store<T>(T entity, Guid version)
         {
-            throw new NotImplementedException();
+            assertNotDisposed();
+
+            var storage = storageFor<T>();
+            storage.Store(this, entity, version);
+            var op = storage.Upsert(entity, this);
+            _pendingOperations.Add(op);
         }
 
         public void Insert<T>(IEnumerable<T> entities)
         {
-            throw new NotImplementedException();
+            assertNotDisposed();
+
+            var storage = storageFor<T>();
+            foreach (var entity in entities)
+            {
+                storage.Store(this, entity);
+                var op = storage.Insert(entity, this);
+                _pendingOperations.Add(op);
+            }
         }
 
         public void Insert<T>(params T[] entities)
         {
-            throw new NotImplementedException();
+            assertNotDisposed();
+
+            var storage = storageFor<T>();
+            foreach (var entity in entities)
+            {
+                storage.Store(this, entity);
+                var op = storage.Insert(entity, this);
+                _pendingOperations.Add(op);
+            }
         }
 
         public void Update<T>(IEnumerable<T> entities)
         {
-            throw new NotImplementedException();
+            assertNotDisposed();
+
+            var storage = storageFor<T>();
+            foreach (var entity in entities)
+            {
+                storage.Store(this, entity);
+                var op = storage.Update(entity, this);
+                _pendingOperations.Add(op);
+            }
         }
 
         public void Update<T>(params T[] entities)
         {
-            throw new NotImplementedException();
+            assertNotDisposed();
+
+            var storage = storageFor<T>();
+            foreach (var entity in entities)
+            {
+                storage.Store(this, entity);
+                var op = storage.Update(entity, this);
+                _pendingOperations.Add(op);
+            }
         }
 
         public void InsertObjects(IEnumerable<object> documents)
@@ -168,6 +287,71 @@ namespace Marten.V4Internals.Sessions
         }
 
         public void EjectAllOfType(Type type)
+        {
+            throw new NotImplementedException();
+        }
+
+        IEnumerable<IDeletion> IUnitOfWork.Deletions()
+        {
+            throw new NotImplementedException();
+        }
+
+        IEnumerable<IDeletion> IUnitOfWork.DeletionsFor<T>()
+        {
+            throw new NotImplementedException();
+        }
+
+        IEnumerable<IDeletion> IUnitOfWork.DeletionsFor(Type documentType)
+        {
+            throw new NotImplementedException();
+        }
+
+        IEnumerable<object> IUnitOfWork.Updates()
+        {
+            throw new NotImplementedException();
+        }
+
+        IEnumerable<object> IUnitOfWork.Inserts()
+        {
+            throw new NotImplementedException();
+        }
+
+        IEnumerable<T> IUnitOfWork.UpdatesFor<T>()
+        {
+            throw new NotImplementedException();
+        }
+
+        IEnumerable<T> IUnitOfWork.InsertsFor<T>()
+        {
+            throw new NotImplementedException();
+        }
+
+        IEnumerable<T> IUnitOfWork.AllChangedFor<T>()
+        {
+            throw new NotImplementedException();
+        }
+
+        IEnumerable<EventStream> IUnitOfWork.Streams()
+        {
+            throw new NotImplementedException();
+        }
+
+        IEnumerable<PatchOperation> IUnitOfWork.Patches()
+        {
+            throw new NotImplementedException();
+        }
+
+        IEnumerable<Services.IStorageOperation> IUnitOfWork.Operations()
+        {
+            throw new NotImplementedException();
+        }
+
+        IEnumerable<Services.IStorageOperation> IUnitOfWork.OperationsFor<T>()
+        {
+            throw new NotImplementedException();
+        }
+
+        IEnumerable<Services.IStorageOperation> IUnitOfWork.OperationsFor(Type documentType)
         {
             throw new NotImplementedException();
         }

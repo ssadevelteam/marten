@@ -29,34 +29,6 @@ namespace Marten.V4Internals
 
     internal static class MartenSessionExtensions
     {
-        internal static void RunOperations(this IMartenSession session, IList<IStorageOperation> operations)
-        {
-            var command = new NpgsqlCommand();
-            var builder = new CommandBuilder(command);
-            foreach (var operation in operations)
-            {
-                operation.ConfigureCommand(builder, session);
-                builder.Append(";");
-            }
 
-            var exceptions = new List<Exception>();
-
-            // TODO -- hokey!
-            command.CommandText = builder.ToString();
-            using (var reader = session.Database.ExecuteReader(command))
-            {
-                operations[0].Postprocess(reader, exceptions);
-                for (int i = 1; i < operations.Count; i++)
-                {
-                    reader.NextResult();
-                    operations[i].Postprocess(reader, exceptions);
-                }
-            }
-
-            if (exceptions.Any())
-            {
-                throw new AggregateException(exceptions);
-            }
-        }
     }
 }
