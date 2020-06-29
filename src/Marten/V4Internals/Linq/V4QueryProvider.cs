@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
@@ -7,6 +8,7 @@ using Marten.Linq;
 using Marten.Schema.Arguments;
 using Marten.Storage;
 using Marten.Util;
+using Marten.V4Internals.Linq.Includes;
 using Npgsql;
 using Remotion.Linq.Clauses;
 
@@ -41,7 +43,7 @@ namespace Marten.V4Internals.Linq
         public TResult Execute<TResult>(Expression expression)
         {
             var builder = new LinqHandlerBuilder(_session, expression);
-            var handler = builder.BuildHandler<TResult>(Statistics);
+            var handler = builder.BuildHandler<TResult>(Statistics, Includes);
 
             return executeHandler(handler);
         }
@@ -49,7 +51,7 @@ namespace Marten.V4Internals.Linq
         public Task<TResult> ExecuteAsync<TResult>(Expression expression, CancellationToken token)
         {
             var builder = new LinqHandlerBuilder(_session, expression);
-            var handler = builder.BuildHandler<TResult>(Statistics);
+            var handler = builder.BuildHandler<TResult>(Statistics, Includes);
 
             return executeHandlerAsync(handler, token);
         }
@@ -57,7 +59,7 @@ namespace Marten.V4Internals.Linq
         public TResult Execute<TResult>(Expression expression, ResultOperatorBase op)
         {
             var builder = new LinqHandlerBuilder(_session, expression, op);
-            var handler = builder.BuildHandler<TResult>(Statistics);
+            var handler = builder.BuildHandler<TResult>(Statistics, Includes);
 
             return executeHandler(handler);
         }
@@ -65,7 +67,7 @@ namespace Marten.V4Internals.Linq
         public Task<TResult> ExecuteAsync<TResult>(Expression expression, CancellationToken token, ResultOperatorBase op)
         {
             var builder = new LinqHandlerBuilder(_session, expression, op);
-            var handler = builder.BuildHandler<TResult>(Statistics);
+            var handler = builder.BuildHandler<TResult>(Statistics, Includes);
 
             // TODO -- worry about QueryStatistics later
             return executeHandlerAsync(handler, token);
@@ -110,6 +112,8 @@ namespace Marten.V4Internals.Linq
                 return handler.Handle(reader, _session);
             }
         }
+
+        public IList<IInclude> Includes { get; } = new List<IInclude>();
 
     }
 }

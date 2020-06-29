@@ -4,6 +4,7 @@ using Remotion.Linq;
 
 namespace Marten.Linq.Model
 {
+    [Obsolete("Goes away in v4")]
     public interface ILinqQuery
     {
         QueryModel Model { get; }

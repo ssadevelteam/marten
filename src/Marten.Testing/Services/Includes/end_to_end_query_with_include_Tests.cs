@@ -21,6 +21,8 @@ namespace Marten.Testing.Services.Includes
 {
     public class end_to_end_query_with_include_Tests : IntegrationContextWithIdentityMap<IdentityMap>
     {
+        private readonly ITestOutputHelper _output;
+
         [Fact]
         public async Task include_within_batch_query()
         {
@@ -91,11 +93,13 @@ namespace Marten.Testing.Services.Includes
 
             using (var query = theStore.QuerySession())
             {
+                query.Logger = new TestOutputMartenLogger(_output);
+
                 User included = null;
-                var issue2 = query.Query<Issue>()
+                var issue2 = query
+                    .Query<Issue>()
                     .Include<User>(x => x.AssigneeId, x => included = x)
-                    .Where(x => x.Title == issue.Title)
-                    .Single();
+                    .Single(x => x.Title == issue.Title);
 
                 SpecificationExtensions.ShouldNotBeNull(included);
                 included.Id.ShouldBe(user.Id);
@@ -369,12 +373,12 @@ namespace Marten.Testing.Services.Includes
         [Fact]
         public void include_to_list()
         {
-            var user1 = new User();
-            var user2 = new User();
+            var user1 = new User{FirstName = "Travis", LastName = "Kelce"};
+            var user2 = new User{FirstName = "Tyrann", LastName = "Mathieu"};
 
-            var issue1 = new Issue { AssigneeId = user1.Id, Title = "Garage Door is busted" };
-            var issue2 = new Issue { AssigneeId = user2.Id, Title = "Garage Door is busted" };
-            var issue3 = new Issue { AssigneeId = user2.Id, Title = "Garage Door is busted" };
+            var issue1 = new Issue { AssigneeId = user1.Id, Title = "Garage Door is busted 1" };
+            var issue2 = new Issue { AssigneeId = user2.Id, Title = "Garage Door is busted 2" };
+            var issue3 = new Issue { AssigneeId = user2.Id, Title = "Garage Door is busted 3" };
 
             theSession.Store(user1, user2);
             theSession.Store(issue1, issue2, issue3);
@@ -384,12 +388,12 @@ namespace Marten.Testing.Services.Includes
             {
                 var list = new List<User>();
 
-                query.Query<Issue>().Include<User>(x => x.AssigneeId, list).ToArray();
+                var issues = query.Query<Issue>().Include<User>(x => x.AssigneeId, list).ToArray();
 
                 list.Count.ShouldBe(2);
 
-                list.Any(x => x.Id == user1.Id);
-                list.Any(x => x.Id == user2.Id);
+                list.Any(x => x.Id == user1.Id).ShouldBeTrue();
+                list.Any(x => x.Id == user2.Id).ShouldBeTrue();
             }
         }
 
@@ -412,12 +416,15 @@ namespace Marten.Testing.Services.Includes
             {
                 var list = new List<User>();
 
-                var issues = query.Query<Issue>().Include<User>(x => x.AssigneeId, list, JoinType.Inner).ToArray();
+                var issues = query.Query<Issue>()
+                    .Include<User>(x => x.AssigneeId, list, JoinType.Inner)
+                    .Where(x => x.AssigneeId.HasValue)
+                    .ToArray();
 
                 list.Count.ShouldBe(2);
 
-                list.Any(x => x.Id == user1.Id);
-                list.Any(x => x.Id == user2.Id);
+                list.Any(x => x.Id == user1.Id).ShouldBeTrue();
+                list.Any(x => x.Id == user2.Id).ShouldBeTrue();
 
                 issues.Length.ShouldBe(3);
             }
@@ -444,11 +451,11 @@ namespace Marten.Testing.Services.Includes
 
                 var issues = query.Query<Issue>().Include<User>(x => x.AssigneeId, list, JoinType.LeftOuter).ToArray();
 
-                list.Count.ShouldBe(3);
+                list.Count.ShouldBe(2);
 
-                list.Any(x => x.Id == user1.Id);
-                list.Any(x => x.Id == user2.Id);
-                list.Any(x => x == null);
+                list.Any(x => x.Id == user1.Id).ShouldBeTrue();
+                list.Any(x => x.Id == user2.Id).ShouldBeTrue();
+                list.Any(x => x == null).ShouldBeFalse();
 
                 issues.Length.ShouldBe(4);
             }
@@ -527,7 +534,10 @@ namespace Marten.Testing.Services.Includes
             {
                 var dict = new Dictionary<Guid, User>();
 
-                var issues = query.Query<Issue>().Include(x => x.AssigneeId, dict).ToArray();
+                var issues = query
+                    .Query<Issue>()
+                    .Include(x => x.AssigneeId, dict)
+                    .Where(x => x.AssigneeId.HasValue).ToArray();
 
                 dict.Count.ShouldBe(2);
                 dict.ContainsKey(user1.Id).ShouldBeTrue();
@@ -734,8 +744,9 @@ namespace Marten.Testing.Services.Includes
         }
         // ENDSAMPLE
 
-        public end_to_end_query_with_include_Tests(DefaultStoreFixture fixture) : base(fixture)
+        public end_to_end_query_with_include_Tests(DefaultStoreFixture fixture, ITestOutputHelper output) : base(fixture)
         {
+            _output = output;
         }
     }
 }

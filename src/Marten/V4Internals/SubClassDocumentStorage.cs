@@ -152,5 +152,10 @@ namespace Marten.V4Internals
         {
             return _parent.AssignIdentity(document, tenant);
         }
+
+        public TId Identity(T document)
+        {
+            return _parent.Identity(document);
+        }
     }
 }

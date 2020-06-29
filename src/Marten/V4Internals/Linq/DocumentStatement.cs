@@ -1,4 +1,5 @@
 using System.Linq;
+using Baseline;
 using Marten.Linq;
 
 namespace Marten.V4Internals.Linq
@@ -22,6 +23,20 @@ namespace Marten.V4Internals.Linq
                 : new CompoundWhereFragment(parser, Fields, "and", WhereClauses);
 
             return _storage.FilterDocuments(null, where);
+        }
+
+        public DocumentStatement Clone()
+        {
+            var clone = new DocumentStatement(_storage)
+            {
+                Offset = Offset,
+                Limit = Limit,
+                Where = Where,
+                SelectClause = SelectClause,
+                Orderings = Orderings
+            };
+
+            return clone;
         }
     }
 }

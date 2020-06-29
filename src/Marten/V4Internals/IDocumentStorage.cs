@@ -55,5 +55,6 @@ namespace Marten.V4Internals
 
 
         TId AssignIdentity(T document, ITenant tenant);
+        TId Identity(T document);
     }
 }

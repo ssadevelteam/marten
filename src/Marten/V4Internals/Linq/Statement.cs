@@ -5,8 +5,6 @@ using System.Linq.Expressions;
 using Baseline;
 using Marten.Linq;
 using Marten.Linq.Fields;
-using Marten.Schema;
-using Marten.Storage;
 using Marten.Util;
 using Marten.V4Internals.Linq.QueryHandlers;
 using Remotion.Linq.Clauses;
@@ -21,14 +19,25 @@ namespace Marten.V4Internals.Linq
 
     public abstract class Statement
     {
+        private Statement _next;
+
         protected Statement(ISelectClause selectClause, IFieldMapping fields)
         {
             SelectClause = selectClause;
             Fields = fields;
         }
 
-        public Statement Previous { get; protected set; }
-        public Statement Next { get; protected set; }
+        public Statement Previous { get; internal set; }
+
+        public Statement Next
+        {
+            get => _next;
+            internal set
+            {
+                _next = value ?? throw new ArgumentNullException(nameof(value));
+                value.Previous = this;
+            }
+        }
 
         public StatementMode Mode { get; set; } = StatementMode.Select;
 
@@ -47,8 +56,8 @@ namespace Marten.V4Internals.Linq
             }
         }
 
-        public ISelectClause SelectClause { get; private set; }
-        public IList<Ordering> Orderings { get; } = new List<Ordering>();
+        public ISelectClause SelectClause { get; internal set; }
+        public IList<Ordering> Orderings { get; protected set; } = new List<Ordering>();
         public IFieldMapping Fields { get; }
 
         public IList<WhereClause> WhereClauses { get; } = new List<WhereClause>();
@@ -139,7 +148,7 @@ namespace Marten.V4Internals.Linq
             Next?.CompileStructure(parser);
         }
 
-        public IWhereFragment Where { get; private set; }
+        public IWhereFragment Where { get; internal set; }
         public bool SingleValue { get; set; }
         public bool ReturnDefaultWhenEmpty { get; set; }
         public bool CanBeMultiples { get; set; }
@@ -154,10 +163,10 @@ namespace Marten.V4Internals.Linq
             SelectClause = new CountClause<T>(SelectClause.FromObject);
         }
 
-        public IQueryHandler<TResult> BuildSingleResultHandler<TResult>(IMartenSession session)
+        public IQueryHandler<TResult> BuildSingleResultHandler<TResult>(IMartenSession session, Statement topStatement)
         {
             var selector = (ISelector<TResult>)SelectClause.BuildSelector(session);
-            return new OneResultHandler<TResult>(this, selector, ReturnDefaultWhenEmpty, CanBeMultiples);
+            return new OneResultHandler<TResult>(topStatement, selector, ReturnDefaultWhenEmpty, CanBeMultiples);
         }
 
         public void ToScalar(Expression selectClauseSelector)

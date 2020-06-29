@@ -7,6 +7,7 @@ using Baseline;
 using LamarCodeGeneration;
 using Marten.Linq;
 using Marten.Util;
+using Marten.V4Internals.Linq.Includes;
 using Marten.V4Internals.Linq.QueryHandlers;
 using Remotion.Linq;
 using Remotion.Linq.Clauses;
@@ -100,7 +101,7 @@ namespace Marten.V4Internals.Linq
 
         public Statement CurrentStatement { get; set; }
 
-        public Statement TopStatement { get; }
+        public Statement TopStatement { get; private set; }
 
 
         public QueryModel Model { get; }
@@ -168,7 +169,7 @@ namespace Marten.V4Internals.Linq
             }
         }
 
-        public IQueryHandler<TResult> BuildHandler<TResult>(QueryStatistics statistics)
+        public IQueryHandler<TResult> BuildHandler<TResult>(QueryStatistics statistics, IList<IInclude> includes)
         {
             if (statistics != null)
             {
@@ -179,9 +180,23 @@ namespace Marten.V4Internals.Linq
             // the object allocations
             TopStatement.CompileStructure(new MartenExpressionParser(_session.Serializer, _session.Options));
 
+            if (includes.Any())
+            {
+                TopStatement = new IncludeIdentitySelectorStatement((DocumentStatement) TopStatement, includes);
+            }
+
+            var handler = buildHandlerForCurrentStatement<TResult>();
+
+            return includes.Any()
+                ? new IncludeQueryHandler<TResult>(handler, includes.Select(x => x.BuildReader(_session)).ToArray())
+                : handler;
+        }
+
+        private IQueryHandler<TResult> buildHandlerForCurrentStatement<TResult>()
+        {
             if (CurrentStatement.SingleValue)
             {
-                return CurrentStatement.BuildSingleResultHandler<TResult>(_session);
+                return CurrentStatement.BuildSingleResultHandler<TResult>(_session, TopStatement);
             }
 
             return CurrentStatement.SelectClause.BuildHandler<TResult>(_session, TopStatement);

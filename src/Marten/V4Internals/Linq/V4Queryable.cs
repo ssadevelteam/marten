@@ -4,12 +4,14 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
+using LamarCodeGeneration;
 using LamarCodeGeneration.Util;
 using Marten.Linq;
 using Marten.Linq.Model;
 using Marten.Services;
 using Marten.Services.Includes;
 using Marten.Util;
+using Marten.V4Internals.Linq.Includes;
 using Marten.V4Internals.Sessions;
 using Npgsql;
 using Remotion.Linq;
@@ -151,18 +153,46 @@ namespace Marten.V4Internals.Linq
 
         public IMartenQueryable<T> Include<TInclude>(Expression<Func<T, object>> idSource, Action<TInclude> callback, JoinType joinType = JoinType.Inner)
         {
-            throw new NotImplementedException();
+            var storage = (IDocumentStorage<TInclude>)_session.StorageFor(typeof(TInclude));
+            var identityField = _session.StorageFor(typeof(T)).Fields.FieldFor(idSource);
+
+            var include = new Include<TInclude>(_provider.Includes.Count, storage, identityField, callback);
+            _provider.Includes.Add(include);
+
+            return this;
         }
 
         public IMartenQueryable<T> Include<TInclude>(Expression<Func<T, object>> idSource, IList<TInclude> list, JoinType joinType = JoinType.Inner)
         {
-            throw new NotImplementedException();
+            return Include<TInclude>(idSource, list.Add);
         }
 
         public IMartenQueryable<T> Include<TInclude, TKey>(Expression<Func<T, object>> idSource, IDictionary<TKey, TInclude> dictionary,
             JoinType joinType = JoinType.Inner)
         {
-            throw new NotImplementedException();
+            var storage = (IDocumentStorage<TInclude>)_session.StorageFor(typeof(TInclude));
+
+            if (storage is IDocumentStorage<TInclude, TKey> s)
+            {
+                var identityField = _session.StorageFor(typeof(T)).Fields.FieldFor(idSource);
+
+                void Callback(TInclude item)
+                {
+                    var id = s.Identity(item);
+                    dictionary[id] = item;
+                }
+
+                var include = new Include<TInclude>(_provider.Includes.Count, storage, identityField, Callback);
+                _provider.Includes.Add(include);
+            }
+            else
+            {
+                throw new InvalidOperationException($"Id/Document type mismatch. The id type for the included document type {typeof(TInclude).FullNameInCode()} is {storage.IdType.FullNameInCode()}");
+            }
+
+
+
+            return this;
         }
 
         public IMartenQueryable<T> Stats(out QueryStatistics stats)
