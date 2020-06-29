@@ -196,21 +196,25 @@ namespace Marten
             var connection = buildManagedConnection(options, tenant, CommandRunnerMode.Transactional, _retryPolicy);
             connection.BeginSession();
 
+            IDocumentSession session;
             switch (options.Tracking)
             {
                 case DocumentTracking.None:
-                    return new LightweightSession(this, connection, Serializer, tenant, Options);
+                    session = new LightweightSession(this, connection, Serializer, tenant, Options);
+                    break;
 
-                // TODO -- switch over more things!
+                case DocumentTracking.IdentityOnly:
+                    session = new IdentityMapDocumentSession(this, connection, Serializer, tenant, Options);
+                    break;
+
+                case DocumentTracking.DirtyTracking:
+                    session = new DirtyCheckingDocumentSession(this, connection, Serializer, tenant, Options);
+                    break;
+
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(SessionOptions.Tracking));
             }
-
-            var sessionPool = CreateWriterPool();
-            var map = createMap(options.Tracking, sessionPool, options.Listeners);
-
-
-
-            var session = new DocumentSession(this, connection, _parser, map, tenant, options.ConcurrencyChecks, options.Listeners);
-
 
             session.Logger = _logger.StartSession(session);
 
@@ -268,24 +272,6 @@ namespace Marten
         internal MemoryPool<char> CreateWriterPool()
         {
             return Options.UseCharBufferPooling ? MemoryPool<char>.Shared : new AllocatingMemoryPool<char>();
-        }
-
-        private IIdentityMap createMap(DocumentTracking tracking, MemoryPool<char> sessionPool, IEnumerable<IDocumentSessionListener> localListeners)
-        {
-            switch (tracking)
-            {
-                case DocumentTracking.None:
-                    return new NulloIdentityMap(Serializer, Options.Listeners.Concat(localListeners));
-
-                case DocumentTracking.IdentityOnly:
-                    return new IdentityMap(Serializer, Options.Listeners.Concat(localListeners));
-
-                case DocumentTracking.DirtyTracking:
-                    return new DirtyTrackingIdentityMap(Serializer, Options.Listeners.Concat(localListeners));
-
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(tracking));
-            }
         }
 
         public IDocumentSession DirtyTrackedSession(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)

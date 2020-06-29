@@ -13,6 +13,7 @@ namespace Marten.Services
         Loaded
     }
 
+    [Obsolete("goes away in v4")]
     public abstract class IdentityMap<TCacheValue>: IIdentityMap
     {
         private readonly IEnumerable<IDocumentSessionListener> _listeners;
