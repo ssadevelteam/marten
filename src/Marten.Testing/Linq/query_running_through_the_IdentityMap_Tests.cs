@@ -36,11 +36,11 @@ namespace Marten.Testing.Linq
         [Fact]
         public void single_runs_through_the_identity_map()
         {
-            theSession.Query<User>().Where(x => x.FirstName == "Jeremy")
-                .Single().ShouldBeTheSameAs(user1);
+            theSession.Query<User>()
+                .Single(x => x.FirstName == "Jeremy").ShouldBeTheSameAs(user1);
 
-            theSession.Query<User>().Where(x => x.FirstName == user4.FirstName)
-                .SingleOrDefault().ShouldBeTheSameAs(user4);
+            theSession.Query<User>()
+                .SingleOrDefault(x => x.FirstName == user4.FirstName).ShouldBeTheSameAs(user4);
 
 
         }

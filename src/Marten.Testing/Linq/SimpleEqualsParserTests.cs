@@ -13,7 +13,7 @@ namespace Marten.Testing.Linq
 {
 	public class SimpleEqualsParserTests : IntegrationContextWithIdentityMap<NulloIdentityMap>
 	{
-		class QueryTarget
+		public class QueryTarget
 		{
 			public int IntProp { get; set; }
 			public long LongProp { get; set; }

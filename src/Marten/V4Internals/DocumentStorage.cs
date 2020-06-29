@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -32,7 +33,7 @@ namespace Marten.V4Internals
 
             _defaultWhere = document.DefaultWhereFragment();
 
-            _selectClause = $"select {_document.SelectFields().Join(", ")} from {document.Table.QualifiedName} as d";
+            _selectClause = $"select {_document.SelectFields().Select(x => $"d.{x}").Join(", ")} from {document.Table.QualifiedName} as d";
 
             _loaderSql =
                 $"select {document.SelectFields().Join(", ")} from {document.Table.QualifiedName} as d where id = :id";

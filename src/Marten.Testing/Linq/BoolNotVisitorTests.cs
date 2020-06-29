@@ -8,7 +8,7 @@ namespace Marten.Testing.Linq
 {
     public class BoolNotVisitorTests : IntegrationContextWithIdentityMap<NulloIdentityMap>
     {
-        private class TestClass
+        public class TestClass
         {
             public TestClass()
             {

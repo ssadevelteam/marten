@@ -52,7 +52,7 @@ namespace Marten.Testing.Linq
         {
             var cmd = theSession.Query<Target>().OrderBy(x => x.Double).ToCommand(FetchType.FetchOne);
 
-            cmd.CommandText.Trim().ShouldBe("select d.data, d.id, d.mt_version from public.mt_doc_target as d order by CAST(d.data ->> 'Double' as double precision) LIMIT 1");
+            cmd.CommandText.Trim().ShouldBe("select d.data, d.id, d.mt_version from public.mt_doc_target as d order by CAST(d.data ->> 'Double' as double precision) LIMIT :p0");
         }
 
         [Fact]
@@ -129,7 +129,7 @@ namespace Marten.Testing.Linq
         {
             var cmd = theSession.Query<Target>().OrderBy(x => x.Double).ToCommand(FetchType.FetchOne);
 
-            cmd.CommandText.Trim().ShouldBe("select d.data, d.id, d.mt_version from other.mt_doc_target as d order by CAST(d.data ->> 'Double' as double precision) LIMIT 1");
+            cmd.CommandText.Trim().ShouldBe("select d.data, d.id, d.mt_version from other.mt_doc_target as d order by CAST(d.data ->> 'Double' as double precision) LIMIT :p0");
         }
     }
 }

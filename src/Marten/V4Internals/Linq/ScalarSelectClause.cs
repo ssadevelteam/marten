@@ -68,6 +68,11 @@ namespace Marten.V4Internals.Linq
         {
             try
             {
+                if (reader.IsDBNull(0))
+                {
+                    return default(T);
+                }
+
                 return reader.GetFieldValue<T>(0);
             }
             catch (InvalidCastException e)
@@ -76,9 +81,14 @@ namespace Marten.V4Internals.Linq
             }
         }
 
-        public Task<T> ResolveAsync(DbDataReader reader, CancellationToken token)
+        public async Task<T> ResolveAsync(DbDataReader reader, CancellationToken token)
         {
-            return reader.GetFieldValueAsync<T>(0, token);
+            if (await reader.IsDBNullAsync(0, token).ConfigureAwait(false))
+            {
+                return default(T);
+            }
+
+            return await reader.GetFieldValueAsync<T>(0, token);
         }
 
         public void ApplyOperator(string op)
