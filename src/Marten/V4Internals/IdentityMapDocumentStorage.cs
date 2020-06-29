@@ -142,5 +142,39 @@ namespace Marten.V4Internals
 
             return list;
         }
+
+        public sealed override T Load(TId id, IMartenSession session)
+        {
+            if (session.ItemMap.TryGetValue(typeof(T), out var items))
+            {
+                if (items is Dictionary<TId, T> d)
+                {
+                    if (d.TryGetValue(id, out var item)) return item;
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Invalid id of type {typeof(TId)} for document type {typeof(T)}");
+                }
+            }
+
+            return load(id, session);
+        }
+
+        public sealed override async Task<T> LoadAsync(TId id, IMartenSession session, CancellationToken token)
+        {
+            if (session.ItemMap.TryGetValue(typeof(T), out var items))
+            {
+                if (items is Dictionary<TId, T> d)
+                {
+                    if (d.TryGetValue(id, out var item)) return item;
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Invalid id of type {typeof(TId)} for document type {typeof(T)}");
+                }
+            }
+
+            return await loadAsync(id, session, token);
+        }
     }
 }

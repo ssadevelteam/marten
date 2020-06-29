@@ -13,9 +13,9 @@ namespace Marten.V4Internals
     internal class DocumentStorageBuilder
     {
         private readonly Func<DocumentOperations, GeneratedType> _selectorTypeSource;
-        private Type _baseType;
-        private string _typeName;
-        private DocumentMapping _mapping;
+        private readonly Type _baseType;
+        private readonly string _typeName;
+        private readonly DocumentMapping _mapping;
 
         public DocumentStorageBuilder(DocumentMapping mapping, StorageStyle style, Func<DocumentOperations, GeneratedType> selectorTypeSource)
         {
@@ -91,8 +91,12 @@ namespace Marten.V4Internals
             }
 
             foreach (var method in type.Methods)
+            {
                 if (!method.Frames.Any())
+                {
                     method.Frames.ThrowNotImplementedException();
+                }
+            }
         }
 
         private void buildLoaderCommands(GeneratedType type)

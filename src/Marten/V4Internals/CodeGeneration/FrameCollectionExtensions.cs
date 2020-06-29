@@ -27,6 +27,11 @@ namespace Marten.V4Internals
             frames.Code("_identityMap[id] = document;");
         }
 
+        public static void CheckExistingFirst(this FramesCollection frames)
+        {
+            frames.Code("if (_identityMap.TryGetValue(id, out var existing)) return existing;");
+        }
+
         public static void Deserialize(this FramesCollection frames, IDocumentMapping mapping)
         {
             var documentType = mapping.DocumentType;

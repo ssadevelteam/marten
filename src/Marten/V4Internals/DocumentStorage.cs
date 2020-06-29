@@ -89,10 +89,11 @@ namespace Marten.V4Internals
 
         public abstract IStorageOperation DeleteForId(TId id);
 
+        public abstract T Load(TId id, IMartenSession session);
+        public abstract Task<T> LoadAsync(TId id, IMartenSession session, CancellationToken token);
 
 
-
-        public T Load(TId id, IMartenSession session)
+        protected T load(TId id, IMartenSession session)
         {
             var command = BuildLoadCommand(id, session.Tenant);
             using (var reader = session.Database.ExecuteReader(command))
@@ -104,7 +105,7 @@ namespace Marten.V4Internals
             }
         }
 
-        public async Task<T> LoadAsync(TId id, IMartenSession session, CancellationToken token)
+        protected async Task<T> loadAsync(TId id, IMartenSession session, CancellationToken token)
         {
             var command = BuildLoadCommand(id, session.Tenant);
             using (var reader = await session.Database.ExecuteReaderAsync(command, token).ConfigureAwait(false))

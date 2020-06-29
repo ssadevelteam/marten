@@ -9,12 +9,14 @@ using Marten.Util;
 
 namespace Marten.V4Internals.Linq
 {
+
+
     public interface IScalarSelectClause
     {
         void ApplyOperator(string op);
     }
 
-    public class ScalarSelectClause<T> : ISelectClause, ISelector<T>, IScalarSelectClause
+    public class ScalarSelectClause<T> : ISelectClause, ISelector<T>, IScalarSelectClause, ISelector<Nullable<T>> where T : struct
     {
         private static readonly string NullResultMessage = $"The cast to value type '{typeof(T).FullNameInCode()}' failed because the materialized value is null. Either the result type's generic parameter or the query must use a nullable type.";
         private string _locator;
@@ -71,6 +73,33 @@ namespace Marten.V4Internals.Linq
                 if (reader.IsDBNull(0))
                 {
                     return default(T);
+                }
+
+                return reader.GetFieldValue<T>(0);
+            }
+            catch (InvalidCastException e)
+            {
+                throw new InvalidOperationException(NullResultMessage, e);
+            }
+        }
+
+        async Task<T?> ISelector<T?>.ResolveAsync(DbDataReader reader, CancellationToken token)
+        {
+            if (await reader.IsDBNullAsync(0, token).ConfigureAwait(false))
+            {
+                return null;
+            }
+
+            return await reader.GetFieldValueAsync<T>(0, token);
+        }
+
+        T? ISelector<T?>.Resolve(DbDataReader reader)
+        {
+            try
+            {
+                if (reader.IsDBNull(0))
+                {
+                    return null;
                 }
 
                 return reader.GetFieldValue<T>(0);

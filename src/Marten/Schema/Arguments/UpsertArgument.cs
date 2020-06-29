@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using Baseline;
 using LamarCodeGeneration;
 using LamarCodeGeneration.Model;
 using Marten.Services;
@@ -89,10 +90,15 @@ namespace Marten.Schema.Arguments
                     method.Frames.Code($"{parameters.Usage}[{i}].{nameof(NpgsqlParameter.NpgsqlDbType)} = {{0}};", NpgsqlDbType.Integer);
                     method.Frames.Code($"{parameters.Usage}[{i}].{nameof(NpgsqlParameter.Value)} = (int)document.{_members.Last().Name};");
                 }
-                else
+                else if (DotNetType.IsNullable())
                 {
                     method.Frames.Code($"{parameters.Usage}[{i}].{nameof(NpgsqlParameter.NpgsqlDbType)} = {{0}};", NpgsqlDbType.Varchar);
                     method.Frames.Code($"{parameters.Usage}[{i}].{nameof(NpgsqlParameter.Value)} = document.{_members.Last().Name}?.ToString();");
+                }
+                else
+                {
+                    method.Frames.Code($"{parameters.Usage}[{i}].{nameof(NpgsqlParameter.NpgsqlDbType)} = {{0}};", NpgsqlDbType.Varchar);
+                    method.Frames.Code($"{parameters.Usage}[{i}].{nameof(NpgsqlParameter.Value)} = document.{_members.Last().Name}.ToString();");
                 }
             }
             else
@@ -110,9 +116,14 @@ namespace Marten.Schema.Arguments
                 {
                     load.Frames.Code($"writer.Write((int)document.{_members.Last().Name}, {{0}});", NpgsqlDbType.Integer);
                 }
+                else if (DotNetType.IsNullable())
+                {
+
+                    load.Frames.Code($"writer.Write(document.{_members.Last().Name}?.ToString(), {{0}});", NpgsqlDbType.Varchar);
+                }
                 else
                 {
-                    load.Frames.Code($"writer.Write(document.{_members.Last().Name}?.ToString(), {{0}});", NpgsqlDbType.Varchar);
+                    load.Frames.Code($"writer.Write(document.{_members.Last().Name}.ToString(), {{0}});", NpgsqlDbType.Varchar);
                 }
             }
             else

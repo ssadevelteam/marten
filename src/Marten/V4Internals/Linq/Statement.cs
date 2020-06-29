@@ -188,7 +188,9 @@ namespace Marten.V4Internals.Linq
                 Mode = StatementMode.CommonTableExpression;
                 ExportName = elementType.Name.Sanitize() + "CTE";
 
-                Next = typeof(ScalarSelectManyStatement<>).CloseAndBuildAs<Statement>(this, session.Serializer, elementType);
+                Next = elementType == typeof(string)
+                    ? new ScalarSelectManyStringStatement(this)
+                    : typeof(ScalarSelectManyStatement<>).CloseAndBuildAs<Statement>(this, session.Serializer, elementType);
 
                 return Next;
             }

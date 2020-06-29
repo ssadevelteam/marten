@@ -26,5 +26,6 @@ namespace Marten.V4Internals
                 session.ItemMap[typeof(T)] = _identityMap;
             }
         }
+
     }
 }
