@@ -272,12 +272,6 @@ namespace Marten
                 return q1.ToPreviewCommand(fetchType);
             }
 
-            if (queryable is MartenQueryable<T> q)
-            {
-                return q.BuildCommand(fetchType);
-
-            }
-
             throw new InvalidOperationException($"{nameof(ToCommand)} is only valid on Marten IQueryable objects");
         }
 

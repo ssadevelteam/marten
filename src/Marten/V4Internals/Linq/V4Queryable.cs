@@ -9,6 +9,7 @@ using LamarCodeGeneration.Util;
 using Marten.Linq;
 using Marten.Services;
 using Marten.Services.Includes;
+using Marten.Transforms;
 using Marten.Util;
 using Marten.V4Internals.Linq.Includes;
 using Npgsql;
@@ -144,7 +145,7 @@ namespace Marten.V4Internals.Linq
 
         public IQueryable<TDoc> TransformTo<TDoc>(string transformName)
         {
-            throw new NotImplementedException();
+            return this.Select(x => x.TransformTo<T, TDoc>(transformName));
         }
 
         public IMartenQueryable<T> Include<TInclude>(Expression<Func<T, object>> idSource, Action<TInclude> callback,

@@ -97,15 +97,7 @@ namespace Marten
 
         public void DeleteWhere<T>(Expression<Func<T, bool>> expression)
         {
-            assertNotDisposed();
-
-            var model = Query<T>().Where(expression).As<MartenQueryable<T>>().ToQueryModel();
-
-            var where = QueryModelExtensions.BuildWhereFragment(_store, model, Tenant);
-
-            var deletion = Tenant.StorageFor(typeof(T)).DeletionForWhere(@where);
-
-            _unitOfWork.Add(deletion);
+            throw new NotImplementedException();
         }
 
         public void Store<T>(IEnumerable<T> entities)

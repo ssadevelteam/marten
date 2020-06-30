@@ -59,12 +59,7 @@ namespace Marten
 
         public IMartenQueryable<T> Query<T>()
         {
-            assertNotDisposed();
-
-            var executor = new MartenQueryExecutor(_connection, _store, _identityMap, Tenant);
-
-            var queryProvider = new MartenQueryProvider(typeof(MartenQueryable<>), _parser, executor);
-            return new MartenQueryable<T>(queryProvider);
+            throw new NotImplementedException();
         }
 
         public IReadOnlyList<T> Query<T>(string sql, params object[] parameters)
