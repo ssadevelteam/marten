@@ -51,8 +51,9 @@ namespace Marten.Services
 
         public IEnumerable<object> Updates()
         {
-            return _operations.Value.Enumerate().SelectMany(x => x.Value.Where(t => t is UpsertDocument || t is UpdateDocument).OfType<DocumentStorageOperation>().Select(u => u.Document))
-                .Union(detectTrackerChanges().Select(x => x.Document));
+            throw new NotImplementedException();
+            // return _operations.Value.Enumerate().SelectMany(x => x.Value.Where(t => t is UpsertDocument || t is UpdateDocument).OfType<DocumentStorageOperation>().Select(u => u.Document))
+            //     .Union(detectTrackerChanges().Select(x => x.Document));
         }
 
         public IEnumerable<T> UpdatesFor<T>()
@@ -62,7 +63,8 @@ namespace Marten.Services
 
         public IEnumerable<object> Inserts()
         {
-            return _operations.Value.Enumerate().SelectMany(x => x.Value).OfType<InsertDocument>().Select(x => x.Document);
+            throw new NotImplementedException();
+            //return _operations.Value.Enumerate().SelectMany(x => x.Value).OfType<InsertDocument>().Select(x => x.Document);
         }
 
         public IEnumerable<T> InsertsFor<T>()
@@ -145,21 +147,24 @@ namespace Marten.Services
         {
             var list = operationsFor(typeof(T));
 
-            list.AddRange(documents.Select(x => new UpsertDocument(x)));
+            throw new NotImplementedException();
+            //list.AddRange(documents.Select(x => new UpsertDocument(x)));
         }
 
         public void StoreUpdates<T>(params T[] documents)
         {
             var list = operationsFor(typeof(T));
 
-            list.AddRange(documents.Select(x => new UpdateDocument(x)));
+            throw new NotImplementedException();
+            //list.AddRange(documents.Select(x => new UpdateDocument(x)));
         }
 
         public void StoreInserts<T>(params T[] documents)
         {
             var list = operationsFor(typeof(T));
 
-            list.AddRange(documents.Select(x => new InsertDocument(x)));
+            throw new NotImplementedException();
+            //list.AddRange(documents.Select(x => new InsertDocument(x)));
         }
 
         public ChangeSet ApplyChanges(UpdateBatch batch)
@@ -504,44 +509,6 @@ namespace Marten.Services
         }
     }
 
-    public class UpsertDocument: DocumentStorageOperation
-    {
-        public UpsertDocument(object document) : base(UpdateStyle.Upsert, document)
-        {
-        }
 
-        public UpsertDocument(object document, string tenantId) : this(document)
-        {
-            TenantOverride = tenantId;
-        }
 
-        public override string ToString()
-        {
-            return $"{GetType().Name}: {DocumentType.Name}";
-        }
-    }
-
-    public class UpdateDocument: DocumentStorageOperation
-    {
-        public UpdateDocument(object document) : base(UpdateStyle.Update, document)
-        {
-        }
-
-        public override string ToString()
-        {
-            return $"{GetType().Name}: {DocumentType.Name}";
-        }
-    }
-
-    public class InsertDocument: DocumentStorageOperation
-    {
-        public InsertDocument(object document) : base(UpdateStyle.Insert, document)
-        {
-        }
-
-        public override string ToString()
-        {
-            return $"{GetType().Name}: {DocumentType.Name}";
-        }
-    }
 }

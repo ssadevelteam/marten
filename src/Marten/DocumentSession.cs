@@ -188,7 +188,8 @@ namespace Marten
                     var id = idAssignment.Assign(Tenant, entity, out var assigned);
 
                     storage.Store(IdentityMap, id, entity);
-                    _unitOfWork.Add(new UpsertDocument(entity, tenantId));
+                    throw new NotImplementedException();
+                    //_unitOfWork.Add(new UpsertDocument(entity, tenantId));
                 }
             }
         }

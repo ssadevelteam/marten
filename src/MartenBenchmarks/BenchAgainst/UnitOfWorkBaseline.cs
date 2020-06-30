@@ -52,8 +52,9 @@ namespace MartenBenchmarks.BenchAgainst
 
         public IEnumerable<object> Updates()
         {
-            return _operations.Values.SelectMany(x => x.OfType<UpsertDocument>().Select(u => u.Document))
-                .Union(detectTrackerChanges().Select(x => x.Document));
+            throw new NotImplementedException();
+            // return _operations.Values.SelectMany(x => x.OfType<UpsertDocument>().Select(u => u.Document))
+            //     .Union(detectTrackerChanges().Select(x => x.Document));
         }
 
         public IEnumerable<T> UpdatesFor<T>()
@@ -63,7 +64,8 @@ namespace MartenBenchmarks.BenchAgainst
 
         public IEnumerable<object> Inserts()
         {
-            return _operations.Values.SelectMany(x => x).OfType<InsertDocument>().Select(x => x.Document);
+            throw new NotImplementedException();
+            // return _operations.Values.SelectMany(x => x).OfType<InsertDocument>().Select(x => x.Document);
         }
 
         public IEnumerable<T> InsertsFor<T>()
@@ -130,21 +132,24 @@ namespace MartenBenchmarks.BenchAgainst
         {
             var list = operationsFor(typeof(T));
 
-            list.AddRange(documents.Select(x => new UpsertDocument(x)));
+            throw new NotImplementedException();
+            //list.AddRange(documents.Select(x => new UpsertDocument(x)));
         }
 
         public void StoreUpdates<T>(params T[] documents)
         {
             var list = operationsFor(typeof(T));
 
-            list.AddRange(documents.Select(x => new UpdateDocument(x)));
+            throw new NotImplementedException();
+            //list.AddRange(documents.Select(x => new UpdateDocument(x)));
         }
 
         public void StoreInserts<T>(params T[] documents)
         {
             var list = operationsFor(typeof(T));
 
-            list.AddRange(documents.Select(x => new InsertDocument(x)));
+            throw new NotImplementedException();
+            //list.AddRange(documents.Select(x => new InsertDocument(x)));
         }
 
         public ChangeSet ApplyChanges(UpdateBatch batch)
