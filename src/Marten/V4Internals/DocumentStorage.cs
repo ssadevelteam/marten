@@ -50,6 +50,8 @@ namespace Marten.V4Internals
             QueryableDocument = document;
         }
 
+        public Type SelectedType => typeof(T);
+
         public IQueryableDocument QueryableDocument { get; }
 
         public Type SourceType => typeof(T);
@@ -139,7 +141,8 @@ namespace Marten.V4Internals
 
         public abstract ISelector BuildSelector(IMartenSession session);
 
-        public IQueryHandler<TResult> BuildHandler<TResult>(IMartenSession session, Statement statement)
+        public IQueryHandler<TResult> BuildHandler<TResult>(IMartenSession session, Statement statement,
+            Statement currentStatement)
         {
             var selector = (ISelector<T>)BuildSelector(session);
 

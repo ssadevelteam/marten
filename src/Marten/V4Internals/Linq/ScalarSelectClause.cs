@@ -9,13 +9,6 @@ using Marten.Util;
 
 namespace Marten.V4Internals.Linq
 {
-
-
-    public interface IScalarSelectClause
-    {
-        void ApplyOperator(string op);
-    }
-
     public class ScalarSelectClause<T> : ISelectClause, ISelector<T>, IScalarSelectClause, ISelector<Nullable<T>> where T : struct
     {
         private static readonly string NullResultMessage = $"The cast to value type '{typeof(T).FullNameInCode()}' failed because the materialized value is null. Either the result type's generic parameter or the query must use a nullable type.";
@@ -33,6 +26,8 @@ namespace Marten.V4Internals.Linq
 
             _locator = field.TypedLocator;
         }
+
+        public Type SelectedType => typeof(T);
 
         public string FromObject { get; }
         public void WriteSelectClause(CommandBuilder sql)
@@ -54,7 +49,8 @@ namespace Marten.V4Internals.Linq
             return this;
         }
 
-        public IQueryHandler<TResult> BuildHandler<TResult>(IMartenSession session, Statement statement)
+        public IQueryHandler<TResult> BuildHandler<TResult>(IMartenSession session, Statement statement,
+            Statement currentStatement)
         {
             var selector = (ISelector<T>)BuildSelector(session);
 

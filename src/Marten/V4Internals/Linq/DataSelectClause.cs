@@ -17,6 +17,8 @@ namespace Marten.V4Internals.Linq
             SelectionText = selectionText;
         }
 
+        public Type SelectedType => typeof(T);
+
         public string SelectionText { get; protected set; } = "select d.data from ";
 
         public string FromObject { get; }
@@ -37,7 +39,8 @@ namespace Marten.V4Internals.Linq
             return new SerializationSelector<T>(session.Serializer);
         }
 
-        public IQueryHandler<TResult> BuildHandler<TResult>(IMartenSession session, Statement statement)
+        public IQueryHandler<TResult> BuildHandler<TResult>(IMartenSession session, Statement statement,
+            Statement currentStatement)
         {
             var selector = new SerializationSelector<T>(session.Serializer);
 

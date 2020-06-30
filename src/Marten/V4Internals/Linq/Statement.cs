@@ -262,5 +262,10 @@ namespace Marten.V4Internals.Linq
         {
             SelectClause = SelectClause.UseStatistics(statistics);
         }
+
+        public void ToJsonSelector()
+        {
+            SelectClause = new JsonSelectClause(SelectClause);
+        }
     }
 }

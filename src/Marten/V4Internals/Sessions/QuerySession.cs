@@ -297,7 +297,7 @@ namespace Marten.V4Internals.Sessions
 
 
 
-        public IJsonLoader Json => throw new NotImplementedException();
+        public IJsonLoader Json => new JsonLoader(Database, Tenant);
         public Guid? VersionFor<TDoc>(TDoc entity)
         {
             return storageFor<TDoc>().VersionFor(entity, this);

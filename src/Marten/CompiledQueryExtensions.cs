@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Baseline;
 using Marten.Linq;
@@ -44,18 +45,17 @@ namespace Marten
 
         public static string ToJsonArray<T>(this IQueryable<T> queryable)
         {
-            return $"[{queryable.Select(x => x.AsJson()).ToArray().Join(",")}]";
+            return queryable.As<IMartenQueryable<T>>().ToJsonArray();
         }
 
         public static string ToJsonArray<T>(this IOrderedQueryable<T> queryable)
         {
-            return $"[{queryable.Select(x => x.AsJson()).ToArray().Join(",")}]";
+            return queryable.As<IMartenQueryable<T>>().ToJsonArray();
         }
 
-        public static async Task<string> ToJsonArrayAsync<T>(this IQueryable<T> queryable)
+        public static Task<string> ToJsonArrayAsync<T>(this IQueryable<T> queryable, CancellationToken token = default)
         {
-            var jsonStrings = await queryable.Select(x => x.AsJson()).ToListAsync().ConfigureAwait(false);
-            return $"[{jsonStrings.Join(",")}]";
+            return queryable.As<IMartenQueryable<T>>().ToJsonArrayAsync(token);
         }
     }
 }

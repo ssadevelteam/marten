@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
@@ -54,7 +55,23 @@ namespace Marten.V4Internals.Linq
                     CurrentStatement.ToScalar(Model.SelectClause.Selector);
                     break;
 
-                case ExpressionType.MemberInit:
+                case ExpressionType.Call:
+                    var method = (MethodCallExpression)Model.SelectClause.Selector;
+                    if (method.Method.Name == nameof(CompiledQueryExtensions.AsJson))
+                    {
+                        CurrentStatement.ToJsonSelector();
+                    }
+                    else
+                    {
+                        throw new NotImplementedException($"Marten does not (yet) support the {method.Method.DeclaringType.FullNameInCode()}.{method.Method.Name}() method as a Linq selector");
+
+
+
+                    }
+
+                    break;
+
+                                   case ExpressionType.MemberInit:
                 case ExpressionType.New:
                     CurrentStatement.ToSelectTransform(Model.SelectClause);
                     break;
@@ -82,6 +99,9 @@ namespace Marten.V4Internals.Linq
                         CurrentStatement = CurrentStatement.ToSelectMany(collectionField, _session, isComplex, elementType);
 
 
+                        break;
+                    case AsJsonResultOperator json:
+                        CurrentStatement.ToJsonSelector();
                         break;
                     default:
                         throw new NotSupportedException();
@@ -164,6 +184,10 @@ namespace Marten.V4Internals.Linq
                     CurrentStatement.ApplyAggregateOperator("MAX");
                     break;
 
+                case AsJsonResultOperator _:
+                    CurrentStatement.ToJsonSelector();
+                    break;
+
                 default:
                     throw new NotSupportedException("Don't yet know how to deal with " + resultOperator);
             }
@@ -199,7 +223,7 @@ namespace Marten.V4Internals.Linq
                 return CurrentStatement.BuildSingleResultHandler<TResult>(_session, TopStatement);
             }
 
-            return CurrentStatement.SelectClause.BuildHandler<TResult>(_session, TopStatement);
+            return CurrentStatement.SelectClause.BuildHandler<TResult>(_session, TopStatement, CurrentStatement);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

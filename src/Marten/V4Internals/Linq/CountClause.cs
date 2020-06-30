@@ -16,6 +16,8 @@ namespace Marten.V4Internals.Linq
             FromObject = from;
         }
 
+        public Type SelectedType => typeof(T);
+
         public string FromObject { get; }
         public void WriteSelectClause(CommandBuilder sql)
         {
@@ -35,7 +37,8 @@ namespace Marten.V4Internals.Linq
             throw new NotSupportedException();
         }
 
-        public IQueryHandler<TResult> BuildHandler<TResult>(IMartenSession session, Statement topStatement)
+        public IQueryHandler<TResult> BuildHandler<TResult>(IMartenSession session, Statement topStatement,
+            Statement currentStatement)
         {
             _topStatement = topStatement;
             return (IQueryHandler<TResult>) this;

@@ -31,6 +31,8 @@ namespace Marten.V4Internals
         }
 
         public string FromObject { get; }
+        public Type SelectedType => typeof(T);
+
         public void WriteSelectClause(CommandBuilder sql)
         {
             _parent.WriteSelectClause(sql);
@@ -47,7 +49,8 @@ namespace Marten.V4Internals
             return new CastingSelector<T, TRoot>((ISelector<TRoot>) inner);
         }
 
-        public IQueryHandler<TResult> BuildHandler<TResult>(IMartenSession session, Statement statement)
+        public IQueryHandler<TResult> BuildHandler<TResult>(IMartenSession session, Statement statement,
+            Statement currentStatement)
         {
             var selector = (ISelector<T>)BuildSelector(session);
 

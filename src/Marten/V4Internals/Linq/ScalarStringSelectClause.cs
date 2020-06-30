@@ -25,6 +25,8 @@ namespace Marten.V4Internals.Linq
             _locator = field.TypedLocator;
         }
 
+        public Type SelectedType => typeof(string);
+
         public string FromObject { get; }
 
         public void WriteSelectClause(CommandBuilder sql)
@@ -46,7 +48,8 @@ namespace Marten.V4Internals.Linq
             return this;
         }
 
-        public IQueryHandler<TResult> BuildHandler<TResult>(IMartenSession session, Statement statement)
+        public IQueryHandler<TResult> BuildHandler<TResult>(IMartenSession session, Statement statement,
+            Statement currentStatement)
         {
             return LinqHandlerBuilder.BuildHandler<string, TResult>(this, statement);
         }

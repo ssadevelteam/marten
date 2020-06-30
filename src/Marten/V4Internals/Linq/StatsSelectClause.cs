@@ -19,7 +19,7 @@ namespace Marten.V4Internals.Linq
             _statistics = statistics;
         }
 
-
+        public Type SelectedType => _inner.SelectedType;
 
         public string FromObject => _inner.FromObject;
 
@@ -44,7 +44,8 @@ namespace Marten.V4Internals.Linq
             throw new System.NotSupportedException();
         }
 
-        public IQueryHandler<TResult> BuildHandler<TResult>(IMartenSession session, Statement topStatement)
+        public IQueryHandler<TResult> BuildHandler<TResult>(IMartenSession session, Statement topStatement,
+            Statement currentStatement)
         {
             var selector = (ISelector<T>)_inner.BuildSelector(session);
 

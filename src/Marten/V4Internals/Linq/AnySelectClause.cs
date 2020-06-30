@@ -18,6 +18,8 @@ namespace Marten.V4Internals.Linq
 
         public string FromObject { get; }
 
+        public Type SelectedType => typeof(bool);
+
         public void WriteSelectClause(CommandBuilder sql)
         {
             sql.Append("select (count(*) > 0) as result");
@@ -36,7 +38,8 @@ namespace Marten.V4Internals.Linq
             throw new NotSupportedException();
         }
 
-        public IQueryHandler<T> BuildHandler<T>(IMartenSession session, Statement topStatement)
+        public IQueryHandler<T> BuildHandler<T>(IMartenSession session, Statement topStatement,
+            Statement currentStatement)
         {
             _topStatement = topStatement;
             return (IQueryHandler<T>) this;

@@ -17,6 +17,7 @@ using Remotion.Linq;
 
 namespace Marten.Linq
 {
+    [Obsolete("being replaced for v4")]
     public class MartenQueryable<T>: QueryableBase<T>, IMartenQueryable<T>
     {
         public MartenQueryable(IQueryProvider provider) : base(provider)
@@ -45,6 +46,16 @@ namespace Marten.Linq
         public IQueryable<TDoc> TransformTo<TDoc>(string transformName)
         {
             return this.Select(x => x.TransformTo<T, TDoc>(transformName));
+        }
+
+        public string ToJsonArray()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<string> ToJsonArrayAsync(CancellationToken token)
+        {
+            throw new NotImplementedException();
         }
 
         public IEnumerable<IIncludeJoin> Includes

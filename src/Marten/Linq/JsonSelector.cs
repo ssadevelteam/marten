@@ -1,3 +1,4 @@
+using System;
 using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
@@ -5,6 +6,7 @@ using Marten.Services;
 
 namespace Marten.Linq
 {
+    [Obsolete("Goes away in v4")]
     public class JsonSelector: BasicSelector, ISelector<string>
     {
         public JsonSelector() : base("data")

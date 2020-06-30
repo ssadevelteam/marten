@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Baseline;
@@ -35,6 +36,8 @@ namespace Marten.V4Internals.Linq.Includes
             original.Offset = 0;
         }
 
+        public Type SelectedType => typeof(void);
+
         public Statement Inner { get; }
 
         protected override void configure(CommandBuilder sql)
@@ -66,7 +69,8 @@ namespace Marten.V4Internals.Linq.Includes
             throw new System.NotSupportedException();
         }
 
-        public IQueryHandler<T> BuildHandler<T>(IMartenSession session, Statement topStatement)
+        public IQueryHandler<T> BuildHandler<T>(IMartenSession session, Statement topStatement,
+            Statement currentStatement)
         {
             throw new System.NotSupportedException();
         }

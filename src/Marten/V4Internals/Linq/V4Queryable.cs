@@ -129,6 +129,18 @@ namespace Marten.V4Internals.Linq
             return _provider.ExecuteAsync<double>(Expression, token, new AverageResultOperator());
         }
 
+        public string ToJsonArray()
+        {
+            // TODO -- flyweight for the operator
+            return _provider.Execute<string>(Expression, new AsJsonResultOperator(null));
+        }
+
+        public Task<string> ToJsonArrayAsync(CancellationToken token)
+        {
+            // TODO -- flyweight for the operator
+            return _provider.ExecuteAsync<string>(Expression, token, new AsJsonResultOperator(null));
+        }
+
         public QueryPlan Explain(FetchType fetchType = FetchType.FetchMany, Action<IConfigureExplainExpressions> configureExplain = null)
         {
             var command = ToPreviewCommand(fetchType);
