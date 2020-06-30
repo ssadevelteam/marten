@@ -435,28 +435,17 @@ namespace Marten
 
         private IPatchExpression<T> patchById<T>(object id)
         {
-            assertNotDisposed();
-
-            var @where = new WhereFragment("d.id = ?", id);
-            return new PatchExpression<T>(@where, Tenant, _unitOfWork, _store.Serializer);
+            throw new NotImplementedException();
         }
 
         public IPatchExpression<T> Patch<T>(Expression<Func<T, bool>> @where)
         {
-            assertNotDisposed();
-
-            var model = Query<T>().Where(@where).As<MartenQueryable<T>>().ToQueryModel();
-
-            var fragment = QueryModelExtensions.BuildWhereFragment(_store, model, Tenant);
-
-            return new PatchExpression<T>(fragment, Tenant, _unitOfWork, _store.Serializer);
+            throw new NotImplementedException();
         }
 
         public IPatchExpression<T> Patch<T>(IWhereFragment fragment)
         {
-            assertNotDisposed();
-
-            return new PatchExpression<T>(fragment, Tenant, _unitOfWork, _store.Serializer);
+            throw new NotImplementedException();
         }
 
         public void QueueOperation(IStorageOperation storageOperation)

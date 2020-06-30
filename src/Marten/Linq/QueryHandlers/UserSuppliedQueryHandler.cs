@@ -5,44 +5,44 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Baseline;
-using Marten.Schema;
-using Marten.Services;
 using Marten.Util;
+using Marten.V4Internals;
+using Marten.V4Internals.Linq;
 
 namespace Marten.Linq.QueryHandlers
 {
-    public class UserSuppliedQueryHandler<T>: IQueryHandler<IReadOnlyList<T>>
+    public class UserSuppliedQueryHandler<T>: Marten.V4Internals.IQueryHandler<IReadOnlyList<T>>
     {
         private readonly object[] _parameters;
-        private readonly ISelector<T> _selector;
+        private readonly Marten.V4Internals.ISelector<T> _selector;
         private readonly string _sql;
         private readonly bool _sqlContainsCustomSelect;
-        private readonly DocumentStore _store;
+        private readonly ISelectClause _selectClause;
 
-        public UserSuppliedQueryHandler(DocumentStore store, string sql, object[] parameters)
+        public UserSuppliedQueryHandler(IMartenSession session, string sql, object[] parameters)
         {
-            _store = store;
             _sql = sql;
             _parameters = parameters;
             _sqlContainsCustomSelect = _sql.Contains("select", StringComparison.OrdinalIgnoreCase);
 
-            _selector = GetSelector();
+            _selectClause = GetSelectClause(session);
+            _selector = (V4Internals.ISelector<T>) _selectClause.BuildSelector(session);
         }
 
-        public Type SourceType => typeof(T);
-
-        public void ConfigureCommand(CommandBuilder builder)
+        public void ConfigureCommand(CommandBuilder builder, IMartenSession session)
         {
             if (!_sqlContainsCustomSelect)
             {
-                var mapping = _store.Storage.MappingFor(typeof(T)).ToQueryableDocument();
-                var tableName = mapping.Table.QualifiedName;
-
-                _selector.WriteSelectClause(builder, mapping);
+                _selectClause.WriteSelectClause(builder);
 
                 if (_sql.TrimStart().StartsWith("where", StringComparison.OrdinalIgnoreCase))
+                {
                     builder.Append(" ");
-                else if (!_sql.Contains(" where ", StringComparison.OrdinalIgnoreCase)) builder.Append(" where ");
+                }
+                else if (!_sql.Contains(" where ", StringComparison.OrdinalIgnoreCase))
+                {
+                    builder.Append(" where ");
+                }
             }
 
             builder.Append(_sql);
@@ -50,37 +50,65 @@ namespace Marten.Linq.QueryHandlers
             var firstParameter = _parameters.FirstOrDefault();
 
             if (_parameters.Length == 1 && firstParameter != null && firstParameter.IsAnonymousType())
+            {
                 builder.AddParameters(firstParameter);
+            }
             else
+            {
                 _parameters.Each(x =>
                 {
                     var param = builder.AddParameter(x);
                     builder.UseParameter(param);
                 });
+            }
         }
 
-        public IReadOnlyList<T> Handle(DbDataReader reader, IIdentityMap map, QueryStatistics stats)
+        public IReadOnlyList<T> Handle(DbDataReader reader, IMartenSession session)
         {
-            return _selector.Read(reader, map, stats);
+            var list = new List<T>();
+
+            while (reader.Read())
+            {
+                var item = _selector.Resolve(reader);
+                list.Add(item);
+            }
+
+            return list;
         }
 
-        public Task<IReadOnlyList<T>> HandleAsync(DbDataReader reader, IIdentityMap map, QueryStatistics stats,
+        public async Task<IReadOnlyList<T>> HandleAsync(DbDataReader reader, IMartenSession session,
             CancellationToken token)
         {
-            return _selector.ReadAsync(reader, map, stats, token);
+            var list = new List<T>();
+
+            while (await reader.ReadAsync(token).ConfigureAwait(false))
+            {
+                var item = await _selector.ResolveAsync(reader, token).ConfigureAwait(false);
+                list.Add(item);
+            }
+
+            return list;
         }
 
 
-        private ISelector<T> GetSelector()
+        private ISelectClause GetSelectClause(IMartenSession session)
         {
-            if (typeof(T).IsSimple() || _sqlContainsCustomSelect)
-                return new DeserializeSelector<T>(_store.Serializer);
+            if (typeof(T) == typeof(string))
+            {
+                return new ScalarStringSelectClause("", "");
+            }
 
-            var mapping = _store.Tenancy.Default.MappingFor(typeof(T)).As<DocumentMapping>();
+            if (typeof(T).IsSimple())
+            {
+                return typeof(ScalarSelectClause<>).CloseAndBuildAs<ISelectClause>("", "", typeof(T));
+            }
 
-            return !mapping.IsHierarchy()
-                ? (ISelector<T>)new DeserializeSelector<T>(_store.Serializer)
-                : new WholeDocumentSelector<T>(mapping, _store.Tenancy.Default.StorageFor<T>());
+            if (_sqlContainsCustomSelect)
+            {
+                return new DataSelectClause<T>("", "");
+            }
+
+            return session.StorageFor(typeof(T));
         }
     }
 }

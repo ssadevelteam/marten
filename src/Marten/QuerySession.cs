@@ -69,18 +69,12 @@ namespace Marten
 
         public IReadOnlyList<T> Query<T>(string sql, params object[] parameters)
         {
-            assertNotDisposed();
-
-            var handler = new UserSuppliedQueryHandler<T>(_store, sql, parameters);
-            return _connection.Fetch(handler, _identityMap.ForQuery(), null, Tenant);
+            throw new NotImplementedException();
         }
 
         public Task<IReadOnlyList<T>> QueryAsync<T>(string sql, CancellationToken token = default(CancellationToken), params object[] parameters)
         {
-            assertNotDisposed();
-
-            var handler = new UserSuppliedQueryHandler<T>(_store, sql, parameters);
-            return _connection.FetchAsync(handler, _identityMap.ForQuery(), null, Tenant, token);
+            throw new NotImplementedException();
         }
 
         public IBatchedQuery CreateBatchQuery()

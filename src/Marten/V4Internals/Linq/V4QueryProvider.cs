@@ -45,7 +45,7 @@ namespace Marten.V4Internals.Linq
             var builder = new LinqHandlerBuilder(_session, expression);
             var handler = builder.BuildHandler<TResult>(Statistics, Includes);
 
-            return executeHandler(handler);
+            return ExecuteHandler(handler);
         }
 
         public Task<TResult> ExecuteAsync<TResult>(Expression expression, CancellationToken token)
@@ -53,7 +53,7 @@ namespace Marten.V4Internals.Linq
             var builder = new LinqHandlerBuilder(_session, expression);
             var handler = builder.BuildHandler<TResult>(Statistics, Includes);
 
-            return executeHandlerAsync(handler, token);
+            return ExecuteHandlerAsync(handler, token);
         }
 
         public TResult Execute<TResult>(Expression expression, ResultOperatorBase op)
@@ -61,7 +61,7 @@ namespace Marten.V4Internals.Linq
             var builder = new LinqHandlerBuilder(_session, expression, op);
             var handler = builder.BuildHandler<TResult>(Statistics, Includes);
 
-            return executeHandler(handler);
+            return ExecuteHandler(handler);
         }
 
         public Task<TResult> ExecuteAsync<TResult>(Expression expression, CancellationToken token, ResultOperatorBase op)
@@ -70,10 +70,10 @@ namespace Marten.V4Internals.Linq
             var handler = builder.BuildHandler<TResult>(Statistics, Includes);
 
             // TODO -- worry about QueryStatistics later
-            return executeHandlerAsync(handler, token);
+            return ExecuteHandlerAsync(handler, token);
         }
 
-        protected async Task<T> executeHandlerAsync<T>(IQueryHandler<T> handler, CancellationToken token)
+        public async Task<T> ExecuteHandlerAsync<T>(IQueryHandler<T> handler, CancellationToken token)
         {
             var cmd = new NpgsqlCommand();
             var builder = new CommandBuilder(cmd);
@@ -93,7 +93,7 @@ namespace Marten.V4Internals.Linq
             }
         }
 
-        protected T executeHandler<T>(IQueryHandler<T> handler)
+        public T ExecuteHandler<T>(IQueryHandler<T> handler)
         {
             var cmd = new NpgsqlCommand();
             var builder = new CommandBuilder(cmd);

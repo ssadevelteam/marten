@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Marten.Linq;
 using Marten.Linq.Fields;
+using Marten.Schema;
 using Marten.Storage;
 using Marten.V4Internals.Linq;
 using Remotion.Linq;
@@ -19,6 +20,8 @@ namespace Marten.V4Internals
         IWhereFragment FilterDocuments(QueryModel model, IWhereFragment query);
 
         IWhereFragment DefaultWhereFragment();
+
+        IQueryableDocument QueryableDocument { get; }
     }
 
     public interface IDocumentStorage<T> : IDocumentStorage

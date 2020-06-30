@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Baseline;
 using Marten.Linq;
+using Marten.Linq.QueryHandlers;
 using Marten.Schema;
 using Marten.Services;
 using Marten.Services.BatchQuerying;
@@ -86,12 +87,18 @@ namespace Marten.V4Internals.Sessions
 
         public IReadOnlyList<T> Query<T>(string sql, params object[] parameters)
         {
-            throw new NotImplementedException();
+            assertNotDisposed();
+            var handler = new UserSuppliedQueryHandler<T>(this, sql, parameters);
+            var provider = new V4QueryProvider(this);
+            return provider.ExecuteHandler(handler);
         }
 
         public Task<IReadOnlyList<T>> QueryAsync<T>(string sql, CancellationToken token = default(CancellationToken), params object[] parameters)
         {
-            throw new NotImplementedException();
+            assertNotDisposed();
+            var handler = new UserSuppliedQueryHandler<T>(this, sql, parameters);
+            var provider = new V4QueryProvider(this);
+            return provider.ExecuteHandlerAsync(handler, token);
         }
 
         public IBatchedQuery CreateBatchQuery()

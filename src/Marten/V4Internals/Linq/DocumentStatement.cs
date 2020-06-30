@@ -15,6 +15,8 @@ namespace Marten.V4Internals.Linq
 
         protected override IWhereFragment buildWhereFragment(MartenExpressionParser parser)
         {
+            // TODO -- this logic is duplicated. Pull it into a helper somewhere.
+            // Find the duplication of DefaultWhereFragment/ FilterDocuments in other places
             if (WhereClauses.Count == 0)
                 return _storage.DefaultWhereFragment();
 

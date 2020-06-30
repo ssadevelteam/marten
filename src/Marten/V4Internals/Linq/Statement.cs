@@ -172,7 +172,10 @@ namespace Marten.V4Internals.Linq
         public void ToScalar(Expression selectClauseSelector)
         {
             var field = Fields.FieldFor(selectClauseSelector);
-            SelectClause = typeof(ScalarSelectClause<>).CloseAndBuildAs<ISelectClause>(field, SelectClause.FromObject, field.FieldType);
+
+            SelectClause = field.FieldType == typeof(string)
+                ? new ScalarStringSelectClause(field, SelectClause.FromObject)
+                : typeof(ScalarSelectClause<>).CloseAndBuildAs<ISelectClause>(field, SelectClause.FromObject, field.FieldType);
         }
 
         public Statement ToSelectMany(IField collectionField, IMartenSession session, bool isComplex,

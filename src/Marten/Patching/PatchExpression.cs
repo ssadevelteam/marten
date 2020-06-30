@@ -7,23 +7,21 @@ using Marten.Linq;
 using Marten.Services;
 using Marten.Storage;
 using Marten.Util;
+using Marten.V4Internals;
+using Marten.V4Internals.Sessions;
 
 namespace Marten.Patching
 {
     public class PatchExpression<T>: IPatchExpression<T>
     {
         private readonly IWhereFragment _fragment;
-        private readonly ITenant _tenant;
-        private readonly UnitOfWork _unitOfWork;
-        private readonly ISerializer _serializer;
+        private readonly NewDocumentSession _session;
         public readonly IDictionary<string, object> Patch = new Dictionary<string, object>();
 
-        public PatchExpression(IWhereFragment fragment, ITenant tenant, UnitOfWork unitOfWork, ISerializer serializer)
+        public PatchExpression(IWhereFragment fragment, NewDocumentSession session)
         {
             _fragment = fragment;
-            _tenant = tenant;
-            _unitOfWork = unitOfWork;
-            _serializer = serializer;
+            _session = session;
         }
 
         public void Set<TValue>(string name, TValue value)
@@ -195,19 +193,20 @@ namespace Marten.Patching
             var visitor = new FindMembers();
             visitor.Visit(expression);
 
-            return visitor.Members.Select(x => x.Name.FormatCase(_serializer.Casing)).Join(".");
+            // TODO -- don't like this. Smells like duplication in logic
+            return visitor.Members.Select(x => x.Name.FormatCase(_session.Serializer.Casing)).Join(".");
         }
 
         private void apply()
         {
-            var transform = _tenant.TransformFor(StoreOptions.PatchDoc);
-            var document = _tenant.MappingFor(typeof(T)).ToQueryableDocument();
+            var transform = _session.Tenant.TransformFor(StoreOptions.PatchDoc);
+            var storage = _session.StorageFor(typeof(T));
 
-            var where = document.FilterDocuments(null, _fragment);
+            var where = storage.FilterDocuments(null, _fragment);
 
-            var operation = new PatchOperation(transform, document, where, Patch, _serializer);
+            var operation = new PatchOperation(transform, storage.QueryableDocument, where, Patch, _session.Serializer);
 
-            _unitOfWork.Patch(operation);
+            _session.QueueOperation(operation);
         }
     }
 }

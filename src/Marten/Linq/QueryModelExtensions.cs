@@ -4,6 +4,7 @@ using System.Linq;
 using Baseline;
 using Marten.Storage;
 using Marten.Util;
+using Marten.V4Internals;
 using Remotion.Linq;
 using Remotion.Linq.Clauses;
 using Remotion.Linq.Clauses.Expressions;
@@ -51,6 +52,7 @@ namespace Marten.Linq
             return query.AllResultOperators().Any(x => x is T);
         }
 
+        [Obsolete("Not technically obsolete. Rebuilt as a different extension on IDocumentStorage")]
         internal static IWhereFragment BuildWhereFragment(DocumentStore store, QueryModel query, ITenant tenant)
         {
             var mapping = tenant.MappingFor(query.SourceType()).ToQueryableDocument();
@@ -63,6 +65,19 @@ namespace Marten.Linq
                 : new CompoundWhereFragment(store.Parser, mapping, "and", wheres);
 
             return mapping.FilterDocuments(query, @where);
+        }
+
+        internal static IWhereFragment BuildWhereFragment(this IDocumentStorage storage, QueryModel query, MartenExpressionParser parser)
+        {
+            var wheres = query.AllBodyClauses().OfType<WhereClause>().ToArray();
+            if (wheres.Length == 0)
+                return storage.DefaultWhereFragment();
+
+            var @where = wheres.Length == 1
+                ? parser.ParseWhereFragment(storage.Fields, wheres.Single().Predicate)
+                : new CompoundWhereFragment(parser, storage.Fields, "and", wheres);
+
+            return storage.FilterDocuments(query, @where);
         }
 
         public static void ApplyTake(this QueryModel model, int limit, CommandBuilder sql)

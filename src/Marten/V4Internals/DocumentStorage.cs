@@ -47,7 +47,10 @@ namespace Marten.V4Internals
                 _loadArraySql += $" and {TenantWhereFragment.Filter}";
             }
 
+            QueryableDocument = document;
         }
+
+        public IQueryableDocument QueryableDocument { get; }
 
         public Type SourceType => typeof(T);
 

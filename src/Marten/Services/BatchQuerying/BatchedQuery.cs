@@ -49,7 +49,8 @@ namespace Marten.Services.BatchQuerying
 
         public Task<IReadOnlyList<T>> Query<T>(string sql, params object[] parameters) where T : class
         {
-            return AddItem(new UserSuppliedQueryHandler<T>(_store, sql, parameters), null);
+            throw new NotImplementedException();
+            //return AddItem(new UserSuppliedQueryHandler<T>(_store, sql, parameters), null);
         }
 
         public IBatchedQueryable<T> Query<T>() where T : class

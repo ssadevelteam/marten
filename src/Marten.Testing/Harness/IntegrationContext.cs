@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Marten.Testing.Examples;
 using Xunit;
 
@@ -14,6 +15,8 @@ namespace Marten.Testing.Harness
     public class IntegrationContext : StoreContext<DefaultStoreFixture>
     {
         private DocumentStore _store;
+
+        protected readonly IList<IDisposable> Disposables = new List<IDisposable>();
 
         public IntegrationContext(DefaultStoreFixture fixture) : base(fixture)
         {
@@ -74,6 +77,11 @@ namespace Marten.Testing.Harness
 
         public override void Dispose()
         {
+            foreach (var disposable in Disposables)
+            {
+                disposable.Dispose();
+            }
+
             if (_overrodeStore)
             {
                 Fixture.Store.Advanced.Clean.CompletelyRemoveAll();

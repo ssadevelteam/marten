@@ -72,6 +72,8 @@ namespace Marten.V4Internals
             return _defaultWhere;
         }
 
+        public IQueryableDocument QueryableDocument => _mapping;
+
         public Type IdType => typeof(TId);
         public Guid? VersionFor(T document, IMartenSession session)
         {

@@ -119,9 +119,11 @@ namespace MartenBenchmarks.BenchAgainst
 
         public void Patch(PatchOperation patch)
         {
-            var list = operationsFor(patch.DocumentType);
+            throw new NotImplementedException();
 
-            list.Add(patch);
+            // var list = operationsFor(patch.DocumentType);
+            //
+            // list.Add(patch);
         }
 
         public void StoreUpserts<T>(params T[] documents)

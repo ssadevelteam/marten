@@ -4,13 +4,16 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Baseline;
 using Marten.Events;
 using Marten.Linq;
 using Marten.Patching;
 using Marten.Services;
 using Marten.Storage;
 using Marten.Util;
+using Marten.V4Internals.Linq;
 using Npgsql;
+using Remotion.Linq.Clauses;
 
 namespace Marten.V4Internals.Sessions
 {
@@ -237,7 +240,8 @@ namespace Marten.V4Internals.Sessions
             throw new NotImplementedException();
         }
 
-        public IUnitOfWork PendingChanges { get; }
+        public IUnitOfWork PendingChanges => this;
+
         public void StoreObjects(IEnumerable<object> documents)
         {
             throw new NotImplementedException();
@@ -248,37 +252,62 @@ namespace Marten.V4Internals.Sessions
         public IList<IDocumentSessionListener> Listeners { get; }
         public IPatchExpression<T> Patch<T>(int id)
         {
-            throw new NotImplementedException();
+            return patchById<T>(id);
         }
 
         public IPatchExpression<T> Patch<T>(long id)
         {
-            throw new NotImplementedException();
+            return patchById<T>(id);
         }
 
         public IPatchExpression<T> Patch<T>(string id)
         {
-            throw new NotImplementedException();
+            return patchById<T>(id);
         }
 
         public IPatchExpression<T> Patch<T>(Guid id)
         {
-            throw new NotImplementedException();
+            return patchById<T>(id);
         }
 
-        public IPatchExpression<T> Patch<T>(Expression<Func<T, bool>> @where)
+        public IPatchExpression<T> Patch<T>(Expression<Func<T, bool>> filter)
         {
-            throw new NotImplementedException();
+            assertNotDisposed();
+
+            var queryable = Query<T>().Where(filter);
+            var model = MartenQueryParser.Flyweight.GetParsedQuery(queryable.Expression);
+
+            var storage = storageFor<T>();
+
+            // TODO -- parser needs to be a singleton in the system
+            var @where = storage.BuildWhereFragment(model, new MartenExpressionParser(Serializer, Options));
+
+            return new PatchExpression<T>(@where, this);
         }
 
         public IPatchExpression<T> Patch<T>(IWhereFragment fragment)
         {
-            throw new NotImplementedException();
+            assertNotDisposed();
+
+            return new PatchExpression<T>(fragment, this);
+        }
+
+        private IPatchExpression<T> patchById<T>(object id)
+        {
+            assertNotDisposed();
+
+            var @where = new WhereFragment("d.id = ?", id);
+            return new PatchExpression<T>(@where, this);
         }
 
         public void QueueOperation(Services.IStorageOperation storageOperation)
         {
             throw new NotImplementedException();
+        }
+
+        public void QueueOperation(IStorageOperation storageOperation)
+        {
+            _pendingOperations.Add(storageOperation);
         }
 
         public void Eject<T>(T document)

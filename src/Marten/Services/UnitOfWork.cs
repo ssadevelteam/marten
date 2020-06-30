@@ -14,6 +14,7 @@ using Marten.Util;
 
 namespace Marten.Services
 {
+    [Obsolete("This will be removed in v4")]
     public class UnitOfWork: IUnitOfWork
     {
         private readonly ConcurrentDictionary<Guid, EventStream> _events = new ConcurrentDictionary<Guid, EventStream>();
@@ -138,9 +139,7 @@ namespace Marten.Services
 
         public void Patch(PatchOperation patch)
         {
-            var list = operationsFor(patch.DocumentType);
-
-            list.Add(patch);
+            throw new NotImplementedException();
         }
 
         public void StoreUpserts<T>(params T[] documents)
