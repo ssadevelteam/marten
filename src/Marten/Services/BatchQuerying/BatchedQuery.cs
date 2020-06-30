@@ -175,7 +175,8 @@ namespace Marten.Services.BatchQuerying
 
             var mapping = _parent.Tenant.MappingFor(typeof(T)).ToQueryableDocument();
 
-            return AddItem(new LoadByIdHandler<T>(_parent.Tenant.StorageFor<T>(), mapping, id), null);
+            throw new NotImplementedException();
+            //return AddItem(new LoadByIdHandler<T>(_parent.Tenant.StorageFor<T>(), mapping, id), null);
         }
 
         public Task<bool> Any<TDoc>(IMartenQueryable<TDoc> queryable)
@@ -274,7 +275,8 @@ namespace Marten.Services.BatchQuerying
                 var resolver = tenant.StorageFor<TDoc>();
                 var mapping = tenant.MappingFor(typeof(TDoc)).ToQueryableDocument();
 
-                return _parent.AddItem(new LoadByIdArrayHandler<TDoc, TKey>(resolver, mapping, keys), null);
+                throw new NotImplementedException();
+                //return _parent.AddItem(new LoadByIdArrayHandler<TDoc, TKey>(resolver, mapping, keys), null);
             }
         }
     }
