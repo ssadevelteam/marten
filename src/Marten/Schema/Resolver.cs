@@ -9,7 +9,6 @@ using Baseline;
 using Marten.Linq;
 using Marten.Schema.Identity;
 using Marten.Services;
-using Marten.Services.Deletes;
 using Marten.Storage;
 using Marten.Util;
 using Npgsql;
@@ -297,17 +296,20 @@ namespace Marten.Schema
 
         public IStorageOperation DeletionForId(object id)
         {
-            return new DeleteById(_mapping.TenancyStyle, DeleteByIdSql, this, id);
+            throw new NotImplementedException();
+            //return new DeleteById(_mapping.TenancyStyle, DeleteByIdSql, this, id);
         }
 
         public IStorageOperation DeletionForEntity(object entity)
         {
-            return new DeleteById(_mapping.TenancyStyle, DeleteByIdSql, this, Identity(entity), entity);
+            throw new NotImplementedException();
+            //return new DeleteById(_mapping.TenancyStyle, DeleteByIdSql, this, Identity(entity), entity);
         }
 
         public IStorageOperation DeletionForWhere(IWhereFragment @where)
         {
-            return new DeleteWhere(typeof(T), DeleteByWhereSql, @where, _mapping.TenancyStyle);
+            throw new NotImplementedException();
+            //return new DeleteWhere(typeof(T), DeleteByWhereSql, @where, _mapping.TenancyStyle);
         }
     }
 }

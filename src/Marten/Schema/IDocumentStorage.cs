@@ -17,6 +17,7 @@ namespace Marten.Schema
         Update
     }
 
+    [Obsolete("Goes away in v4")]
     public interface IDocumentStorage
     {
         TenancyStyle TenancyStyle { get; }

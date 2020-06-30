@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Baseline;
 using Marten.Schema;
 using Marten.Services;
-using Marten.Services.Deletes;
 using Marten.Testing.Documents;
 using Marten.Testing.Harness;
 using Marten.Util;

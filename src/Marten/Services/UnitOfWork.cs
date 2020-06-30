@@ -8,7 +8,6 @@ using Baseline;
 using Marten.Events;
 using Marten.Patching;
 using Marten.Schema;
-using Marten.Services.Deletes;
 using Marten.Storage;
 using Marten.Util;
 
@@ -384,21 +383,22 @@ namespace Marten.Services
                 var xIndex = FindIndex(x);
                 var yIndex = FindIndex(y);
 
-                var xIsDelete = x is DeleteWhere || x is DeleteById;
-                var yIsDelete = y is DeleteWhere || y is DeleteById;
+                // TODO -- bring back in v4
+                // var xIsDelete = x is DeleteWhere || x is DeleteById;
+                // var yIsDelete = y is DeleteWhere || y is DeleteById;
 
-                if (xIsDelete != yIsDelete)
-                {
-                    // Arbitrary order if one is a delete but the other is not, because this will force the sorting
-                    // to try and compare these documents against others and fall in to the below checks.
-                    return -1;
-                }
-
-                if (xIsDelete)
-                {
-                    // Both are deletes, so we need reverse topological order to inserts, updates and upserts
-                    return yIndex.CompareTo(xIndex);
-                }
+                // if (xIsDelete != yIsDelete)
+                // {
+                //     // Arbitrary order if one is a delete but the other is not, because this will force the sorting
+                //     // to try and compare these documents against others and fall in to the below checks.
+                //     return -1;
+                // }
+                //
+                // if (xIsDelete)
+                // {
+                //     // Both are deletes, so we need reverse topological order to inserts, updates and upserts
+                //     return yIndex.CompareTo(xIndex);
+                // }
 
                 // Both are inserts, updates or upserts so topological
                 return xIndex.CompareTo(yIndex);

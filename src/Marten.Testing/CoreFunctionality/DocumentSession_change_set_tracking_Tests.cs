@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Linq;
-using Marten.Services;
-using Marten.Services.Deletes;
 using Marten.Testing.Documents;
 using Marten.Testing.Harness;
 using Shouldly;
@@ -37,8 +35,9 @@ namespace Marten.Testing.CoreFunctionality
             theSession.PendingChanges.InsertsFor<Target>()
                 .ShouldHaveTheSameElementsAs(newDoc1, newDoc2);
 
-            theSession.PendingChanges.DeletionsFor<Target>().OfType<DeleteById>().Select(x => x.Id)
-                .ShouldHaveTheSameElementsAs(id1, id2);
+            throw new NotImplementedException();
+            // theSession.PendingChanges.DeletionsFor<Target>().OfType<DeleteById>().Select(x => x.Id)
+            //     .ShouldHaveTheSameElementsAs(id1, id2);
 
             SpecificationExtensions.ShouldBeNull(logger.LastCommit);
             theSession.SaveChanges();
@@ -50,7 +49,9 @@ namespace Marten.Testing.CoreFunctionality
 
             logger.LastCommit.Updated.ShouldHaveTheSameElementsAs(target1, target2, target3);
             logger.LastCommit.Inserted.ShouldHaveTheSameElementsAs(newDoc1, newDoc2);
-            logger.LastCommit.Deleted.OfType<DeleteById>().Select(x => x.Id).ShouldHaveTheSameElementsAs(id1, id2);
+
+            throw new NotImplementedException();
+            //logger.LastCommit.Deleted.OfType<DeleteById>().Select(x => x.Id).ShouldHaveTheSameElementsAs(id1, id2);
 
             theSession.Store(new Target());
             theSession.SaveChanges();
