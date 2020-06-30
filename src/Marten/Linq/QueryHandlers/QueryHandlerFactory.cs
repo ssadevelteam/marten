@@ -4,7 +4,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using Baseline;
 using Marten.Linq.Compiled;
-using Marten.Linq.Model;
 using Marten.Linq.QueryHandlers.CompiledInclude;
 using Marten.Schema;
 using Marten.Services.Includes;
@@ -94,83 +93,86 @@ namespace Marten.Linq.QueryHandlers
 
         private IQueryHandler<T> listHandlerFor<T>(QueryModel model, IIncludeJoin[] joins, QueryStatistics stats)
         {
-            if (model.HasOperator<ToJsonArrayResultOperator>())
-            {
-                var query = new LinqQuery<T>(_store, model, joins, stats);
-                return new JsonQueryHandler(query.As<LinqQuery<string>>()).As<IQueryHandler<T>>();
-            }
-
-            if (!typeof(T).IsGenericEnumerable())
-                return null;
-
-            var elementType = typeof(T).GetGenericArguments().First();
-            var handlerType = typeof(LinqQuery<>);
-
-            if (typeof(T).GetGenericTypeDefinition() == typeof(IEnumerable<>))
-                handlerType = typeof(EnumerableQueryHandler<>);
-
-            // TODO -- WTH?
-            return
-                Activator.CreateInstance(handlerType.MakeGenericType(elementType), _store, model, joins, stats)
-                    .As<IQueryHandler<T>>();
+            throw new NotImplementedException();
+            // if (model.HasOperator<ToJsonArrayResultOperator>())
+            // {
+            //     var query = new LinqQuery<T>(_store, model, joins, stats);
+            //     return new JsonQueryHandler(query.As<LinqQuery<string>>()).As<IQueryHandler<T>>();
+            // }
+            //
+            // if (!typeof(T).IsGenericEnumerable())
+            //     return null;
+            //
+            // var elementType = typeof(T).GetGenericArguments().First();
+            // var handlerType = typeof(LinqQuery<>);
+            //
+            // if (typeof(T).GetGenericTypeDefinition() == typeof(IEnumerable<>))
+            //     handlerType = typeof(EnumerableQueryHandler<>);
+            //
+            // // TODO -- WTH?
+            // return
+            //     Activator.CreateInstance(handlerType.MakeGenericType(elementType), _store, model, joins, stats)
+            //         .As<IQueryHandler<T>>();
         }
 
         private IQueryHandler<T> tryFindScalarQuery<T>(QueryModel model, IIncludeJoin[] joins, QueryStatistics stats)
         {
-            if (model.HasOperator<CountResultOperator>() || model.HasOperator<LongCountResultOperator>())
-                return new LinqQuery<T>(_store, model, joins, stats).ToCount<T>();
-
-            if (model.HasOperator<SumResultOperator>())
-                return AggregateQueryHandler<T>.Sum(new LinqQuery<T>(_store, model, joins, stats));
-
-            if (model.HasOperator<AverageResultOperator>())
-                return AggregateQueryHandler<T>.Average(new LinqQuery<T>(_store, model, joins, stats));
-
-            if (model.HasOperator<AnyResultOperator>())
-                return new LinqQuery<T>(_store, model, joins, stats).ToAny().As<IQueryHandler<T>>();
-
-            return null;
+            throw new NotImplementedException();
+            // if (model.HasOperator<CountResultOperator>() || model.HasOperator<LongCountResultOperator>())
+            //     return new LinqQuery<T>(_store, model, joins, stats).ToCount<T>();
+            //
+            // if (model.HasOperator<SumResultOperator>())
+            //     return AggregateQueryHandler<T>.Sum(new LinqQuery<T>(_store, model, joins, stats));
+            //
+            // if (model.HasOperator<AverageResultOperator>())
+            //     return AggregateQueryHandler<T>.Average(new LinqQuery<T>(_store, model, joins, stats));
+            //
+            // if (model.HasOperator<AnyResultOperator>())
+            //     return new LinqQuery<T>(_store, model, joins, stats).ToAny().As<IQueryHandler<T>>();
+            //
+            // return null;
         }
 
         private IQueryHandler<T> tryFindSingleQuery<T>(QueryModel model, IIncludeJoin[] joins, QueryStatistics stats)
         {
-            var choice = model.FindOperators<ChoiceResultOperatorBase>().FirstOrDefault();
-
-            if (choice == null)
-                return null;
-
-            var query = new LinqQuery<T>(_store, model, joins, stats);
-
-            if (choice is FirstResultOperator)
-            {
-                return choice.ReturnDefaultWhenEmpty
-                    ? OneResultHandler<T>.FirstOrDefault(query)
-                    : OneResultHandler<T>.First(query);
-            }
-
-            if (choice is SingleResultOperator)
-            {
-                return choice.ReturnDefaultWhenEmpty
-                    ? OneResultHandler<T>.SingleOrDefault(query)
-                    : OneResultHandler<T>.Single(query);
-            }
-
-            if (choice is MinResultOperator)
-            {
-                return AggregateQueryHandler<T>.Min(query);
-            }
-
-            if (choice is MaxResultOperator)
-            {
-                return AggregateQueryHandler<T>.Max(query);
-            }
-
-            if (model.HasOperator<LastResultOperator>())
-            {
-                throw new InvalidOperationException(
-                    "Marten does not support Last()/LastOrDefault(). Use reverse ordering and First()/FirstOrDefault() instead");
-            }
-            return null;
+            throw new NotImplementedException();
+            // var choice = model.FindOperators<ChoiceResultOperatorBase>().FirstOrDefault();
+            //
+            // if (choice == null)
+            //     return null;
+            //
+            // var query = new LinqQuery<T>(_store, model, joins, stats);
+            //
+            // if (choice is FirstResultOperator)
+            // {
+            //     return choice.ReturnDefaultWhenEmpty
+            //         ? OneResultHandler<T>.FirstOrDefault(query)
+            //         : OneResultHandler<T>.First(query);
+            // }
+            //
+            // if (choice is SingleResultOperator)
+            // {
+            //     return choice.ReturnDefaultWhenEmpty
+            //         ? OneResultHandler<T>.SingleOrDefault(query)
+            //         : OneResultHandler<T>.Single(query);
+            // }
+            //
+            // if (choice is MinResultOperator)
+            // {
+            //     return AggregateQueryHandler<T>.Min(query);
+            // }
+            //
+            // if (choice is MaxResultOperator)
+            // {
+            //     return AggregateQueryHandler<T>.Max(query);
+            // }
+            //
+            // if (model.HasOperator<LastResultOperator>())
+            // {
+            //     throw new InvalidOperationException(
+            //         "Marten does not support Last()/LastOrDefault(). Use reverse ordering and First()/FirstOrDefault() instead");
+            // }
+            // return null;
         }
 
         private CachedQuery buildCachedQuery<TDoc, TOut>(Type queryType, ICompiledQuery<TDoc, TOut> query)

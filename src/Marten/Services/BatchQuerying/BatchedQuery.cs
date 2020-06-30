@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Baseline;
 using Marten.Events;
 using Marten.Linq;
-using Marten.Linq.Model;
 using Marten.Linq.QueryHandlers;
 using Marten.Util;
 using Npgsql;
@@ -181,12 +180,14 @@ namespace Marten.Services.BatchQuerying
 
         public Task<bool> Any<TDoc>(IMartenQueryable<TDoc> queryable)
         {
-            return AddItem(queryable.ToLinqQuery().ToAny(), null);
+            throw new NotImplementedException();
+            //return AddItem(queryable.ToLinqQuery().ToAny(), null);
         }
 
         public Task<long> Count<TDoc>(IMartenQueryable<TDoc> queryable)
         {
-            return AddItem(queryable.ToLinqQuery().ToCount<long>(), null);
+            throw new NotImplementedException();
+            //return AddItem(queryable.ToLinqQuery().ToCount<long>(), null);
         }
 
         internal Task<IReadOnlyList<T>> Query<T>(IMartenQueryable<T> queryable)
@@ -195,62 +196,57 @@ namespace Marten.Services.BatchQuerying
 
             var query = QueryParser.GetParsedQuery(expression);
 
-            return AddItem(new LinqQuery<T>(_store, query, queryable.Includes.ToArray(), queryable.Statistics).ToList(), queryable.Statistics);
+            throw new NotImplementedException();
+            //return AddItem(new LinqQuery<T>(_store, query, queryable.Includes.ToArray(), queryable.Statistics).ToList(), queryable.Statistics);
         }
 
         public Task<T> First<T>(IMartenQueryable<T> queryable)
         {
-            var query = queryable.ToLinqQuery();
 
-            return AddItem(OneResultHandler<T>.First(query), queryable.Statistics);
+            throw new NotImplementedException();
+            //return AddItem(OneResultHandler<T>.First(query), queryable.Statistics);
         }
 
         public Task<T> FirstOrDefault<T>(IMartenQueryable<T> queryable)
         {
-            var query = queryable.ToLinqQuery();
-
-            return AddItem(OneResultHandler<T>.FirstOrDefault(query), queryable.Statistics);
+            throw new NotImplementedException();
+            //return AddItem(OneResultHandler<T>.FirstOrDefault(query), queryable.Statistics);
         }
 
         public Task<T> Single<T>(IMartenQueryable<T> queryable)
         {
-            var query = queryable.ToLinqQuery();
-
-            return AddItem(OneResultHandler<T>.Single(query), queryable.Statistics);
+            throw new NotImplementedException();
+            //return AddItem(OneResultHandler<T>.Single(query), queryable.Statistics);
         }
 
         public Task<T> SingleOrDefault<T>(IMartenQueryable<T> queryable)
         {
-            var query = queryable.ToLinqQuery();
-
-            return AddItem(OneResultHandler<T>.SingleOrDefault(query), queryable.Statistics);
+            throw new NotImplementedException();
+            //return AddItem(OneResultHandler<T>.SingleOrDefault(query), queryable.Statistics);
         }
 
         public Task<TResult> Min<TResult>(IQueryable<TResult> queryable)
         {
-            var linqQuery = queryable.As<IMartenQueryable<TResult>>().ToLinqQuery();
-            return AddItem(AggregateQueryHandler<TResult>.Min(linqQuery), null);
+            throw new NotImplementedException();
+            //return AddItem(AggregateQueryHandler<TResult>.Min(linqQuery), null);
         }
 
         public Task<TResult> Max<TResult>(IQueryable<TResult> queryable)
         {
-            var linqQuery = queryable.As<IMartenQueryable<TResult>>().ToLinqQuery();
-
-            return AddItem(AggregateQueryHandler<TResult>.Max(linqQuery), null);
+            throw new NotImplementedException();
+            //return AddItem(AggregateQueryHandler<TResult>.Max(linqQuery), null);
         }
 
         public Task<TResult> Sum<TResult>(IQueryable<TResult> queryable)
         {
-            var linqQuery = queryable.As<IMartenQueryable<TResult>>().ToLinqQuery();
-
-            return AddItem(AggregateQueryHandler<TResult>.Sum(linqQuery), null);
+            throw new NotImplementedException();
+            //return AddItem(AggregateQueryHandler<TResult>.Sum(linqQuery), null);
         }
 
         public Task<double> Average<T>(IQueryable<T> queryable)
         {
-            var linqQuery = queryable.As<IMartenQueryable<T>>().ToLinqQuery();
-
-            return AddItem(AggregateQueryHandler<double>.Average(linqQuery), null);
+            throw new NotImplementedException();
+            //return AddItem(AggregateQueryHandler<double>.Average(linqQuery), null);
         }
 
         public class BatchLoadByKeys<TDoc>: IBatchLoadByKeys<TDoc> where TDoc : class

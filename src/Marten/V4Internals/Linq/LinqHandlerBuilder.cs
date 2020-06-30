@@ -71,7 +71,7 @@ namespace Marten.V4Internals.Linq
 
                     break;
 
-                                   case ExpressionType.MemberInit:
+                case ExpressionType.MemberInit:
                 case ExpressionType.New:
                     CurrentStatement.ToSelectTransform(Model.SelectClause);
                     break;

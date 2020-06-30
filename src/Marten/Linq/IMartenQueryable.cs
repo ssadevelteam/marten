@@ -4,7 +4,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Marten.Linq.Model;
 using Marten.Services.Includes;
 
 namespace Marten.Linq
@@ -79,6 +78,5 @@ namespace Marten.Linq
 
         IMartenQueryable<T> Stats(out QueryStatistics stats);
 
-        LinqQuery<T> ToLinqQuery();
     }
 }

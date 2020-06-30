@@ -7,55 +7,48 @@ using System.Threading.Tasks;
 using LamarCodeGeneration;
 using LamarCodeGeneration.Util;
 using Marten.Linq;
-using Marten.Linq.Model;
 using Marten.Services;
 using Marten.Services.Includes;
 using Marten.Util;
 using Marten.V4Internals.Linq.Includes;
-using Marten.V4Internals.Sessions;
 using Npgsql;
 using Remotion.Linq;
 using Remotion.Linq.Clauses.ResultOperators;
 
 namespace Marten.V4Internals.Linq
 {
-    public class V4Queryable<T> : QueryableBase<T>, IMartenQueryable<T>
+    public class V4Queryable<T>: QueryableBase<T>, IMartenQueryable<T>
     {
-        private readonly IMartenSession _session;
         private readonly V4QueryProvider _provider;
+        private readonly IMartenSession _session;
 
-        public V4Queryable(IMartenSession session, V4QueryProvider provider, Expression expression) : base(provider, expression)
+        public V4Queryable(IMartenSession session, V4QueryProvider provider, Expression expression): base(provider,
+            expression)
         {
             _session = session;
             _provider = provider;
         }
 
-        public V4Queryable(IMartenSession session) : base(new V4QueryProvider(session))
+        public V4Queryable(IMartenSession session): base(new V4QueryProvider(session))
         {
             _session = session;
             _provider = Provider.As<V4QueryProvider>();
         }
 
-        public V4Queryable(IMartenSession session, Expression expression) : base(new V4QueryProvider(session), expression)
+        public V4Queryable(IMartenSession session, Expression expression): base(new V4QueryProvider(session),
+            expression)
         {
             _session = session;
             _provider = Provider.As<V4QueryProvider>();
         }
-
 
 
         public IEnumerable<IIncludeJoin> Includes { get; }
 
         public QueryStatistics Statistics
         {
-            get
-            {
-                return _provider.Statistics;
-            }
-            set
-            {
-                _provider.Statistics = value;
-            }
+            get => _provider.Statistics;
+            set => _provider.Statistics = value;
         }
 
         public Task<IReadOnlyList<TResult>> ToListAsync<TResult>(CancellationToken token)
@@ -141,21 +134,12 @@ namespace Marten.V4Internals.Linq
             return _provider.ExecuteAsync<string>(Expression, token, new AsJsonResultOperator(null));
         }
 
-        public QueryPlan Explain(FetchType fetchType = FetchType.FetchMany, Action<IConfigureExplainExpressions> configureExplain = null)
+        public QueryPlan Explain(FetchType fetchType = FetchType.FetchMany,
+            Action<IConfigureExplainExpressions> configureExplain = null)
         {
             var command = ToPreviewCommand(fetchType);
 
             return _session.Database.ExplainQuery(command, configureExplain);
-        }
-
-        public NpgsqlCommand ToPreviewCommand(FetchType fetchType)
-        {
-            var builder = new LinqHandlerBuilder(_session, Expression);
-            var command = new NpgsqlCommand();
-            var sql = new CommandBuilder(command);
-            builder.BuildDiagnosticCommand(fetchType, sql);
-            command.CommandText = sql.ToString();
-            return command;
         }
 
         public IQueryable<TDoc> TransformTo<TDoc>(string transformName)
@@ -163,7 +147,8 @@ namespace Marten.V4Internals.Linq
             throw new NotImplementedException();
         }
 
-        public IMartenQueryable<T> Include<TInclude>(Expression<Func<T, object>> idSource, Action<TInclude> callback, JoinType joinType = JoinType.Inner)
+        public IMartenQueryable<T> Include<TInclude>(Expression<Func<T, object>> idSource, Action<TInclude> callback,
+            JoinType joinType = JoinType.Inner)
         {
             var storage = (IDocumentStorage<TInclude>)_session.StorageFor(typeof(TInclude));
             var identityField = _session.StorageFor(typeof(T)).Fields.FieldFor(idSource);
@@ -174,12 +159,14 @@ namespace Marten.V4Internals.Linq
             return this;
         }
 
-        public IMartenQueryable<T> Include<TInclude>(Expression<Func<T, object>> idSource, IList<TInclude> list, JoinType joinType = JoinType.Inner)
+        public IMartenQueryable<T> Include<TInclude>(Expression<Func<T, object>> idSource, IList<TInclude> list,
+            JoinType joinType = JoinType.Inner)
         {
             return Include<TInclude>(idSource, list.Add);
         }
 
-        public IMartenQueryable<T> Include<TInclude, TKey>(Expression<Func<T, object>> idSource, IDictionary<TKey, TInclude> dictionary,
+        public IMartenQueryable<T> Include<TInclude, TKey>(Expression<Func<T, object>> idSource,
+            IDictionary<TKey, TInclude> dictionary,
             JoinType joinType = JoinType.Inner)
         {
             var storage = (IDocumentStorage<TInclude>)_session.StorageFor(typeof(TInclude));
@@ -199,9 +186,9 @@ namespace Marten.V4Internals.Linq
             }
             else
             {
-                throw new InvalidOperationException($"Id/Document type mismatch. The id type for the included document type {typeof(TInclude).FullNameInCode()} is {storage.IdType.FullNameInCode()}");
+                throw new InvalidOperationException(
+                    $"Id/Document type mismatch. The id type for the included document type {typeof(TInclude).FullNameInCode()} is {storage.IdType.FullNameInCode()}");
             }
-
 
 
             return this;
@@ -215,10 +202,14 @@ namespace Marten.V4Internals.Linq
             return this;
         }
 
-        // TODO -- try to get rid of this
-        public LinqQuery<T> ToLinqQuery()
+        public NpgsqlCommand ToPreviewCommand(FetchType fetchType)
         {
-            throw new NotImplementedException();
+            var builder = new LinqHandlerBuilder(_session, Expression);
+            var command = new NpgsqlCommand();
+            var sql = new CommandBuilder(command);
+            builder.BuildDiagnosticCommand(fetchType, sql);
+            command.CommandText = sql.ToString();
+            return command;
         }
     }
 }

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Baseline;
-using Marten.Linq.Model;
 using Marten.Services;
 using Marten.Services.Includes;
 using Marten.Storage;
@@ -10,6 +9,7 @@ using Remotion.Linq;
 
 namespace Marten.Linq
 {
+    [Obsolete("goes away in v4")]
     public class MartenQueryExecutor: IQueryExecutor
     {
         private readonly IList<IIncludeJoin> _includes = new List<IIncludeJoin>();
@@ -57,11 +57,7 @@ namespace Marten.Linq
 
         IEnumerable<T> IQueryExecutor.ExecuteCollection<T>(QueryModel queryModel)
         {
-            Tenant.EnsureStorageExists(queryModel.SourceType());
-
-            var handler = new LinqQuery<T>(Store, queryModel, _includes.ToArray(), Statistics).ToList();
-
-            return Connection.Fetch(handler, IdentityMap.ForQuery(), Statistics, Tenant);
+throw new NotImplementedException();
         }
 
         public void AddInclude(IIncludeJoin include)
