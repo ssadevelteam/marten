@@ -17,6 +17,7 @@ namespace Marten.Linq
         void WriteSelectClause(CommandBuilder sql, IQueryableDocument mapping);
     }
 
+    [Obsolete("Goes away in v4")]
     public interface ISelector<T>: ISelector
     {
         T Resolve(DbDataReader reader, IIdentityMap map, QueryStatistics stats);

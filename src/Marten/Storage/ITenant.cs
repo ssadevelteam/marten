@@ -30,7 +30,6 @@ namespace Marten.Storage
         void EnsureStorageExists(Type documentType);
     }
 
-    [Obsolete("This gets dramatically thinned down in v4. See the version in the V4 internals")]
     public interface ITenant : ITenantStorage
     {
         string TenantId { get; }
@@ -48,6 +47,14 @@ namespace Marten.Storage
         /// <param name="documentType"></param>
         /// <returns></returns>
         IDocumentStorage StorageFor(Type documentType);
+
+        /// <summary>
+        /// Retrieves or generates the active IDocumentStorage object
+        /// for the given document type
+        /// </summary>
+        /// <param name="documentType"></param>
+        /// <returns></returns>
+        IDocumentStorage<T> StorageFor<T>();
 
         /// <summary>
         /// Finds or creates the IDocumentMapping for a document type
