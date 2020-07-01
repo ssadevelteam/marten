@@ -4,27 +4,27 @@ using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
 using Marten.Linq;
-using Marten.Linq.QueryHandlers;
 using Marten.Services;
 using Marten.Storage;
 using Marten.Util;
+using Marten.V4Internals;
 
 namespace Marten.Events
 {
-    internal interface IEventQueryHandler: IQueryHandler<IReadOnlyList<IEvent>>
+    internal interface IEventQueryHandler: Linq.QueryHandlers.IQueryHandler<IReadOnlyList<IEvent>>
     {
     }
 
     internal class EventQueryHandler<TIdentity>: IEventQueryHandler
     {
-        private readonly ISelector<IEvent> _selector;
+        private readonly Linq.ISelector<IEvent> _selector;
         private readonly TIdentity _streamId;
         private readonly DateTime? _timestamp;
         private readonly int _version;
         private readonly TenancyStyle _tenancyStyle;
         private readonly string _tenantId;
 
-        public EventQueryHandler(ISelector<IEvent> selector, TIdentity streamId, int version = 0, DateTime? timestamp = null, TenancyStyle tenancyStyle = TenancyStyle.Single, string tenantId = null)
+        public EventQueryHandler(Linq.ISelector<IEvent> selector, TIdentity streamId, int version = 0, DateTime? timestamp = null, TenancyStyle tenancyStyle = TenancyStyle.Single, string tenantId = null)
         {
             if (timestamp != null && timestamp.Value.Kind != DateTimeKind.Utc)
             {
@@ -46,7 +46,7 @@ namespace Marten.Events
 
         public Type SourceType => typeof(IEvent);
 
-        public void ConfigureCommand(CommandBuilder sql)
+        public void ConfigureCommand(CommandBuilder sql, IMartenSession session)
         {
             _selector.WriteSelectClause(sql, null);
 

@@ -51,13 +51,14 @@ namespace Marten.Util
             return cmd;
         }
 
+        [Obsolete("Think this goes away in v4")]
         public static NpgsqlCommand ToCommand(ITenant tenant, IQueryHandler handler)
         {
             var command = new NpgsqlCommand();
 
             using (var builder = new CommandBuilder(command))
             {
-                handler.ConfigureCommand(builder);
+                handler.ConfigureCommand(builder, null);
                 command.CommandText = builder._sql.ToString();
 
                 if (command.CommandText.Contains(TenantIdArg))
@@ -69,6 +70,7 @@ namespace Marten.Util
             }
         }
 
+        [Obsolete("Think this goes away in v4")]
         public static NpgsqlCommand ToBatchCommand(ITenant tenant, IEnumerable<IQueryHandler> handlers)
         {
             if (handlers.Count() == 1)
@@ -82,7 +84,7 @@ namespace Marten.Util
                 // Maybe have it use a shared pool here.
                 using (var builder = new CommandBuilder(command))
                 {
-                    handler.ConfigureCommand(builder);
+                    handler.ConfigureCommand(builder, null);
                     if (wholeStatement.Length > 0)
                     {
                         wholeStatement.Append(";");

@@ -24,45 +24,6 @@ namespace Marten.Linq
         Task<T> ResolveAsync(DbDataReader reader, IIdentityMap map, QueryStatistics stats, CancellationToken token);
     }
 
-    public abstract class BasicSelector
-    {
-        private readonly string[] _selectFields;
-        private readonly bool _distinct;
-
-        protected BasicSelector(params string[] selectFields)
-        {
-            _selectFields = selectFields;
-        }
-
-        protected BasicSelector(bool distinct, params string[] selectFields)
-        {
-            _selectFields = selectFields;
-            _distinct = distinct;
-        }
-
-        public string[] SelectFields() => _selectFields;
-
-        public void WriteSelectClause(CommandBuilder sql, IQueryableDocument mapping)
-        {
-            sql.Append("select ");
-            if (_distinct)
-            {
-                sql.Append("distinct ");
-            }
-
-            var fields = SelectFields();
-            sql.Append(fields[0]);
-            for (int i = 1; i < fields.Length; i++)
-            {
-                sql.Append(", ");
-                sql.Append(fields[i]);
-            }
-
-            sql.Append(" from ");
-            sql.Append(mapping.Table.QualifiedName);
-            sql.Append(" as d");
-        }
-    }
 
     public static class SelectorExtensions
     {

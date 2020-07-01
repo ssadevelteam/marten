@@ -49,7 +49,7 @@ namespace Marten.Storage
             }
         }
 
-        public void ConfigureCommand(CommandBuilder sql)
+        public void ConfigureCommand(CommandBuilder sql, IMartenSession session)
         {
             sql.Append("select ");
 

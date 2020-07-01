@@ -4,13 +4,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using Marten.Events.Projections;
 using Marten.Linq;
-using Marten.Linq.QueryHandlers;
 using Marten.Services;
 using Marten.Util;
+using Marten.V4Internals;
 
 namespace Marten.Events
 {
-    internal class AggregationQueryHandler<T>: IQueryHandler<T> where T : class
+    internal class AggregationQueryHandler<T>: Linq.QueryHandlers.IQueryHandler<T> where T : class
     {
         private readonly IAggregator<T> _aggregator;
         private readonly IEventQueryHandler _inner;
@@ -25,9 +25,9 @@ namespace Marten.Events
             _state = state;
         }
 
-        public void ConfigureCommand(CommandBuilder builder)
+        public void ConfigureCommand(CommandBuilder builder, IMartenSession session)
         {
-            _inner.ConfigureCommand(builder);
+            _inner.ConfigureCommand(builder, session);
         }
 
         public Type SourceType => typeof(IEvent);

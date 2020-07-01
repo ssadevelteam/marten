@@ -3,13 +3,13 @@ using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
 using Marten.Linq;
-using Marten.Linq.QueryHandlers;
 using Marten.Services;
 using Marten.Util;
+using Marten.V4Internals;
 
 namespace Marten.Events
 {
-    internal class SingleEventQueryHandler: IQueryHandler<IEvent>
+    internal class SingleEventQueryHandler: Linq.QueryHandlers.IQueryHandler<IEvent>
     {
         private readonly Guid _id;
         private readonly EventSelector _selector;
@@ -20,7 +20,7 @@ namespace Marten.Events
             _selector = new EventSelector(events, serializer);
         }
 
-        public void ConfigureCommand(CommandBuilder sql)
+        public void ConfigureCommand(CommandBuilder sql, IMartenSession session)
         {
             _selector.WriteSelectClause(sql, null);
 

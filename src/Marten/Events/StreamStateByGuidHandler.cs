@@ -4,11 +4,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using Baseline;
 using Marten.Linq;
-using Marten.Linq.QueryHandlers;
 using Marten.Schema;
 using Marten.Services;
 using Marten.Storage;
 using Marten.Util;
+using Marten.V4Internals;
 
 namespace Marten.Events
 {
@@ -26,7 +26,7 @@ namespace Marten.Events
         }
     }
 
-    internal class StreamStateByIdHandler<T>: IQueryHandler<StreamState>, ISelector<StreamState>
+    internal class StreamStateByIdHandler<T>: Linq.QueryHandlers.IQueryHandler<StreamState>, Linq.ISelector<StreamState>
     {
         private readonly T _streamKey;
         private readonly EventGraph _events;
@@ -43,7 +43,7 @@ namespace Marten.Events
             _tenantId = tenantId;
         }
 
-        public void ConfigureCommand(CommandBuilder sql)
+        public void ConfigureCommand(CommandBuilder sql, IMartenSession session)
         {
             WriteSelectClause(sql, null);
 

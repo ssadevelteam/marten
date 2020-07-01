@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Marten.Linq.Compiled;
 using Marten.Services;
 using Marten.Util;
+using Marten.V4Internals;
 using Npgsql;
 
 namespace Marten.Linq.QueryHandlers
@@ -28,7 +29,7 @@ namespace Marten.Linq.QueryHandlers
 
         public Type SourceType => _handler.SourceType;
 
-        public void ConfigureCommand(CommandBuilder builder)
+        public void ConfigureCommand(CommandBuilder builder, IMartenSession session)
         {
             var sql = _template.CommandText;
             for (var i = 0; i < _setters.Length && i < _template.Parameters.Count; i++)

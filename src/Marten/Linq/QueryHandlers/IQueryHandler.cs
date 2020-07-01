@@ -4,12 +4,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using Marten.Services;
 using Marten.Util;
+using Marten.V4Internals;
 
 namespace Marten.Linq.QueryHandlers
 {
     public interface IQueryHandler
     {
-        void ConfigureCommand(CommandBuilder builder);
+        void ConfigureCommand(CommandBuilder builder, IMartenSession session);
     }
 
     public interface IReaderHandler<T>
