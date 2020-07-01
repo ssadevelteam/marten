@@ -10,7 +10,6 @@ using Marten.Services;
 using Marten.Transforms;
 using Marten.V4Internals;
 using Npgsql;
-using IDocumentStorage = Marten.Schema.IDocumentStorage;
 
 namespace Marten.Storage
 {
@@ -75,10 +74,6 @@ namespace Marten.Storage
 
         public ISequences Sequences => _inner.Sequences;
 
-        public Schema.IDocumentStorage<T> StorageFor<T>()
-        {
-            return _inner.StorageFor<T>();
-        }
 
         public IdAssignment<T> IdAssignmentFor<T>()
         {

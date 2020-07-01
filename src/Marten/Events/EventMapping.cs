@@ -12,9 +12,9 @@ using Marten.Linq.Fields;
 using Marten.Schema;
 using Marten.Schema.Identity;
 using Marten.Services;
-using Marten.Services.Includes;
 using Marten.Storage;
 using Marten.Util;
+using Marten.V4Internals;
 using Npgsql;
 using NpgsqlTypes;
 using Remotion.Linq;
@@ -88,8 +88,6 @@ namespace Marten.Events
             return new WhereFragment($"d.type = '{EventTypeName}'");
         }
 
-        public abstract IDocumentStorage BuildStorage(StoreOptions options);
-
         public void DeleteAllDocuments(ITenant factory)
         {
             factory.RunSql($"delete from mt_events where type = '{Alias}'");
@@ -105,13 +103,9 @@ namespace Marten.Events
             return this;
         }
 
-        public IncludeJoin<TOther> JoinToInclude<TOther>(JoinType joinType, IQueryableDocument other, MemberInfo[] members, Action<TOther> callback)
-        {
-            return _inner.JoinToInclude<TOther>(joinType, other, members, callback);
-        }
     }
 
-    public class EventMapping<T>: EventMapping, IDocumentStorage<T> where T : class
+    public class EventMapping<T>: EventMapping where T : class
     {
         private readonly string _tableName;
 
@@ -119,11 +113,6 @@ namespace Marten.Events
         {
             var schemaName = parent.DatabaseSchemaName;
             _tableName = schemaName == StoreOptions.DefaultDatabaseSchemaName ? "mt_events" : $"{schemaName}.mt_events";
-        }
-
-        public override IDocumentStorage BuildStorage(StoreOptions options)
-        {
-            return this;
         }
 
         public Type TopLevelBaseType => DocumentType;
@@ -141,16 +130,6 @@ namespace Marten.Events
         public object Identity(object document)
         {
             return document.As<IEvent>().Id;
-        }
-
-        public void RegisterUpdate(string tenantIdOverride, UpdateStyle updateStyle, UpdateBatch batch, object entity)
-        {
-            // Do nothing
-        }
-
-        public void RegisterUpdate(string tenantIdOverride, UpdateStyle updateStyle, UpdateBatch batch, object entity, string json)
-        {
-            // Do nothing
         }
 
         public void Remove(IIdentityMap map, object entity)
