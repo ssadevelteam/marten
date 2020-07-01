@@ -15,7 +15,6 @@ using Marten.Transforms;
 using Marten.Util;
 using Marten.V4Internals;
 using Npgsql;
-using IDocumentStorage = Marten.Schema.IDocumentStorage;
 
 namespace Marten.Storage
 {
@@ -171,10 +170,11 @@ namespace Marten.Storage
             }
         }
 
+
         public IDocumentStorage StorageFor(Type documentType)
         {
-            EnsureStorageExists(documentType);
-            return _features.StorageFor(documentType);
+            // TODO -- need to use a provider graph here
+            throw new NotImplementedException();
         }
 
         public IDocumentMapping MappingFor(Type documentType)
@@ -184,12 +184,6 @@ namespace Marten.Storage
         }
 
         public ISequences Sequences => _sequences.Value;
-
-        public Schema.IDocumentStorage<T> StorageFor<T>()
-        {
-            EnsureStorageExists(typeof(T));
-            return _features.StorageFor(typeof(T)).As<Schema.IDocumentStorage<T>>();
-        }
 
         private readonly ConcurrentDictionary<Type, object> _identityAssignments =
              new ConcurrentDictionary<Type, object>();
@@ -264,17 +258,18 @@ namespace Marten.Storage
         /// <returns></returns>
         public DocumentMetadata MetadataFor<T>(T entity)
         {
-            if (entity == null)
-                throw new ArgumentNullException(nameof(entity));
-
-            var mapping = MappingFor(typeof(T));
-            var handler = new EntityMetadataQueryHandler(entity, StorageFor(typeof(T)),
-                mapping);
-
-            using (var connection = OpenConnection())
-            {
-                return connection.Fetch(handler, null, null, this);
-            }
+            throw new NotImplementedException();
+            // if (entity == null)
+            //     throw new ArgumentNullException(nameof(entity));
+            //
+            // var mapping = MappingFor(typeof(T));
+            // var handler = new EntityMetadataQueryHandler(entity, StorageFor(typeof(T)),
+            //     mapping);
+            //
+            // using (var connection = OpenConnection())
+            // {
+            //     return connection.Fetch(handler, null, null, this);
+            // }
         }
 
         /// <summary>
@@ -286,16 +281,17 @@ namespace Marten.Storage
         public async Task<DocumentMetadata> MetadataForAsync<T>(T entity,
             CancellationToken token = default(CancellationToken))
         {
-            if (entity == null)
-                throw new ArgumentNullException(nameof(entity));
-
-            var handler = new EntityMetadataQueryHandler(entity, StorageFor(typeof(T)),
-                MappingFor(typeof(T)));
-
-            using (var connection = OpenConnection())
-            {
-                return await connection.FetchAsync(handler, null, null, this, token).ConfigureAwait(false);
-            }
+            throw new NotImplementedException();
+            // if (entity == null)
+            //     throw new ArgumentNullException(nameof(entity));
+            //
+            // var handler = new EntityMetadataQueryHandler(entity, StorageFor(typeof(T)),
+            //     MappingFor(typeof(T)));
+            //
+            // using (var connection = OpenConnection())
+            // {
+            //     return await connection.FetchAsync(handler, null, null, this, token).ConfigureAwait(false);
+            // }
         }
     }
 }

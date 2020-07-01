@@ -4,9 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using Baseline;
 using Marten.Linq.Compiled;
-using Marten.Linq.QueryHandlers.CompiledInclude;
 using Marten.Schema;
-using Marten.Services.Includes;
 using Marten.Util;
 using Remotion.Linq;
 using Remotion.Linq.Clauses.ResultOperators;
@@ -16,13 +14,13 @@ namespace Marten.Linq.QueryHandlers
     public interface IQueryHandlerFactory
     {
 
-        IQueryHandler<T> HandlerForScalarQuery<T>(QueryModel model, IIncludeJoin[] toArray, QueryStatistics statistics);
+        IQueryHandler<T> HandlerForScalarQuery<T>(QueryModel model, QueryStatistics statistics);
 
 
-        IQueryHandler<T> HandlerForSingleQuery<T>(QueryModel model, IIncludeJoin[] joins, QueryStatistics statistics,
+        IQueryHandler<T> HandlerForSingleQuery<T>(QueryModel model, QueryStatistics statistics,
             bool returnDefaultWhenEmpty);
 
-        IQueryHandler<T> BuildHandler<T>(QueryModel model, IIncludeJoin[] joins, QueryStatistics stats);
+        IQueryHandler<T> BuildHandler<T>(QueryModel model, QueryStatistics stats);
 
         IQueryHandler<TOut> HandlerFor<TDoc, TOut>(ICompiledQuery<TDoc, TOut> query, out QueryStatistics stats);
     }
@@ -37,40 +35,40 @@ namespace Marten.Linq.QueryHandlers
             _store = store;
         }
 
-        public IQueryHandler<T> BuildHandler<T>(QueryModel model, IIncludeJoin[] joins, QueryStatistics stats)
+        public IQueryHandler<T> BuildHandler<T>(QueryModel model, QueryStatistics stats)
         {
-            return tryFindScalarQuery<T>(model, joins, stats) ??
-                   tryFindSingleQuery<T>(model, joins, stats) ?? listHandlerFor<T>(model, joins, stats);
+            return tryFindScalarQuery<T>(model, stats) ??
+                   tryFindSingleQuery<T>(model, stats) ?? listHandlerFor<T>(model, stats);
         }
 
         public IQueryHandler<T> HandlerForScalarQuery<T>(QueryModel model)
         {
-            return HandlerForScalarQuery<T>(model, new IIncludeJoin[0], null);
+            return HandlerForScalarQuery<T>(model, null);
         }
 
         // TODO -- going to have to do the ensure storage exists outside of this
-        public IQueryHandler<T> HandlerForScalarQuery<T>(QueryModel model, IIncludeJoin[] joins,
+        public IQueryHandler<T> HandlerForScalarQuery<T>(QueryModel model,
             QueryStatistics statistics)
         {
             _store.Tenancy.Default.EnsureStorageExists(model.SourceType());
 
-            return tryFindScalarQuery<T>(model, joins, statistics);
+            return tryFindScalarQuery<T>(model, statistics);
         }
 
         // TODO -- going to have to do the ensure storage exists outside of this
-        public IQueryHandler<T> HandlerForSingleQuery<T>(QueryModel model, IIncludeJoin[] joins,
+        public IQueryHandler<T> HandlerForSingleQuery<T>(QueryModel model,
             QueryStatistics statistics,
             bool returnDefaultWhenEmpty)
         {
             _store.Tenancy.Default.EnsureStorageExists(model.SourceType());
 
-            return tryFindSingleQuery<T>(model, joins, statistics);
+            return tryFindSingleQuery<T>(model, statistics);
         }
 
-        public IQueryHandler<T> HandlerForSingleQuery<T>(QueryModel model, IIncludeJoin[] joins,
+        public IQueryHandler<T> HandlerForSingleQuery<T>(QueryModel model,
             bool returnDefaultWhenEmpty)
         {
-            return HandlerForSingleQuery<T>(model, joins, null, returnDefaultWhenEmpty);
+            return HandlerForSingleQuery<T>(model, (QueryStatistics) null, returnDefaultWhenEmpty);
         }
 
         public IQueryHandler<TOut> HandlerFor<TDoc, TOut>(ICompiledQuery<TDoc, TOut> query, out QueryStatistics stats)
@@ -91,7 +89,7 @@ namespace Marten.Linq.QueryHandlers
             return cachedQuery.CreateHandler<TOut>(query, _store.Serializer, out stats);
         }
 
-        private IQueryHandler<T> listHandlerFor<T>(QueryModel model, IIncludeJoin[] joins, QueryStatistics stats)
+        private IQueryHandler<T> listHandlerFor<T>(QueryModel model, QueryStatistics stats)
         {
             throw new NotImplementedException();
             // if (model.HasOperator<ToJsonArrayResultOperator>())
@@ -115,7 +113,7 @@ namespace Marten.Linq.QueryHandlers
             //         .As<IQueryHandler<T>>();
         }
 
-        private IQueryHandler<T> tryFindScalarQuery<T>(QueryModel model, IIncludeJoin[] joins, QueryStatistics stats)
+        private IQueryHandler<T> tryFindScalarQuery<T>(QueryModel model, QueryStatistics stats)
         {
             throw new NotImplementedException();
             // if (model.HasOperator<CountResultOperator>() || model.HasOperator<LongCountResultOperator>())
@@ -133,7 +131,7 @@ namespace Marten.Linq.QueryHandlers
             // return null;
         }
 
-        private IQueryHandler<T> tryFindSingleQuery<T>(QueryModel model, IIncludeJoin[] joins, QueryStatistics stats)
+        private IQueryHandler<T> tryFindSingleQuery<T>(QueryModel model, QueryStatistics stats)
         {
             throw new NotImplementedException();
             // var choice = model.FindOperators<ChoiceResultOperatorBase>().FirstOrDefault();
@@ -191,19 +189,12 @@ namespace Marten.Linq.QueryHandlers
             // TODO -- move this outside of this call
             _store.Tenancy.Default.EnsureStorageExists(typeof(TDoc));
 
-            var includeJoins = new IIncludeJoin[0];
-
-            if (model.HasOperator<IncludeResultOperator>())
-            {
-                var builder = new CompiledIncludeJoinBuilder<TDoc, TOut>(_store.Storage);
-                includeJoins = builder.BuildIncludeJoins(model, query);
-            }
 
             // Hokey. Need a non-null stats to trigger LinqQuery into "knowing" that it needs
             // to create a StatsSelector decorator
             var stats = model.HasOperator<StatsResultOperator>() ? new QueryStatistics() : null;
 
-            var handler = _store.HandlerFactory.BuildHandler<TOut>(model, includeJoins, stats);
+            var handler = _store.HandlerFactory.BuildHandler<TOut>(model, stats);
 
             var cmd = CommandBuilder.ToCommand(_store.Tenancy.Default, handler);
             for (int i = 0; i < setters.Count && i < cmd.Parameters.Count; i++)

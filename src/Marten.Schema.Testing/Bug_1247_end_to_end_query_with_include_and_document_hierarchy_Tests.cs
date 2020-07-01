@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Marten.Schema.Testing.Documents;
 using Marten.Schema.Testing.Hierarchies;
 using Marten.Services;
-using Marten.Services.Includes;
 using Shouldly;
 using Xunit;
 
@@ -31,7 +30,7 @@ namespace Marten.Schema.Testing
             {
                 var list = new List<User>();
 
-                var issues = query.Query<Issue>().Include<User>(x => x.AssigneeId, list, JoinType.LeftOuter).ToArray();
+                var issues = query.Query<Issue>().Include<User>(x => x.AssigneeId, list).ToArray();
 
                 list.Count.ShouldBe(3);
 
@@ -62,7 +61,7 @@ namespace Marten.Schema.Testing
             {
                 var list = new List<User>();
 
-                var issues = await query.Query<Issue>().Include<User>(x => x.AssigneeId, list, JoinType.LeftOuter).ToListAsync();
+                var issues = await query.Query<Issue>().Include<User>(x => x.AssigneeId, list).ToListAsync();
 
                 list.Count.ShouldBe(3);
 

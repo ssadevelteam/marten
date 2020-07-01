@@ -4,11 +4,12 @@ using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
 using Marten.Linq;
+using Marten.Services;
 using Marten.Util;
 
 namespace Marten.V4Internals
 {
-    public abstract class DeleteMany<T>: IStorageOperation
+    public abstract class DeleteMany<T>: IDeletion
     {
         private readonly IWhereFragment _where;
 

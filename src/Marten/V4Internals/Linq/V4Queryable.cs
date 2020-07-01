@@ -8,7 +8,6 @@ using LamarCodeGeneration;
 using LamarCodeGeneration.Util;
 using Marten.Linq;
 using Marten.Services;
-using Marten.Services.Includes;
 using Marten.Transforms;
 using Marten.Util;
 using Marten.V4Internals.Linq.Includes;
@@ -42,9 +41,6 @@ namespace Marten.V4Internals.Linq
             _session = session;
             _provider = Provider.As<V4QueryProvider>();
         }
-
-
-        public IEnumerable<IIncludeJoin> Includes { get; }
 
         public QueryStatistics Statistics
         {
@@ -148,8 +144,7 @@ namespace Marten.V4Internals.Linq
             return this.Select(x => x.TransformTo<T, TDoc>(transformName));
         }
 
-        public IMartenQueryable<T> Include<TInclude>(Expression<Func<T, object>> idSource, Action<TInclude> callback,
-            JoinType joinType = JoinType.Inner)
+        public IMartenQueryable<T> Include<TInclude>(Expression<Func<T, object>> idSource, Action<TInclude> callback)
         {
             var storage = (IDocumentStorage<TInclude>)_session.StorageFor(typeof(TInclude));
             var identityField = _session.StorageFor(typeof(T)).Fields.FieldFor(idSource);
@@ -160,15 +155,13 @@ namespace Marten.V4Internals.Linq
             return this;
         }
 
-        public IMartenQueryable<T> Include<TInclude>(Expression<Func<T, object>> idSource, IList<TInclude> list,
-            JoinType joinType = JoinType.Inner)
+        public IMartenQueryable<T> Include<TInclude>(Expression<Func<T, object>> idSource, IList<TInclude> list)
         {
             return Include<TInclude>(idSource, list.Add);
         }
 
         public IMartenQueryable<T> Include<TInclude, TKey>(Expression<Func<T, object>> idSource,
-            IDictionary<TKey, TInclude> dictionary,
-            JoinType joinType = JoinType.Inner)
+            IDictionary<TKey, TInclude> dictionary)
         {
             var storage = (IDocumentStorage<TInclude>)_session.StorageFor(typeof(TInclude));
 

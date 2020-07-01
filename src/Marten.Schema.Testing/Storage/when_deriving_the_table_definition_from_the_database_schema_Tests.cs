@@ -2,6 +2,7 @@ using System.Linq;
 using Baseline;
 using Marten.Schema.Testing.Documents;
 using Marten.Storage;
+using Marten.V4Internals;
 using Shouldly;
 using Xunit;
 

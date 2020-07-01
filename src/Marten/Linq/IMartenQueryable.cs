@@ -4,7 +4,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Marten.Services.Includes;
 
 namespace Marten.Linq
 {
@@ -12,8 +11,6 @@ namespace Marten.Linq
     // methods are on IMartenQueryable<T>
     public interface IMartenQueryable
     {
-        IEnumerable<IIncludeJoin> Includes { get; }
-
         QueryStatistics Statistics { get; }
 
         Task<IReadOnlyList<TResult>> ToListAsync<TResult>(CancellationToken token);
@@ -67,14 +64,12 @@ namespace Marten.Linq
 
     public interface IMartenQueryable<T>: IQueryable<T>, IMartenQueryable
     {
-        IMartenQueryable<T> Include<TInclude>(Expression<Func<T, object>> idSource, Action<TInclude> callback,
-            JoinType joinType = JoinType.Inner);
+        IMartenQueryable<T> Include<TInclude>(Expression<Func<T, object>> idSource, Action<TInclude> callback);
 
-        IMartenQueryable<T> Include<TInclude>(Expression<Func<T, object>> idSource, IList<TInclude> list,
-            JoinType joinType = JoinType.Inner);
+        IMartenQueryable<T> Include<TInclude>(Expression<Func<T, object>> idSource, IList<TInclude> list);
 
         IMartenQueryable<T> Include<TInclude, TKey>(Expression<Func<T, object>> idSource,
-            IDictionary<TKey, TInclude> dictionary, JoinType joinType = JoinType.Inner);
+            IDictionary<TKey, TInclude> dictionary);
 
         IMartenQueryable<T> Stats(out QueryStatistics stats);
 

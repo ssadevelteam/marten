@@ -6,7 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Baseline;
 using Marten.Linq;
-using Marten.Services.Includes;
 using Marten.V4Internals.Linq;
 using Npgsql;
 
@@ -275,25 +274,25 @@ namespace Marten
             throw new InvalidOperationException($"{nameof(ToCommand)} is only valid on Marten IQueryable objects");
         }
 
-        public static IMartenQueryable<T> Include<T, TInclude>(this IQueryable<T> queryable, Expression<Func<T, object>> idSource,
-            Action<TInclude> callback,
-            JoinType joinType = JoinType.Inner)
+        public static IMartenQueryable<T> Include<T, TInclude>(this IQueryable<T> queryable,
+            Expression<Func<T, object>> idSource,
+            Action<TInclude> callback)
         {
-            return queryable.As<IMartenQueryable<T>>().Include(idSource, callback, joinType);
+            return queryable.As<IMartenQueryable<T>>().Include(idSource, callback);
         }
 
-        public static IMartenQueryable<T> Include<T, TInclude>(this IQueryable<T> queryable, Expression<Func<T, object>> idSource,
-            IList<TInclude> list,
-            JoinType joinType = JoinType.Inner)
+        public static IMartenQueryable<T> Include<T, TInclude>(this IQueryable<T> queryable,
+            Expression<Func<T, object>> idSource,
+            IList<TInclude> list)
         {
-            return queryable.As<IMartenQueryable<T>>().Include(idSource, list, joinType);
+            return queryable.As<IMartenQueryable<T>>().Include(idSource, list);
         }
 
-        public static IMartenQueryable<T> Include<T, TKey, TInclude>(this IQueryable<T> queryable, Expression<Func<T, object>> idSource,
-            IDictionary<TKey, TInclude> dictionary,
-            JoinType joinType = JoinType.Inner)
+        public static IMartenQueryable<T> Include<T, TKey, TInclude>(this IQueryable<T> queryable,
+            Expression<Func<T, object>> idSource,
+            IDictionary<TKey, TInclude> dictionary)
         {
-            return queryable.As<IMartenQueryable<T>>().Include(idSource, dictionary, joinType);
+            return queryable.As<IMartenQueryable<T>>().Include(idSource, dictionary);
         }
     }
 }

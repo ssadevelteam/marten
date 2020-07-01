@@ -113,13 +113,13 @@ namespace Marten.Schema.Testing
             {
 
                 var storage = store.Storage;
-
-                storage.StorageFor(typeof(User)).ShouldNotBeNull();
-
-                Exception<AmbiguousDocumentTypeAliasesException>.ShouldBeThrownBy(() =>
-                {
-                    storage.StorageFor(typeof(User2));
-                });
+throw new NotImplementedException();
+                // storage.StorageFor(typeof(User)).ShouldNotBeNull();
+                //
+                // Exception<AmbiguousDocumentTypeAliasesException>.ShouldBeThrownBy(() =>
+                // {
+                //     storage.StorageFor(typeof(User2));
+                // });
             }
         }
 

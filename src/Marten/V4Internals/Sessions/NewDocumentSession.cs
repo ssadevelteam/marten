@@ -17,7 +17,7 @@ using Remotion.Linq.Clauses;
 
 namespace Marten.V4Internals.Sessions
 {
-    public abstract class NewDocumentSession: QuerySession, IDocumentSession, IUnitOfWork
+    public abstract class NewDocumentSession: QuerySession, IDocumentSession
     {
         private readonly IList<IStorageOperation> _pendingOperations = new List<IStorageOperation>();
 
@@ -240,7 +240,7 @@ namespace Marten.V4Internals.Sessions
             throw new NotImplementedException();
         }
 
-        public IUnitOfWork PendingChanges => this;
+        public IUnitOfWork PendingChanges => throw new NotImplementedException();
 
         public void StoreObjects(IEnumerable<object> documents)
         {
@@ -300,10 +300,6 @@ namespace Marten.V4Internals.Sessions
             return new PatchExpression<T>(@where, this);
         }
 
-        public void QueueOperation(Services.IStorageOperation storageOperation)
-        {
-            throw new NotImplementedException();
-        }
 
         public void QueueOperation(IStorageOperation storageOperation)
         {
@@ -320,69 +316,6 @@ namespace Marten.V4Internals.Sessions
             throw new NotImplementedException();
         }
 
-        IEnumerable<IDeletion> IUnitOfWork.Deletions()
-        {
-            throw new NotImplementedException();
-        }
 
-        IEnumerable<IDeletion> IUnitOfWork.DeletionsFor<T>()
-        {
-            throw new NotImplementedException();
-        }
-
-        IEnumerable<IDeletion> IUnitOfWork.DeletionsFor(Type documentType)
-        {
-            throw new NotImplementedException();
-        }
-
-        IEnumerable<object> IUnitOfWork.Updates()
-        {
-            throw new NotImplementedException();
-        }
-
-        IEnumerable<object> IUnitOfWork.Inserts()
-        {
-            throw new NotImplementedException();
-        }
-
-        IEnumerable<T> IUnitOfWork.UpdatesFor<T>()
-        {
-            throw new NotImplementedException();
-        }
-
-        IEnumerable<T> IUnitOfWork.InsertsFor<T>()
-        {
-            throw new NotImplementedException();
-        }
-
-        IEnumerable<T> IUnitOfWork.AllChangedFor<T>()
-        {
-            throw new NotImplementedException();
-        }
-
-        IEnumerable<EventStream> IUnitOfWork.Streams()
-        {
-            throw new NotImplementedException();
-        }
-
-        IEnumerable<PatchOperation> IUnitOfWork.Patches()
-        {
-            throw new NotImplementedException();
-        }
-
-        IEnumerable<Services.IStorageOperation> IUnitOfWork.Operations()
-        {
-            throw new NotImplementedException();
-        }
-
-        IEnumerable<Services.IStorageOperation> IUnitOfWork.OperationsFor<T>()
-        {
-            throw new NotImplementedException();
-        }
-
-        IEnumerable<Services.IStorageOperation> IUnitOfWork.OperationsFor(Type documentType)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

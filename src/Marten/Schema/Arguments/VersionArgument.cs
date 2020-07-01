@@ -26,12 +26,6 @@ namespace Marten.Schema.Arguments
         }
 
 
-        public override Expression CompileUpdateExpression(EnumStorage enumStorage, ParameterExpression call, ParameterExpression doc, ParameterExpression updateBatch, ParameterExpression mapping, ParameterExpression currentVersion, ParameterExpression newVersion, ParameterExpression tenantId, bool useCharBufferPooling)
-        {
-            var dbType = Expression.Constant(DbType);
-            return Expression.Call(call, _paramMethod, Expression.Constant(Arg), Expression.Convert(newVersion, typeof(object)), dbType);
-        }
-
         public override void GenerateCode(GeneratedMethod method, GeneratedType type, int i, Argument parameters,
             DocumentMapping mapping)
         {

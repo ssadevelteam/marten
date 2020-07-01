@@ -11,7 +11,7 @@ using NpgsqlTypes;
 
 namespace Marten.V4Internals
 {
-    public abstract class StorageOperation<T, TId> : IStorageOperation
+    public abstract class StorageOperation<T, TId> : IDocumentStorageOperation
     {
         private readonly T _document;
         private readonly TId _id;
@@ -24,6 +24,8 @@ namespace Marten.V4Internals
             _id = id;
             _versions = versions;
         }
+
+        public object Document => _document;
 
 
         // TODO -- improve Lamar to make it possible to use protected members

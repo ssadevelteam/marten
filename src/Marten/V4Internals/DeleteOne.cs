@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
+using Marten.Services;
 using Marten.Util;
 
 namespace Marten.V4Internals
 {
 
 
-    public abstract class DeleteOne<T, TId>: IStorageOperation
+    public abstract class DeleteOne<T, TId>: IDeletion
     {
         private readonly TId _id;
 

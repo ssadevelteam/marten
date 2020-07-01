@@ -8,6 +8,7 @@ using Marten.Linq;
 using Marten.Schema.Identity;
 using Marten.Services;
 using Marten.Storage;
+using Marten.V4Internals;
 
 namespace Marten.Events
 {
@@ -17,7 +18,7 @@ namespace Marten.Events
         private readonly IManagedConnection _connection;
         private readonly UnitOfWork _unitOfWork;
         private readonly ITenant _tenant;
-        private readonly ISelector<IEvent> _selector;
+        private readonly Linq.ISelector<IEvent> _selector;
         private readonly DocumentStore _store;
 
         public EventStore(IDocumentSession session, DocumentStore store, IManagedConnection connection, UnitOfWork unitOfWork, ITenant tenant)
@@ -64,22 +65,23 @@ namespace Marten.Events
 
         public EventStream Append(Guid stream, params object[] events)
         {
-            ensureAsGuidStorage();
-
-            EventStream eventStream = null;
-
-            if (_unitOfWork.HasStream(stream))
-            {
-                eventStream = _unitOfWork.StreamFor(stream);
-                eventStream.AddEvents(events.Select(EventStream.ToEvent));
-            }
-            else
-            {
-                eventStream = new EventStream(stream, events.Select(EventStream.ToEvent).ToArray(), false);
-                _unitOfWork.StoreStream(eventStream);
-            }
-
-            return eventStream;
+            throw new NotImplementedException();
+            // ensureAsGuidStorage();
+            //
+            // EventStream eventStream = null;
+            //
+            // if (_unitOfWork.HasStream(stream))
+            // {
+            //     eventStream = _unitOfWork.StreamFor(stream);
+            //     eventStream.AddEvents(events.Select(EventStream.ToEvent));
+            // }
+            // else
+            // {
+            //     eventStream = new EventStream(stream, events.Select(EventStream.ToEvent).ToArray(), false);
+            //     _unitOfWork.StoreStream(eventStream);
+            // }
+            //
+            // return eventStream;
         }
 
         public EventStream Append(string stream, IEnumerable<object> events)
@@ -93,18 +95,19 @@ namespace Marten.Events
 
             EventStream eventStream = null;
 
-            if (_unitOfWork.HasStream(stream))
-            {
-                eventStream = _unitOfWork.StreamFor(stream);
-                eventStream.AddEvents(events.Select(EventStream.ToEvent));
-            }
-            else
-            {
-                eventStream = new EventStream(stream, events.Select(EventStream.ToEvent).ToArray(), false);
-                _unitOfWork.StoreStream(eventStream);
-            }
-
-            return eventStream;
+            throw new NotImplementedException();
+            // if (_unitOfWork.HasStream(stream))
+            // {
+            //     eventStream = _unitOfWork.StreamFor(stream);
+            //     eventStream.AddEvents(events.Select(EventStream.ToEvent));
+            // }
+            // else
+            // {
+            //     eventStream = new EventStream(stream, events.Select(EventStream.ToEvent).ToArray(), false);
+            //     _unitOfWork.StoreStream(eventStream);
+            // }
+            //
+            // return eventStream;
         }
 
         public EventStream Append(Guid stream, int expectedVersion, IEnumerable<object> events)
@@ -157,7 +160,8 @@ namespace Marten.Events
                 AggregateType = aggregateType
             };
 
-            _unitOfWork.StoreStream(stream);
+            throw new NotImplementedException();
+            //_unitOfWork.StoreStream(stream);
 
             return stream;
         }
@@ -186,7 +190,8 @@ namespace Marten.Events
                 AggregateType = aggregateType
             };
 
-            _unitOfWork.StoreStream(stream);
+            throw new NotImplementedException();
+            //_unitOfWork.StoreStream(stream);
 
             return stream;
         }
@@ -202,7 +207,8 @@ namespace Marten.Events
 
             var stream = new EventStream(id, events.Select(EventStream.ToEvent).ToArray(), true);
 
-            _unitOfWork.StoreStream(stream);
+            throw new NotImplementedException();
+            //_unitOfWork.StoreStream(stream);
 
             return stream;
         }
@@ -218,7 +224,8 @@ namespace Marten.Events
 
             var stream = new EventStream(streamKey, events.Select(EventStream.ToEvent).ToArray(), true);
 
-            _unitOfWork.StoreStream(stream);
+            throw new NotImplementedException();
+            //_unitOfWork.StoreStream(stream);
 
             return stream;
         }

@@ -17,11 +17,11 @@ namespace Marten.Services.BatchQuerying
         private static readonly MartenQueryParser QueryParser = new MartenQueryParser();
         private readonly IIdentityMap _identityMap;
         private readonly IList<IBatchQueryItem> _items = new List<IBatchQueryItem>();
-        private readonly QuerySession _parent;
+        private readonly IQuerySession _parent;
         private readonly DocumentStore _store;
         private readonly IManagedConnection _runner;
 
-        public BatchedQuery(DocumentStore store, IManagedConnection runner, IIdentityMap identityMap, QuerySession parent)
+        public BatchedQuery(DocumentStore store, IManagedConnection runner, IIdentityMap identityMap, IQuerySession parent)
         {
             _store = store;
             _runner = runner;
@@ -271,9 +271,9 @@ namespace Marten.Services.BatchQuerying
 
             private Task<IList<TDoc>> load<TKey>(TKey[] keys)
             {
-                var tenant = _parent._parent.Tenant;
-                var resolver = tenant.StorageFor<TDoc>();
-                var mapping = tenant.MappingFor(typeof(TDoc)).ToQueryableDocument();
+                // var tenant = _parent._parent.Tenant;
+                // var resolver = tenant.StorageFor<TDoc>();
+                // var mapping = tenant.MappingFor(typeof(TDoc)).ToQueryableDocument();
 
                 throw new NotImplementedException();
                 //return _parent.AddItem(new LoadByIdArrayHandler<TDoc, TKey>(resolver, mapping, keys), null);

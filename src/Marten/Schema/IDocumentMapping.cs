@@ -12,8 +12,6 @@ namespace Marten.Schema
 
         Type DocumentType { get; }
 
-        IDocumentStorage BuildStorage(StoreOptions options);
-
         DbObjectName Table { get; }
 
         void DeleteAllDocuments(ITenant factory);

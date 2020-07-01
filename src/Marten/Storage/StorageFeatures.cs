@@ -19,9 +19,6 @@ namespace Marten.Storage
         private readonly Ref<ImHashMap<Type, IDocumentMapping>> _mappings =
             Ref.Of(ImHashMap<Type, IDocumentMapping>.Empty);
 
-        private readonly Ref<ImHashMap<Type, IDocumentStorage>> _documentTypes =
-            Ref.Of(ImHashMap<Type, IDocumentStorage>.Empty);
-
         private readonly Dictionary<Type, IFeatureSchema> _features = new Dictionary<Type, IFeatureSchema>();
 
         public StorageFeatures(StoreOptions options)
@@ -106,20 +103,6 @@ namespace Marten.Storage
             _mappings.Swap(d => d.AddOrUpdate(mapping.DocumentType, mapping));
         }
 
-        public IDocumentStorage StorageFor(Type documentType)
-        {
-            if (!_documentTypes.Value.TryFind(documentType, out var value))
-            {
-                var mapping = FindMapping(documentType);
-
-                assertNoDuplicateDocumentAliases();
-
-                value = mapping.BuildStorage(_options);
-
-                _documentTypes.Swap(d => d.AddOrUpdate(documentType, value));
-            }
-            return value;
-        }
 
         private void assertNoDuplicateDocumentAliases()
         {

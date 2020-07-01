@@ -22,9 +22,6 @@ namespace MartenBenchmarks.BenchAgainst
         private readonly ConcurrentDictionary<Type, IDocumentMapping> _mappings =
             new ConcurrentDictionary<Type, IDocumentMapping>();
 
-        private readonly ConcurrentDictionary<Type, IDocumentStorage> _documentTypes =
-            new ConcurrentDictionary<Type, IDocumentStorage>();
-
         private readonly Dictionary<Type, IFeatureSchema> _features = new Dictionary<Type, IFeatureSchema>();
 
         public StorageFeaturesWithConcurrentDictionary(StoreOptions options)
@@ -97,17 +94,6 @@ namespace MartenBenchmarks.BenchAgainst
             _mappings[mapping.DocumentType] = mapping;
         }
 
-        public IDocumentStorage StorageFor(Type documentType)
-        {
-            return _documentTypes.GetOrAdd(documentType, type =>
-            {
-                var mapping = FindMapping(documentType);
-
-                assertNoDuplicateDocumentAliases();
-
-                return mapping.BuildStorage(_options);
-            });
-        }
 
         private void assertNoDuplicateDocumentAliases()
         {

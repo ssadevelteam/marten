@@ -16,13 +16,6 @@ namespace Marten.Schema.Arguments
             Column = null;
         }
 
-        public override Expression CompileUpdateExpression(EnumStorage enumStorage, ParameterExpression call, ParameterExpression doc, ParameterExpression updateBatch, ParameterExpression mapping, ParameterExpression currentVersion, ParameterExpression newVersion, ParameterExpression tenantId, bool useCharBufferPooling)
-        {
-            var argName = Expression.Constant(Arg);
-
-            return Expression.Call(call, _paramMethod, argName, Expression.Convert(currentVersion, typeof(object)), Expression.Constant(DbType));
-        }
-
         public override void GenerateCode(GeneratedMethod method, GeneratedType type, int i, Argument parameters,
             DocumentMapping mapping)
         {

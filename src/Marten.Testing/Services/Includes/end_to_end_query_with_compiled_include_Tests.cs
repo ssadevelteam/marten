@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Baseline;
 using Marten.Linq;
 using Marten.Services;
-using Marten.Services.Includes;
 using Marten.Testing.Harness;
 using Marten.Util;
 using Shouldly;
@@ -45,12 +44,11 @@ namespace Marten.Testing.Services.Includes
         {
             public string Title { get; set; }
             public User Included { get; private set; } = new User();
-            public JoinType JoinType { get; set; } = JoinType.Inner;
 
             public Expression<Func<IQueryable<Issue>, Issue>> QueryIs()
             {
                 return query => query
-                    .Include<Issue, IssueByTitleWithAssignee>(x => x.AssigneeId, x => x.Included, JoinType)
+                    .Include<Issue, IssueByTitleWithAssignee>(x => x.AssigneeId, x => x.Included)
                     .Single(x => x.Title == Title);
             }
         }
@@ -85,13 +83,12 @@ public class IssueByTitleIncludingUsers : ICompiledQuery<Issue>
     public string Title { get; set; }
     public User IncludedAssignee { get; private set; } = new User();
     public User IncludedReported { get; private set; } = new User();
-    public JoinType JoinType { get; set; } = JoinType.Inner;
 
     public Expression<Func<IQueryable<Issue>, Issue>> QueryIs()
     {
         return query => query
-            .Include<Issue, IssueByTitleIncludingUsers>(x => x.AssigneeId, x => x.IncludedAssignee, JoinType)
-            .Include<Issue, IssueByTitleIncludingUsers>(x => x.ReporterId, x => x.IncludedReported, JoinType)
+            .Include<Issue, IssueByTitleIncludingUsers>(x => x.AssigneeId, x => x.IncludedAssignee)
+            .Include<Issue, IssueByTitleIncludingUsers>(x => x.ReporterId, x => x.IncludedReported)
             .Single(x => x.Title == Title);
     }
 }
@@ -105,7 +102,7 @@ public class IssueByTitleIncludingUsers : ICompiledQuery<Issue>
 
             public Expression<Func<IQueryable<Issue>, IEnumerable<Issue>>> QueryIs()
             {
-                return query => query.Include<Issue, IssueWithUsers>(x => x.AssigneeId, x => x.Users, JoinType.Inner);
+                return query => query.Include<Issue, IssueWithUsers>(x => x.AssigneeId, x => x.Users);
             }
         }
 
@@ -147,7 +144,7 @@ public class IssueByTitleIncludingUsers : ICompiledQuery<Issue>
 
             public Expression<Func<IQueryable<Issue>, IEnumerable<Issue>>> QueryIs()
             {
-                return query => query.Include<Issue, IssueWithUsersById>(x => x.AssigneeId, x => x.UsersById, JoinType.Inner);
+                return query => query.Include<Issue, IssueWithUsersById>(x => x.AssigneeId, x => x.UsersById);
             }
         }
 

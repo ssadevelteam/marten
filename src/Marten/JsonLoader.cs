@@ -37,24 +37,26 @@ namespace Marten
         {
             var storage = _tenant.StorageFor(typeof(T));
 
-            var loader = storage.LoaderCommand(id);
-            loader.AddTenancy(_tenant);
-
-            return _connection.Execute(loader, c => loader.ExecuteScalar() as string);
+            throw new NotImplementedException();
+            // var loader = storage.LoaderCommand(id);
+            // loader.AddTenancy(_tenant);
+            //
+            // return _connection.Execute(loader, c => loader.ExecuteScalar() as string);
         }
 
         private Task<string> findJsonByIdAsync<T>(object id, CancellationToken token)
         {
             var storage = _tenant.StorageFor(typeof(T));
 
-            var loader = storage.LoaderCommand(id);
-            loader.AddTenancy(_tenant);
-
-            return _connection.ExecuteAsync(loader, async (conn, executeAsyncToken) =>
-            {
-                var result = await loader.ExecuteScalarAsync(executeAsyncToken).ConfigureAwait(false);
-                return result as string; // Maybe do this as a stream later for big docs?
-            }, token);
+            throw new NotImplementedException();
+            // var loader = storage.LoaderCommand(id);
+            // loader.AddTenancy(_tenant);
+            //
+            // return _connection.ExecuteAsync(loader, async (conn, executeAsyncToken) =>
+            // {
+            //     var result = await loader.ExecuteScalarAsync(executeAsyncToken).ConfigureAwait(false);
+            //     return result as string; // Maybe do this as a stream later for big docs?
+            // }, token);
         }
 
         public string FindById<T>(int id) where T : class

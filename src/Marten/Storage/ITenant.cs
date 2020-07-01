@@ -9,7 +9,6 @@ using Marten.Services;
 using Marten.Transforms;
 using Marten.V4Internals;
 using Npgsql;
-using IDocumentStorage = Marten.Schema.IDocumentStorage;
 
 namespace Marten.Storage
 {
@@ -48,7 +47,6 @@ namespace Marten.Storage
         /// </summary>
         /// <param name="documentType"></param>
         /// <returns></returns>
-        [Obsolete("Goes away in v4")]
         IDocumentStorage StorageFor(Type documentType);
 
         /// <summary>
@@ -65,9 +63,6 @@ namespace Marten.Storage
         /// </summary>
         [Obsolete("Goes away in v4")]
         ISequences Sequences { get; }
-
-        [Obsolete("Goes away in v4")]
-        Schema.IDocumentStorage<T> StorageFor<T>();
 
         [Obsolete("Goes away in v4")]
         IdAssignment<T> IdAssignmentFor<T>();

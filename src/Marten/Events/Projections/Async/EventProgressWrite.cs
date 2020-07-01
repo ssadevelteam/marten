@@ -1,7 +1,11 @@
 using System;
+using System.Collections.Generic;
+using System.Data.Common;
+using System.Threading;
+using System.Threading.Tasks;
 using Marten.Schema;
-using Marten.Services;
 using Marten.Util;
+using Marten.V4Internals;
 using NpgsqlTypes;
 
 namespace Marten.Events.Projections.Async
@@ -19,7 +23,7 @@ namespace Marten.Events.Projections.Async
             _number = number;
         }
 
-        public void ConfigureCommand(CommandBuilder builder)
+        public void ConfigureCommand(CommandBuilder builder, IMartenSession session)
         {
             var nameArg = builder.AddParameter(_key, NpgsqlDbType.Varchar);
             var numberArg = builder.AddParameter(_number, NpgsqlDbType.Bigint);
@@ -27,5 +31,20 @@ namespace Marten.Events.Projections.Async
         }
 
         public Type DocumentType => null;
+
+        public void Postprocess(DbDataReader reader, IList<Exception> exceptions)
+        {
+            // Nothing
+        }
+
+        public Task PostprocessAsync(DbDataReader reader, IList<Exception> exceptions, CancellationToken token)
+        {
+            return Task.CompletedTask;
+        }
+
+        public StorageRole Role()
+        {
+            return StorageRole.Other;
+        }
     }
 }

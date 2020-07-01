@@ -2,7 +2,6 @@ using System;
 using System.Reflection;
 using Marten.Linq;
 using Marten.Linq.Fields;
-using Marten.Services.Includes;
 using Remotion.Linq;
 
 namespace Marten.Schema
@@ -24,12 +23,6 @@ namespace Marten.Schema
         public IWhereFragment DefaultWhereFragment()
         {
             return null;
-        }
-
-        public IncludeJoin<TOther> JoinToInclude<TOther>(JoinType joinType, IQueryableDocument other,
-            MemberInfo[] members, Action<TOther> callback)
-        {
-            throw new NotSupportedException();
         }
 
         public string[] SelectFields()

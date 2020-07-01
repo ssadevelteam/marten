@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Baseline;
 using Marten.Linq;
 using Marten.Services;
-using Marten.Services.Includes;
 using Marten.Testing.Documents;
 using Marten.Testing.Harness;
 using Marten.Util;
@@ -360,7 +359,7 @@ namespace Marten.Testing.Services.Includes
             {
                 User included = null;
                 var issue2 = query.Query<Issue>()
-                    .Include<User>(x => x.AssigneeId, x => included = x, JoinType.LeftOuter)
+                    .Include<User>(x => x.AssigneeId, x => included = x)
                     .Where(x => x.Title == issue.Title)
                     .Single();
 
@@ -417,7 +416,7 @@ namespace Marten.Testing.Services.Includes
                 var list = new List<User>();
 
                 var issues = query.Query<Issue>()
-                    .Include<User>(x => x.AssigneeId, list, JoinType.Inner)
+                    .Include<User>(x => x.AssigneeId, list)
                     .Where(x => x.AssigneeId.HasValue)
                     .ToArray();
 
@@ -449,7 +448,7 @@ namespace Marten.Testing.Services.Includes
             {
                 var list = new List<User>();
 
-                var issues = query.Query<Issue>().Include<User>(x => x.AssigneeId, list, JoinType.LeftOuter).ToArray();
+                var issues = query.Query<Issue>().Include<User>(x => x.AssigneeId, list).ToArray();
 
                 list.Count.ShouldBe(2);
 
@@ -566,7 +565,7 @@ namespace Marten.Testing.Services.Includes
             {
                 var dict = new Dictionary<Guid, User>();
 
-                var issues = query.Query<Issue>().Include(x => x.AssigneeId, dict, JoinType.LeftOuter).ToArray();
+                var issues = query.Query<Issue>().Include(x => x.AssigneeId, dict).ToArray();
 
                 dict.Count.ShouldBe(2);
                 dict.ContainsKey(user1.Id).ShouldBeTrue();

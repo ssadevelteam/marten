@@ -36,7 +36,8 @@ namespace Marten.Testing.Services
 
         public IdentityMap_Version_Tracking(DefaultStoreFixture fixture) : base(fixture)
         {
-            theIdentityMap = theSession.As<DocumentSession>().IdentityMap;
+            throw new NotImplementedException();
+            //theIdentityMap = theSession.As<DocumentSession>().IdentityMap;
         }
 
         [Fact]

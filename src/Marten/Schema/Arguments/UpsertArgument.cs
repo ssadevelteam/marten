@@ -17,12 +17,6 @@ namespace Marten.Schema.Arguments
         protected static readonly MethodInfo writeMethod =
             typeof(NpgsqlBinaryImporter).GetMethods().FirstOrDefault(x => x.Name == "Write" && x.GetParameters().Length == 2 && x.GetParameters()[0].ParameterType.IsGenericParameter && x.GetParameters()[1].ParameterType == typeof(NpgsqlTypes.NpgsqlDbType));
 
-        protected static readonly MethodInfo _paramMethod = typeof(SprocCall)
-            .GetMethod("Param", new[] { typeof(string), typeof(object), typeof(NpgsqlDbType) });
-
-        protected static readonly MethodInfo _paramWithJsonBody = typeof(SprocCall)
-            .GetMethod("JsonBody", new[] { typeof(string), typeof(ArraySegment<char>) });
-
         private MemberInfo[] _members;
         private string _postgresType;
         public string Arg { get; set; }
@@ -63,21 +57,6 @@ namespace Marten.Schema.Arguments
         public string ArgumentDeclaration()
         {
             return $"{Arg} {PostgresType}";
-        }
-
-        [Obsolete("Will go away in v4")]
-        public virtual Expression CompileUpdateExpression(EnumStorage enumStorage, ParameterExpression call, ParameterExpression doc, ParameterExpression updateBatch, ParameterExpression mapping, ParameterExpression currentVersion, ParameterExpression newVersion, ParameterExpression tenantId, bool useCharBufferPooling)
-        {
-            var argName = Expression.Constant(Arg);
-
-            var memberType = Members.Last().GetMemberType();
-            var body = LambdaBuilder.ToExpression(enumStorage, Members, doc);
-            if (!memberType.GetTypeInfo().IsClass)
-            {
-                body = Expression.Convert(body, typeof(object));
-            }
-
-            return Expression.Call(call, _paramMethod, argName, body, Expression.Constant(DbType));
         }
 
         public virtual void GenerateCode(GeneratedMethod method, GeneratedType type, int i, Argument parameters,

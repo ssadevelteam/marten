@@ -5,8 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Baseline;
 using Marten.Linq;
-using Marten.Services.Includes;
-using Marten.Util;
 
 namespace Marten
 {
@@ -17,8 +15,8 @@ namespace Marten
             throw new NotImplementedException();
         }
 
-        public static IMartenQueryable<T> Include<T, TQuery>(this IQueryable<T> queryable, Expression<Func<T, object>> idSource, Func<TQuery, object> callback,
-            JoinType joinType = JoinType.Inner)
+        public static IMartenQueryable<T> Include<T, TQuery>(this IQueryable<T> queryable,
+            Expression<Func<T, object>> idSource, Func<TQuery, object> callback)
         {
             throw new NotImplementedException();
         }

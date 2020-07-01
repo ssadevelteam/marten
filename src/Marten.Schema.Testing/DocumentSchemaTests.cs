@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using Baseline;
 using Marten.Events;
-using Marten.Schema.Hierarchies;
 using Marten.Schema.Testing.Documents;
 using Marten.Schema.Testing.Hierarchies;
 using Marten.Testing.Harness;
@@ -60,8 +59,9 @@ namespace Marten.Schema.Testing
                 _.Schema.For<Squad>().AddSubClass<FootballTeam>().AddSubClass<BaseballTeam>();
             });
 
-            theStore.Tenancy.Default.StorageFor(typeof(BaseballTeam))
-                .ShouldBeOfType<SubClassDocumentStorage<BaseballTeam, Squad>>();
+            throw new NotImplementedException();
+            // theStore.Tenancy.Default.StorageFor(typeof(BaseballTeam))
+            //     .ShouldBeOfType<SubClassDocumentStorage<BaseballTeam, Squad>>();
         }
 
         [Fact]

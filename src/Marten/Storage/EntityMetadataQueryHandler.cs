@@ -5,14 +5,14 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Marten.Linq;
-using Marten.Linq.QueryHandlers;
 using Marten.Schema;
 using Marten.Services;
 using Marten.Util;
+using Marten.V4Internals;
 
 namespace Marten.Storage
 {
-    public class EntityMetadataQueryHandler: IQueryHandler<DocumentMetadata>
+    public class EntityMetadataQueryHandler: Linq.QueryHandlers.IQueryHandler<DocumentMetadata>
     {
         private readonly Dictionary<string, int> _fields;
         private readonly object _id;
@@ -21,7 +21,8 @@ namespace Marten.Storage
 
         public EntityMetadataQueryHandler(object entity, IDocumentStorage storage, IDocumentMapping mapping)
         {
-            _id = storage.Identity(entity);
+            throw new NotImplementedException("Redo");
+            //_id = storage.Identity(entity);
             _storage = storage;
             _mapping = mapping;
 
@@ -68,7 +69,9 @@ namespace Marten.Storage
             sql.AddNamedParameter("id", _id);
         }
 
-        public Type SourceType => _storage.DocumentType;
+        public Type SourceType => throw new NotImplementedException();
+
+            //_storage.DocumentType;
 
         public DocumentMetadata Handle(DbDataReader reader, IIdentityMap map, QueryStatistics stats)
         {
