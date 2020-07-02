@@ -113,6 +113,11 @@ namespace Marten.V4Internals
             return _parent.Upsert(document, session);
         }
 
+        public IStorageOperation UpsertForTenant(T document, IMartenSession session, ITenant tenant)
+        {
+            return _parent.UpsertForTenant(document, session, tenant);
+        }
+
         public IStorageOperation Overwrite(T document, IMartenSession session)
         {
             return _parent.Overwrite(document, session);

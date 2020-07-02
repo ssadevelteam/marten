@@ -10,23 +10,25 @@ using Marten.Linq;
 using Marten.Patching;
 using Marten.Services;
 using Marten.Storage;
-using Marten.Util;
-using Marten.V4Internals.Linq;
-using Npgsql;
-using Remotion.Linq.Clauses;
 
 namespace Marten.V4Internals.Sessions
 {
     public abstract class NewDocumentSession: QuerySession, IDocumentSession
     {
-        private readonly IList<IStorageOperation> _pendingOperations = new List<IStorageOperation>();
+        // The current unit of work can be replaced
+        private UnitOfWork _unitOfWork = new UnitOfWork();
 
 
-        protected NewDocumentSession(IDocumentStore store, IManagedConnection database, ISerializer serializer, ITenant tenant,
-            StoreOptions options) : base(store, database, serializer, tenant, options)
+        protected NewDocumentSession(DocumentStore store, SessionOptions sessionOptions, IManagedConnection database,
+            ITenant tenant) : base(store, database, tenant)
         {
+            Concurrency = sessionOptions.ConcurrencyChecks;
+            Listeners.AddRange(store.Options.Listeners);
+            Listeners.AddRange(sessionOptions.Listeners);
+
             // TODO -- need to take in concurrency checks
             // Take in SessionOptions here
+            // Get the listeners too
         }
 
 
@@ -34,45 +36,50 @@ namespace Marten.V4Internals.Sessions
         {
             assertNotDisposed();
             var deletion = storageFor<T>().DeleteForDocument(entity);
-            _pendingOperations.Add(deletion);
+            _unitOfWork.Add(deletion);
 
-            // TODO -- eject from identity map
+            storageFor<T>().Eject(this, entity);
         }
 
         public void Delete<T>(int id)
         {
             assertNotDisposed();
             var deletion = storageFor<T, int>().DeleteForId(id);
-            _pendingOperations.Add(deletion);
+            _unitOfWork.Add(deletion);
 
-            // TODO -- eject from identity map
+            ejectById<T>(id);
         }
+
+        protected abstract void ejectById<T>(long id);
+        protected abstract void ejectById<T>(int id);
+        protected abstract void ejectById<T>(Guid id);
+        protected abstract void ejectById<T>(string id);
 
         public void Delete<T>(long id)
         {
             assertNotDisposed();
             var deletion = storageFor<T, long>().DeleteForId(id);
-            _pendingOperations.Add(deletion);
+            _unitOfWork.Add(deletion);
 
-            // TODO -- eject from identity map
+            ejectById<T>(id);
         }
 
         public void Delete<T>(Guid id)
         {
             assertNotDisposed();
             var deletion = storageFor<T, Guid>().DeleteForId(id);
-            _pendingOperations.Add(deletion);
+            _unitOfWork.Add(deletion);
 
-            // TODO -- eject from identity map
+            ejectById<T>(id);
         }
 
         public void Delete<T>(string id)
         {
             assertNotDisposed();
             var deletion = storageFor<T, string>().DeleteForId(id);
-            _pendingOperations.Add(deletion);
+            _unitOfWork.Add(deletion);
 
-            // TODO -- eject from identity map
+            ejectById<T>(id);
         }
 
         public void DeleteWhere<T>(Expression<Func<T, bool>> expression)
@@ -86,69 +93,98 @@ namespace Marten.V4Internals.Sessions
             var documentStorage = storageFor<T>();
             var @where = parser.ParseWhereFragment(documentStorage.Fields, expression);
             var deletion = documentStorage.DeleteForWhere(@where);
-            _pendingOperations.Add(deletion);
+            _unitOfWork.Add(deletion);
         }
 
         public void SaveChanges()
         {
-            // TODO -- move all this to new UnitOfWork!
+            assertNotDisposed();
 
-            var command = new NpgsqlCommand();
-            var builder = new CommandBuilder(command);
-            foreach (var operation in _pendingOperations)
+            if (!_unitOfWork.HasOutstandingWork()) return;
+
+            Database.BeginTransaction();
+
+            // TODO -- apply inline projections
+
+            _unitOfWork.Sort(Options);
+
+            foreach (var listener in Listeners)
             {
-                operation.ConfigureCommand(builder, this);
-                builder.Append(";");
+                listener.BeforeSaveChanges(this);
             }
 
-            var exceptions = new List<Exception>();
-
-            // TODO -- hokey!
-            command.CommandText = builder.ToString();
-            using (var reader = Database.ExecuteReader(command))
+            var batch = new UpdateBatch(_unitOfWork.AllOperations);
+            try
             {
-                _pendingOperations[0].Postprocess(reader, exceptions);
-                for (int i = 1; i < _pendingOperations.Count; i++)
-                {
-                    reader.NextResult();
-                    _pendingOperations[i].Postprocess(reader, exceptions);
-                }
+                batch.ApplyChanges(this);
+                Database.Commit();
+            }
+            catch (Exception)
+            {
+                Database.Rollback();
+                throw;
             }
 
-            if (exceptions.Any())
+            clearDirtyChecking();
+
+            EjectPatchedTypes(_unitOfWork);
+            Logger.RecordSavedChanges(this, _unitOfWork);
+
+            foreach (var listener in Listeners)
             {
-                throw new AggregateException(exceptions);
+                listener.AfterCommit(this, _unitOfWork);
             }
+
+            // Need to clear the unit of work here
+            _unitOfWork = new UnitOfWork();
+        }
+
+        protected virtual void clearDirtyChecking()
+        {
+            // Nothing
         }
 
         public async Task SaveChangesAsync(CancellationToken token = default)
         {
-            var command = new NpgsqlCommand();
-            var builder = new CommandBuilder(command);
-            foreach (var operation in _pendingOperations)
+            assertNotDisposed();
+
+            if (!_unitOfWork.HasOutstandingWork()) return;
+
+            await Database.BeginTransactionAsync(token).ConfigureAwait(false);
+
+            // TODO -- apply inline projections
+
+            _unitOfWork.Sort(Options);
+
+            foreach (var listener in Listeners)
             {
-                operation.ConfigureCommand(builder, this);
-                builder.Append(";");
+                await listener.BeforeSaveChangesAsync(this, token).ConfigureAwait(false);
             }
 
-            var exceptions = new List<Exception>();
-
-            // TODO -- hokey!
-            command.CommandText = builder.ToString();
-            using (var reader = await Database.ExecuteReaderAsync(command, token).ConfigureAwait(false))
+            var batch = new UpdateBatch(_unitOfWork.AllOperations);
+            try
             {
-                await _pendingOperations[0].PostprocessAsync(reader, exceptions, token).ConfigureAwait(false);
-                for (var i = 1; i < _pendingOperations.Count; i++)
-                {
-                    await reader.NextResultAsync(token).ConfigureAwait(false);
-                    await _pendingOperations[i].PostprocessAsync(reader, exceptions, token).ConfigureAwait(false);
-                }
+                await batch.ApplyChangesAsync(this, token).ConfigureAwait(false);
+                await Database.CommitAsync(token).ConfigureAwait(false);
+            }
+            catch (Exception)
+            {
+                await Database.RollbackAsync(token).ConfigureAwait(false);
+                throw;
             }
 
-            if (exceptions.Any())
+            clearDirtyChecking();
+
+            EjectPatchedTypes(_unitOfWork);
+            Logger.RecordSavedChanges(this, _unitOfWork);
+
+            foreach (var listener in Listeners)
             {
-                throw new AggregateException(exceptions);
+                await listener.AfterCommitAsync(this, _unitOfWork, token).ConfigureAwait(false);
             }
+
+            // Need to clear the unit of work here
+            _unitOfWork = new UnitOfWork();
         }
 
         public void Store<T>(IEnumerable<T> entities)
@@ -158,8 +194,6 @@ namespace Marten.V4Internals.Sessions
 
         public void Store<T>(params T[] entities)
         {
-            assertNotDisposed();
-
             if (entities == null)
                 throw new ArgumentNullException(nameof(entities));
 
@@ -189,7 +223,7 @@ namespace Marten.V4Internals.Sessions
                     // Put it in the identity map -- if necessary
                     storage.Store(this, entity);
 
-                    _pendingOperations.Add(upsert);
+                    _unitOfWork.Add(upsert);
                 }
             }
         }
@@ -220,9 +254,9 @@ namespace Marten.V4Internals.Sessions
 
             foreach (var entity in entities)
             {
-                var op = storage.Upsert(entity, this, tenant);
+                var op = storage.UpsertForTenant(entity, this, tenant);
                 storage.Store(this, entity);
-                _pendingOperations.Add(op);
+                _unitOfWork.Add(op);
             }
         }
 
@@ -233,14 +267,12 @@ namespace Marten.V4Internals.Sessions
             var storage = storageFor<T>();
             storage.Store(this, entity, version);
             var op = storage.Upsert(entity, this);
-            _pendingOperations.Add(op);
+            _unitOfWork.Add(op);
         }
 
         public void Insert<T>(IEnumerable<T> entities)
         {
             Insert(entities.ToArray());
-
-
         }
 
         public void Insert<T>(params T[] entities)
@@ -248,7 +280,9 @@ namespace Marten.V4Internals.Sessions
             assertNotDisposed();
 
             if (entities == null)
+            {
                 throw new ArgumentNullException(nameof(entities));
+            }
 
             if (typeof(T).IsGenericEnumerable())
             {
@@ -267,7 +301,7 @@ namespace Marten.V4Internals.Sessions
                 {
                     storage.Store(this, entity);
                     var op = storage.Insert(entity, this);
-                    _pendingOperations.Add(op);
+                    _unitOfWork.Add(op);
                 }
             }
         }
@@ -282,7 +316,9 @@ namespace Marten.V4Internals.Sessions
             assertNotDisposed();
 
             if (entities == null)
+            {
                 throw new ArgumentNullException(nameof(entities));
+            }
 
             if (typeof(T).IsGenericEnumerable())
             {
@@ -301,7 +337,7 @@ namespace Marten.V4Internals.Sessions
                 {
                     storage.Store(this, entity);
                     var op = storage.Update(entity, this);
-                    _pendingOperations.Add(op);
+                    _unitOfWork.Add(op);
                 }
             }
         }
@@ -353,7 +389,7 @@ namespace Marten.V4Internals.Sessions
 
         public IEventStore Events { get; }
         public ConcurrencyChecks Concurrency { get; set; } = ConcurrencyChecks.Enabled;
-        public IList<IDocumentSessionListener> Listeners { get; }
+        public IList<IDocumentSessionListener> Listeners { get; } = new List<IDocumentSessionListener>();
         public IPatchExpression<T> Patch<T>(int id)
         {
             return patchById<T>(id);
@@ -407,7 +443,7 @@ namespace Marten.V4Internals.Sessions
 
         public void QueueOperation(IStorageOperation storageOperation)
         {
-            _pendingOperations.Add(storageOperation);
+            _unitOfWork.Add(storageOperation);
         }
 
         public virtual void Eject<T>(T document)
@@ -420,7 +456,6 @@ namespace Marten.V4Internals.Sessions
             ItemMap.Remove(type);
         }
 
-        // TODO -- this needs to be called at the end of a
         public void EjectPatchedTypes(IUnitOfWork changes)
         {
             var patchedTypes = changes.Patches().Select(x => x.DocumentType).Distinct().ToArray();

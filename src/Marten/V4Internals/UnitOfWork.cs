@@ -12,54 +12,38 @@ namespace Marten.V4Internals
 {
     public class UnitOfWork : IUnitOfWork, IChangeSet
     {
-        // TODO -- watch _store.Options.UpdateBatchSize
+        private readonly List<IStorageOperation> _operations = new List<IStorageOperation>();
 
-        private readonly IList<IStorageOperation> _operations = new List<IStorageOperation>();
-        private IEnumerable<object> _updated;
-        private IEnumerable<object> _inserted;
-        private IEnumerable<IDeletion> _deleted;
-        private IEnumerable<PatchOperation> _patches;
+        public void Add(IStorageOperation operation)
+        {
+            _operations.Add(operation);
+        }
 
-        /*
-            using (var reader = await cmd.ExecuteReaderAsync(tkn).ConfigureAwait(false))
+        public IReadOnlyList<IStorageOperation> AllOperations => _operations;
+
+        public void Sort(StoreOptions options)
+        {
+            if (shouldSort(options, out var comparer))
             {
-                if (batch.Callbacks.Any())
-                {
-                    if (batch.Callbacks[0] != null)
-                        await batch.Callbacks[0].PostprocessAsync(reader, list, tkn).ConfigureAwait(false);
-
-                    for (var i = 1; i < batch.Callbacks.Count; i++)
-                    {
-                        if (!(batch.Calls[i - 1] is NoDataReturnedCall))
-                        {
-                            await reader.NextResultAsync(tkn).ConfigureAwait(false);
-                        }
-
-                        if (batch.Callbacks[i] != null)
-                        {
-                            await batch.Callbacks[i].PostprocessAsync(reader, list, tkn).ConfigureAwait(false);
-                        }
-                    }
-                }
+                _operations.Sort(comparer);
             }
-         */
+        }
 
-
-        private bool shouldSort(List<IStorageOperation> operations, out IComparer<IStorageOperation> comparer)
+        private bool shouldSort(StoreOptions options, out IComparer<IStorageOperation> comparer)
         {
             comparer = null;
-            if (operations.Count <= 1)
+            if (_operations.Count <= 1)
                 return false;
 
-            if (operations.Select(x => x.DocumentType).Distinct().Count() == 1)
+            if (_operations.Select(x => x.DocumentType).Distinct().Count() == 1)
                 return false;
 
             var types = _operations
                 .Select(x => x.DocumentType)
                 .Distinct()
-                .TopologicalSort(GetTypeDependencies).ToArray();
+                .TopologicalSort(type => GetTypeDependencies(options, type)).ToArray();
 
-            if (operations.OfType<IDeletion>().Any())
+            if (_operations.OfType<IDeletion>().Any())
             {
                 comparer = new StorageOperationWithDeletionsComparer(types);
             }
@@ -71,28 +55,27 @@ namespace Marten.V4Internals
             return true;
         }
 
-        private IEnumerable<Type> GetTypeDependencies(Type type)
+        private IEnumerable<Type> GetTypeDependencies(StoreOptions options, Type type)
         {
-            throw new NotImplementedException();
-            // var mappingFor = _tenant.MappingFor(type);
-            // var documentMapping = mappingFor as DocumentMapping ?? (mappingFor as SubClassMapping)?.Parent;
-            // if (documentMapping == null)
-            //     return Enumerable.Empty<Type>();
-            //
-            // return documentMapping.ForeignKeys.Where(x => x.ReferenceDocumentType != type && x.ReferenceDocumentType != null)
-            //     .SelectMany(keyDefinition =>
-            //     {
-            //         var results = new List<Type>();
-            //         var referenceMappingType =
-            //             _tenant.MappingFor(keyDefinition.ReferenceDocumentType) as DocumentMapping;
-            //         // If the reference type has sub-classes, also need to insert/update them first too
-            //         if (referenceMappingType != null && referenceMappingType.SubClasses.Any())
-            //         {
-            //             results.AddRange(referenceMappingType.SubClasses.Select(s => s.DocumentType));
-            //         }
-            //         results.Add(keyDefinition.ReferenceDocumentType);
-            //         return results;
-            //     });
+            var mapping = options.Storage.FindMapping(type);
+            var documentMapping = mapping as DocumentMapping ?? (mapping as SubClassMapping)?.Parent;
+            if (documentMapping == null)
+                return Enumerable.Empty<Type>();
+
+            return documentMapping.ForeignKeys.Where(x => x.ReferenceDocumentType != type && x.ReferenceDocumentType != null)
+                .SelectMany(keyDefinition =>
+                {
+                    var results = new List<Type>();
+                    var referenceMappingType =
+                        options.Storage.FindMapping(keyDefinition.ReferenceDocumentType) as DocumentMapping;
+                    // If the reference type has sub-classes, also need to insert/update them first too
+                    if (referenceMappingType != null && referenceMappingType.SubClasses.Any())
+                    {
+                        results.AddRange(referenceMappingType.SubClasses.Select(s => s.DocumentType));
+                    }
+                    results.Add(keyDefinition.ReferenceDocumentType);
+                    return results;
+                });
         }
 
 
@@ -100,42 +83,60 @@ namespace Marten.V4Internals
 
         IEnumerable<IDeletion> IUnitOfWork.Deletions()
         {
-            throw new NotImplementedException();
+            return _operations.OfType<IDeletion>();
         }
 
         IEnumerable<IDeletion> IUnitOfWork.DeletionsFor<T>()
         {
-            throw new NotImplementedException();
+            return _operations.OfType<IDeletion>().Where(x => x.DocumentType.CanBeCastTo<T>());
         }
 
         IEnumerable<IDeletion> IUnitOfWork.DeletionsFor(Type documentType)
         {
-            throw new NotImplementedException();
+            return _operations.OfType<IDeletion>().Where(x => x.DocumentType.CanBeCastTo(documentType));
         }
 
         IEnumerable<object> IUnitOfWork.Updates()
         {
-            throw new NotImplementedException();
+            return _operations
+                .OfType<IDocumentStorageOperation>()
+                .Where(x => x.Role() == StorageRole.Update)
+                .Select(x => x.Document);
         }
 
         IEnumerable<object> IUnitOfWork.Inserts()
         {
-            throw new NotImplementedException();
+            return _operations
+                .OfType<IDocumentStorageOperation>()
+                .Where(x => x.Role() == StorageRole.Insert)
+                .Select(x => x.Document);
         }
 
         IEnumerable<T> IUnitOfWork.UpdatesFor<T>()
         {
-            throw new NotImplementedException();
+            return _operations
+                .OfType<IDocumentStorageOperation>()
+                .Where(x => x.Role() == StorageRole.Update)
+                .Select(x => x.Document)
+                .OfType<T>();
+
         }
 
         IEnumerable<T> IUnitOfWork.InsertsFor<T>()
         {
-            throw new NotImplementedException();
+            return _operations
+                .OfType<IDocumentStorageOperation>()
+                .Where(x => x.Role() == StorageRole.Insert)
+                .Select(x => x.Document)
+                .OfType<T>();
         }
 
         IEnumerable<T> IUnitOfWork.AllChangedFor<T>()
         {
-            throw new NotImplementedException();
+            return _operations
+                .OfType<IDocumentStorageOperation>()
+                .Select(x => x.Document)
+                .OfType<T>();
         }
 
         IEnumerable<EventStream> IUnitOfWork.Streams()
@@ -145,36 +146,36 @@ namespace Marten.V4Internals
 
         IEnumerable<PatchOperation> IUnitOfWork.Patches()
         {
-            throw new NotImplementedException();
+            return _operations.OfType<PatchOperation>();
         }
 
         IEnumerable<IStorageOperation> IUnitOfWork.Operations()
         {
-            throw new NotImplementedException();
+            return _operations;
         }
 
         IEnumerable<IStorageOperation> IUnitOfWork.OperationsFor<T>()
         {
-            throw new NotImplementedException();
+            return _operations.Where(x => x.DocumentType.CanBeCastTo<T>());
         }
 
         IEnumerable<IStorageOperation> IUnitOfWork.OperationsFor(Type documentType)
         {
-            throw new NotImplementedException();
+            return _operations.Where(x => x.DocumentType.CanBeCastTo(documentType));
         }
 
-        IEnumerable<object> IChangeSet.Updated => _updated;
+        IEnumerable<object> IChangeSet.Updated => _operations.OfType<IDocumentStorageOperation>().Where(x => x.Role() == StorageRole.Update).Select(x => x.Document);
 
-        IEnumerable<object> IChangeSet.Inserted => _inserted;
+        IEnumerable<object> IChangeSet.Inserted => _operations.OfType<IDocumentStorageOperation>().Where(x => x.Role() == StorageRole.Insert).Select(x => x.Document);
 
-        IEnumerable<IDeletion> IChangeSet.Deleted => _deleted;
+        IEnumerable<IDeletion> IChangeSet.Deleted => _operations.OfType<IDeletion>();
 
         IEnumerable<IEvent> IChangeSet.GetEvents()
         {
             throw new NotImplementedException();
         }
 
-        IEnumerable<PatchOperation> IChangeSet.Patches => _patches;
+        IEnumerable<PatchOperation> IChangeSet.Patches => _operations.OfType<PatchOperation>();
 
         IEnumerable<EventStream> IChangeSet.GetStreams()
         {
@@ -313,5 +314,9 @@ namespace Marten.V4Internals
             }
         }
 
+        public bool HasOutstandingWork()
+        {
+            return _operations.Any();
+        }
     }
 }

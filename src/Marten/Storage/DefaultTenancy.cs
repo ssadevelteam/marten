@@ -57,6 +57,11 @@ namespace Marten.Storage
             return _inner.StorageFor(documentType);
         }
 
+        public IDocumentStorage<T> StorageFor<T>()
+        {
+            return _inner.StorageFor<T>();
+        }
+
         public IDocumentMapping MappingFor(Type documentType)
         {
             return _inner.MappingFor(documentType);

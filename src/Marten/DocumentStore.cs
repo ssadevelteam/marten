@@ -200,15 +200,15 @@ namespace Marten
             switch (options.Tracking)
             {
                 case DocumentTracking.None:
-                    session = new LightweightSession(this, connection, Serializer, tenant, Options);
+                    session = new LightweightSession(this, options, connection, tenant);
                     break;
 
                 case DocumentTracking.IdentityOnly:
-                    session = new IdentityMapDocumentSession(this, connection, Serializer, tenant, Options);
+                    session = new IdentityMapDocumentSession(this, options, connection, tenant);
                     break;
 
                 case DocumentTracking.DirtyTracking:
-                    session = new DirtyCheckingDocumentSession(this, connection, Serializer, tenant, Options);
+                    session = new DirtyCheckingDocumentSession(this, options, connection, tenant);
                     break;
 
 
@@ -304,7 +304,7 @@ namespace Marten
             }
 
             var connection = buildManagedConnection(options, tenant, CommandRunnerMode.ReadOnly, _retryPolicy);
-            var session = new V4Internals.Sessions.QuerySession(this, connection, Serializer, tenant, Options);
+            var session = new QuerySession(this, connection, tenant);
 
             connection.BeginSession();
 
@@ -330,7 +330,7 @@ namespace Marten
 
             var connection = tenant.OpenConnection(CommandRunnerMode.ReadOnly);
 
-            var session = new V4Internals.Sessions.QuerySession(this, connection, Serializer, tenant, Options);
+            var session = new V4Internals.Sessions.QuerySession(this, connection, tenant);
 
             connection.BeginSession();
 

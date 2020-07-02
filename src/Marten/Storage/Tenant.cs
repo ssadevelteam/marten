@@ -170,11 +170,15 @@ namespace Marten.Storage
             }
         }
 
-
+        [Obsolete("Try to eliminate in v4")]
         public IDocumentStorage StorageFor(Type documentType)
         {
-            // TODO -- need to use a provider graph here
-            throw new NotImplementedException();
+            throw new NotImplementedException("Trying to get rid of this in v4");
+        }
+
+        public IDocumentStorage<T> StorageFor<T>()
+        {
+            return Providers.StorageFor<T>().QueryOnly;
         }
 
         public IDocumentMapping MappingFor(Type documentType)
