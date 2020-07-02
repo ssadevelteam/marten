@@ -45,8 +45,8 @@ namespace Marten.Testing.V4Internals
 
 
 
-            var newSession = new Marten.V4Internals.Sessions.QuerySession(theStore, database, new JsonNetSerializer(),
-                theStore.Tenancy.Default, theStore.Options);
+            var newSession = new Marten.V4Internals.Sessions.QuerySession(theStore, database,
+                theStore.Tenancy.Default);
             return newSession;
         }
 
@@ -446,7 +446,7 @@ namespace Marten.Testing.V4Internals
 
             using var database =  new ManagedConnection(new ConnectionFactory(ConnectionSource.ConnectionString), new NulloRetryPolicy());
 
-            using var session = new LightweightSession(theStore, database, new JsonNetSerializer(), theStore.Tenancy.Default, theStore.Options);
+            using var session = new LightweightSession(theStore, new SessionOptions(), database, theStore.Tenancy.Default);
 
             session.Store(target1, target2, target3);
             session.SaveChanges();
