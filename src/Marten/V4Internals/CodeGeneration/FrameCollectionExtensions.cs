@@ -61,6 +61,11 @@ END
             }
         }
 
+        public static void MarkAsLoaded(this FramesCollection frames)
+        {
+            frames.Code($"{{0}}.{nameof(IMartenSession.MarkAsDocumentLoaded)}(id, document);", Use.Type<IMartenSession>());
+        }
+
         public static void DeserializeAsync(this FramesCollection frames, IDocumentMapping mapping)
         {
             var documentType = mapping.DocumentType;

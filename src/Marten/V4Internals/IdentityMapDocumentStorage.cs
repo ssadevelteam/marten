@@ -28,6 +28,8 @@ namespace Marten.V4Internals
         public sealed override void Store(IMartenSession session, T document)
         {
             var id = AssignIdentity(document, session.Tenant);
+            session.MarkAsAddedForStorage(id, document);
+
             if (session.ItemMap.TryGetValue(typeof(T), out var items))
             {
                 if (items is Dictionary<TId, T> d)
@@ -49,6 +51,8 @@ namespace Marten.V4Internals
         public sealed override void Store(IMartenSession session, T document, Guid? version)
         {
             var id = AssignIdentity(document, session.Tenant);
+            session.MarkAsAddedForStorage(id, document);
+
             if (session.ItemMap.TryGetValue(typeof(T), out var items))
             {
                 if (items is Dictionary<TId, T> d)

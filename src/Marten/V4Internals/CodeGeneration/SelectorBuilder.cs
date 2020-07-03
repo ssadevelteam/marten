@@ -50,6 +50,9 @@ namespace Marten.V4Internals
                     sync.Frames.Deserialize(_mapping);
                     async.Frames.DeserializeAsync(_mapping);
 
+                    sync.Frames.MarkAsLoaded();
+                    async.Frames.MarkAsLoaded();
+
                     sync.Frames.StoreVersion(false, _mapping, versionPosition);
                     async.Frames.StoreVersion(true, _mapping, versionPosition);
 
@@ -59,12 +62,16 @@ namespace Marten.V4Internals
                     break;
 
                 case StorageStyle.DirtyTracking:
+                    // TODO -- needs to check existing first!
 
                     sync.Frames.Deserialize(_mapping);
                     async.Frames.DeserializeAsync(_mapping);
 
                     sync.Frames.GetId(_mapping);
                     async.Frames.GetIdAsync(_mapping);
+
+                    sync.Frames.MarkAsLoaded();
+                    async.Frames.MarkAsLoaded();
 
 
                     sync.Frames.StoreVersion(false, _mapping, versionPosition);

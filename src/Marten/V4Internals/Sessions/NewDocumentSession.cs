@@ -20,15 +20,9 @@ namespace Marten.V4Internals.Sessions
 
 
         protected NewDocumentSession(DocumentStore store, SessionOptions sessionOptions, IManagedConnection database,
-            ITenant tenant) : base(store, database, tenant)
+            ITenant tenant) : base(store, sessionOptions, database, tenant)
         {
             Concurrency = sessionOptions.ConcurrencyChecks;
-            Listeners.AddRange(store.Options.Listeners);
-            Listeners.AddRange(sessionOptions.Listeners);
-
-            // TODO -- need to take in concurrency checks
-            // Take in SessionOptions here
-            // Get the listeners too
         }
 
 
@@ -224,6 +218,8 @@ namespace Marten.V4Internals.Sessions
                     storage.Store(this, entity);
 
                     _unitOfWork.Add(upsert);
+
+
                 }
             }
         }
@@ -256,6 +252,7 @@ namespace Marten.V4Internals.Sessions
             {
                 var op = storage.Upsert(entity, this, tenant);
                 storage.Store(this, entity);
+
                 _unitOfWork.Add(op);
             }
         }
@@ -389,7 +386,7 @@ namespace Marten.V4Internals.Sessions
 
         public IEventStore Events { get; }
         public ConcurrencyChecks Concurrency { get; set; } = ConcurrencyChecks.Enabled;
-        public IList<IDocumentSessionListener> Listeners { get; } = new List<IDocumentSessionListener>();
+
         public IPatchExpression<T> Patch<T>(int id)
         {
             return patchById<T>(id);

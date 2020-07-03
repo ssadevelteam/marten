@@ -14,6 +14,7 @@ namespace Marten.V4Internals
 
         public sealed override void Store(IMartenSession session, T document)
         {
+
         }
 
         public sealed override void Store(IMartenSession session, T document, Guid? version)

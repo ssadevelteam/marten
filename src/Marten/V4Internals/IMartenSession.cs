@@ -25,10 +25,10 @@ namespace Marten.V4Internals
 
         StoreOptions Options { get; }
 
+
+        void MarkAsAddedForStorage(object id, object document);
+
+        void MarkAsDocumentLoaded(object id, object document);
     }
 
-    internal static class MartenSessionExtensions
-    {
-
-    }
 }

@@ -16,64 +16,201 @@ using Npgsql;
 
 namespace Marten.V4Internals.Sessions
 {
-    public class QuerySession : MartenSessionBase, IQuerySession
+    public class QuerySession : IMartenSession, IQuerySession
     {
-        public QuerySession(DocumentStore store, IManagedConnection database, ITenant tenant) : base(database, store.Serializer, tenant, store.Options)
+        private readonly IProviderGraph _providers;
+        private bool _disposed;
+        public VersionTracker Versions { get; } = new VersionTracker();
+        public IManagedConnection Database { get; }
+        public ISerializer Serializer { get; }
+        public Dictionary<Type, object> ItemMap { get; } = new Dictionary<Type, object>();
+        public ITenant Tenant { get; }
+        public StoreOptions Options { get; }
+
+        public void MarkAsAddedForStorage(object id, object document)
         {
-            DocumentStore = store;
+            foreach (var listener in Listeners)
+            {
+                listener.DocumentAddedForStorage(id, document);
+            }
         }
 
-        protected override IDocumentStorage<T> selectStorage<T>(DocumentProvider<T> provider)
+        public void MarkAsDocumentLoaded(object id, object document)
+        {
+            foreach (var listener in Listeners)
+            {
+                listener.DocumentLoaded(id, document);
+            }
+        }
+
+        public IList<IDocumentSessionListener> Listeners { get; } = new List<IDocumentSessionListener>();
+
+        public QuerySession(DocumentStore store, SessionOptions sessionOptions, IManagedConnection database,
+            ITenant tenant)
+        {
+            DocumentStore = store;
+
+            Listeners.AddRange(store.Options.Listeners);
+            if (sessionOptions != null) Listeners.AddRange(sessionOptions.Listeners);
+
+            _providers = tenant.Providers ?? throw new ArgumentNullException(nameof(ITenant.Providers));
+
+            Database = database;
+            Serializer = store.Serializer;
+            Tenant = tenant;
+            Options = store.Options;
+        }
+
+        protected virtual IDocumentStorage<T> selectStorage<T>(DocumentProvider<T> provider)
         {
             return provider.QueryOnly;
+        }
+
+        public IDocumentStorage StorageFor(Type documentType)
+        {
+            // TODO -- possible optimization opportunity
+            return typeof(StorageFinder<>).CloseAndBuildAs<IStorageFinder>(documentType).Find(this);
+        }
+
+        private interface IStorageFinder
+        {
+            IDocumentStorage Find(QuerySession session);
+        }
+
+        private class StorageFinder<T>: IStorageFinder
+        {
+            public IDocumentStorage Find(QuerySession session)
+            {
+                return session.storageFor<T>();
+            }
+        }
+
+        protected IDocumentStorage<T, TId> storageFor<T, TId>()
+        {
+            var storage = storageFor<T>();
+            if (storage is IDocumentStorage<T, TId> s) return s;
+
+            throw new InvalidOperationException($"The identity type for {typeof(T).FullName} is {storage.IdType.FullName}, but {typeof(TId).FullName} was used as the Id type");
+        }
+
+        protected IDocumentStorage<T> storageFor<T>()
+        {
+            return selectStorage(_providers.StorageFor<T>());
+        }
+
+
+
+
+        public void Dispose()
+        {
+            if (_disposed)
+                return;
+
+            _disposed = true;
+            Database?.Dispose();
+            GC.SuppressFinalize(this);
+        }
+
+        protected void assertNotDisposed()
+        {
+            if (_disposed)
+                throw new ObjectDisposedException("This session has been disposed");
         }
 
         public T Load<T>(string id)
         {
             assertNotDisposed();
-            return storageFor<T, string>().Load(id, this);
+            var document = storageFor<T, string>().Load(id, this);
+            foreach (var listener in Listeners)
+            {
+                listener.DocumentLoaded(id, document);
+            }
+
+            return document;
         }
 
-        public Task<T> LoadAsync<T>(string id, CancellationToken token = default(CancellationToken))
+        public async Task<T> LoadAsync<T>(string id, CancellationToken token = default(CancellationToken))
         {
             assertNotDisposed();
-            return storageFor<T, string>().LoadAsync(id, this, token);
+            var document = await storageFor<T, string>().LoadAsync(id, this, token).ConfigureAwait(false);
+            foreach (var listener in Listeners)
+            {
+                listener.DocumentLoaded(id, document);
+            }
+
+            return document;
         }
 
         public T Load<T>(int id)
         {
             assertNotDisposed();
-            return storageFor<T, int>().Load(id, this);
+            var document = storageFor<T, int>().Load(id, this);
+            foreach (var listener in Listeners)
+            {
+                listener.DocumentLoaded(id, document);
+            }
+
+            return document;
         }
 
-        public Task<T> LoadAsync<T>(int id, CancellationToken token = default(CancellationToken))
+        public async Task<T> LoadAsync<T>(int id, CancellationToken token = default(CancellationToken))
         {
             assertNotDisposed();
-            return storageFor<T, int>().LoadAsync(id, this, token);
+            var document = await storageFor<T, int>().LoadAsync(id, this, token).ConfigureAwait(false);
+            foreach (var listener in Listeners)
+            {
+                listener.DocumentLoaded(id, document);
+            }
+
+            return document;
         }
 
         public T Load<T>(long id)
         {
             assertNotDisposed();
-            return storageFor<T, long>().Load(id, this);
+            var document = storageFor<T, long>().Load(id, this);
+            foreach (var listener in Listeners)
+            {
+                listener.DocumentLoaded(id, document);
+            }
+
+            return document;
         }
 
-        public Task<T> LoadAsync<T>(long id, CancellationToken token = default(CancellationToken))
+        public async Task<T> LoadAsync<T>(long id, CancellationToken token = default(CancellationToken))
         {
             assertNotDisposed();
-            return storageFor<T, long>().LoadAsync(id, this, token);
+            var document = await storageFor<T, long>().LoadAsync(id, this, token).ConfigureAwait(false);
+            foreach (var listener in Listeners)
+            {
+                listener.DocumentLoaded(id, document);
+            }
+
+            return document;
         }
 
         public T Load<T>(Guid id)
         {
             assertNotDisposed();
-            return storageFor<T, Guid>().Load(id, this);
+            var document = storageFor<T, Guid>().Load(id, this);
+            foreach (var listener in Listeners)
+            {
+                listener.DocumentLoaded(id, document);
+            }
+
+            return document;
         }
 
-        public Task<T> LoadAsync<T>(Guid id, CancellationToken token = default(CancellationToken))
+        public async Task<T> LoadAsync<T>(Guid id, CancellationToken token = default(CancellationToken))
         {
             assertNotDisposed();
-            return storageFor<T, Guid>().LoadAsync(id, this, token);
+            var document = await storageFor<T, Guid>().LoadAsync(id, this, token).ConfigureAwait(false);
+            foreach (var listener in Listeners)
+            {
+                listener.DocumentLoaded(id, document);
+            }
+
+            return document;
         }
 
 

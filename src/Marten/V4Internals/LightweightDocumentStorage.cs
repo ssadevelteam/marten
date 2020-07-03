@@ -14,20 +14,22 @@ namespace Marten.V4Internals
 
         public sealed override void Store(IMartenSession session, T document)
         {
-            AssignIdentity(document, session.Tenant);
+            var id = AssignIdentity(document, session.Tenant);
+            session.MarkAsAddedForStorage(id, document);
         }
 
         public sealed override void Store(IMartenSession session, T document, Guid? version)
         {
-            var identity = AssignIdentity(document, session.Tenant);
+            var id = AssignIdentity(document, session.Tenant);
+            session.MarkAsAddedForStorage(id, document);
 
             if (version.HasValue)
             {
-                session.Versions.StoreVersion<T, TId>(identity, version.Value);
+                session.Versions.StoreVersion<T, TId>(id, version.Value);
             }
             else
             {
-                session.Versions.ClearVersion<T, TId>(identity);
+                session.Versions.ClearVersion<T, TId>(id);
             }
 
 

@@ -304,7 +304,7 @@ namespace Marten
             }
 
             var connection = buildManagedConnection(options, tenant, CommandRunnerMode.ReadOnly, _retryPolicy);
-            var session = new QuerySession(this, connection, tenant);
+            var session = new QuerySession(this, options, connection, tenant);
 
             connection.BeginSession();
 
@@ -330,7 +330,7 @@ namespace Marten
 
             var connection = tenant.OpenConnection(CommandRunnerMode.ReadOnly);
 
-            var session = new V4Internals.Sessions.QuerySession(this, connection, tenant);
+            var session = new QuerySession(this, null, connection, tenant);
 
             connection.BeginSession();
 

@@ -45,7 +45,7 @@ namespace Marten.Testing.V4Internals
 
 
 
-            var newSession = new Marten.V4Internals.Sessions.QuerySession(theStore, database,
+            var newSession = new Marten.V4Internals.Sessions.QuerySession(theStore, null, database,
                 theStore.Tenancy.Default);
             return newSession;
         }

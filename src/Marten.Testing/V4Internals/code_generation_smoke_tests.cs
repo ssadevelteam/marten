@@ -84,6 +84,15 @@ namespace Marten.Testing.V4Internals
         }
 
         public StoreOptions Options { get; }
+        public void MarkAsAddedForStorage(object id, object document)
+        {
+        }
+
+        public void MarkAsDocumentLoaded(object id, object document)
+        {
+
+
+        }
 
         public Task<T> ExecuteQuery<T>(IQueryHandler<T> handler, CancellationToken token)
         {
