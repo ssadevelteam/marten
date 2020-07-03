@@ -23,7 +23,7 @@ namespace Marten.V4Internals
             var baseType = typeof(DeleteMany<>).MakeGenericType(_mapping.DocumentType);
             var type = assembly.AddType($"Delete{_mapping.DocumentType.Name}ByWhere", baseType);
 
-            var sql = $"delete from {_mapping.Table.QualifiedName} where ";
+            var sql = $"delete from {_mapping.Table.QualifiedName} as d where ";
             if (_mapping.DeleteStyle == DeleteStyle.SoftDelete)
                 sql =
                     $"update {_mapping.Table.QualifiedName} as d set {DocumentMapping.DeletedColumn} = True, {DocumentMapping.DeletedAtColumn} = now() where ";

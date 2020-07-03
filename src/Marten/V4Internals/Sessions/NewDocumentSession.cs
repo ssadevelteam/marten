@@ -16,7 +16,7 @@ namespace Marten.V4Internals.Sessions
     public abstract class NewDocumentSession: QuerySession, IDocumentSession
     {
         // The current unit of work can be replaced
-        private UnitOfWork _unitOfWork = new UnitOfWork();
+        protected UnitOfWork _unitOfWork = new UnitOfWork();
 
 
         protected NewDocumentSession(DocumentStore store, SessionOptions sessionOptions, IManagedConnection database,
@@ -446,6 +446,7 @@ namespace Marten.V4Internals.Sessions
         public virtual void Eject<T>(T document)
         {
             storageFor<T>().Eject(this, document);
+            _unitOfWork.Eject(document);
         }
 
         public virtual void EjectAllOfType(Type type)

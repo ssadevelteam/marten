@@ -17,7 +17,7 @@ namespace Marten.V4Internals.Sessions
 
         public override void Eject<T>(T document)
         {
-            // Nothing
+            _unitOfWork.Eject(document);
         }
 
         public override void EjectAllOfType(Type type)
