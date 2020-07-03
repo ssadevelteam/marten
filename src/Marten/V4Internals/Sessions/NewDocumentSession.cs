@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Baseline;
+using LamarCodeGeneration;
 using Marten.Events;
 using Marten.Linq;
 using Marten.Patching;
@@ -38,10 +39,26 @@ namespace Marten.V4Internals.Sessions
         public void Delete<T>(int id)
         {
             assertNotDisposed();
-            var deletion = storageFor<T, int>().DeleteForId(id);
-            _unitOfWork.Add(deletion);
 
-            ejectById<T>(id);
+            var storage = storageFor<T>();
+
+            IStorageOperation deletion = null;
+            if (storage is IDocumentStorage<T, int> i)
+            {
+                _unitOfWork.Add(i.DeleteForId(id));
+
+                ejectById<T>(id);
+            }
+            else if (storage is IDocumentStorage<T, long> l)
+            {
+                _unitOfWork.Add(l.DeleteForId(id));
+
+                ejectById<T>((long)id);
+            }
+            else
+            {
+                throw new InvalidOperationException($"The identity type for document type {typeof(T).FullNameInCode()} is not numeric");
+            }
         }
 
         protected abstract void ejectById<T>(long id);

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Baseline;
+using LamarCodeGeneration;
 using Marten.Linq;
 using Marten.Linq.QueryHandlers;
 using Marten.Schema;
@@ -133,10 +134,7 @@ namespace Marten.V4Internals.Sessions
         {
             assertNotDisposed();
             var document = await storageFor<T, string>().LoadAsync(id, this, token).ConfigureAwait(false);
-            foreach (var listener in Listeners)
-            {
-                listener.DocumentLoaded(id, document);
-            }
+            MarkAsDocumentLoaded(id, document);
 
             return document;
         }
@@ -144,10 +142,26 @@ namespace Marten.V4Internals.Sessions
         public T Load<T>(int id)
         {
             assertNotDisposed();
-            var document = storageFor<T, int>().Load(id, this);
-            foreach (var listener in Listeners)
+
+            var storage = storageFor<T>();
+
+            T document = default;
+            if (storage is IDocumentStorage<T, int> i)
             {
-                listener.DocumentLoaded(id, document);
+                document = i.Load(id, this);
+            }
+            else if (storage is IDocumentStorage<T, long> l)
+            {
+                document = l.Load(id, this);
+            }
+            else
+            {
+                throw new InvalidOperationException($"The identity type for document type {typeof(T).FullNameInCode()} is not numeric");
+            }
+
+            if (document != null)
+            {
+                MarkAsDocumentLoaded(id, document);
             }
 
             return document;
@@ -156,10 +170,26 @@ namespace Marten.V4Internals.Sessions
         public async Task<T> LoadAsync<T>(int id, CancellationToken token = default(CancellationToken))
         {
             assertNotDisposed();
-            var document = await storageFor<T, int>().LoadAsync(id, this, token).ConfigureAwait(false);
-            foreach (var listener in Listeners)
+
+            var storage = storageFor<T>();
+
+            T document = default;
+            if (storage is IDocumentStorage<T, int> i)
             {
-                listener.DocumentLoaded(id, document);
+                document = await i.LoadAsync(id, this, token).ConfigureAwait(false);
+            }
+            else if (storage is IDocumentStorage<T, long> l)
+            {
+                document = await l.LoadAsync(id, this, token).ConfigureAwait(false);
+            }
+            else
+            {
+                throw new InvalidOperationException($"The identity type for document type {typeof(T).FullNameInCode()} is not numeric");
+            }
+
+            if (document != null)
+            {
+                MarkAsDocumentLoaded(id, document);
             }
 
             return document;
@@ -193,10 +223,6 @@ namespace Marten.V4Internals.Sessions
         {
             assertNotDisposed();
             var document = storageFor<T, Guid>().Load(id, this);
-            foreach (var listener in Listeners)
-            {
-                listener.DocumentLoaded(id, document);
-            }
 
             return document;
         }
@@ -310,39 +336,57 @@ namespace Marten.V4Internals.Sessions
         public IReadOnlyList<T> LoadMany<T>(params int[] ids)
         {
             assertNotDisposed();
-            return storageFor<T, int>().LoadMany(ids, this);
+
+            var storage = storageFor<T>();
+            if (storage is IDocumentStorage<T, int> i)
+            {
+                return i.LoadMany(ids, this);
+            }
+            else if (storage is IDocumentStorage<T, long> l)
+            {
+                return l.LoadMany(ids.Select(x => (long)x).ToArray(), this);
+            }
+
+
+            throw new InvalidOperationException($"The identity type for document type {typeof(T).FullNameInCode()} is not numeric");
         }
 
         public IReadOnlyList<T> LoadMany<T>(IEnumerable<int> ids)
         {
-            assertNotDisposed();
-            return storageFor<T, int>().LoadMany(ids.ToArray(), this);
-
+            return LoadMany<T>(ids.ToArray());
         }
 
         public Task<IReadOnlyList<T>> LoadManyAsync<T>(params int[] ids)
         {
-            assertNotDisposed();
-            return storageFor<T, int>().LoadManyAsync(ids, this, default(CancellationToken));
-
+            return LoadManyAsync<T>(CancellationToken.None, ids);
         }
 
         public Task<IReadOnlyList<T>> LoadManyAsync<T>(IEnumerable<int> ids)
         {
-            assertNotDisposed();
-            return storageFor<T, int>().LoadManyAsync(ids.ToArray(), this, default(CancellationToken));
+            return LoadManyAsync<T>(ids.ToArray());
         }
 
         public Task<IReadOnlyList<T>> LoadManyAsync<T>(CancellationToken token, params int[] ids)
         {
             assertNotDisposed();
-            return storageFor<T, int>().LoadManyAsync(ids, this, token);
+
+            var storage = storageFor<T>();
+            if (storage is IDocumentStorage<T, int> i)
+            {
+                return i.LoadManyAsync(ids, this, token);
+            }
+            else if (storage is IDocumentStorage<T, long> l)
+            {
+                return l.LoadManyAsync(ids.Select(x => (long)x).ToArray(), this, token);
+            }
+
+
+            throw new InvalidOperationException($"The identity type for document type {typeof(T).FullNameInCode()} is not numeric");
         }
 
         public Task<IReadOnlyList<T>> LoadManyAsync<T>(CancellationToken token, IEnumerable<int> ids)
         {
-            assertNotDisposed();
-            return storageFor<T, int>().LoadManyAsync(ids.ToArray(), this, token);
+            return LoadManyAsync<T>(token, ids.ToArray());
         }
 
 
