@@ -100,7 +100,7 @@ namespace Marten.V4Internals
         {
             return _operations
                 .OfType<IDocumentStorageOperation>()
-                .Where(x => x.Role() == StorageRole.Update)
+                .Where(x => x.Role() == StorageRole.Update || x.Role() == StorageRole.Upsert)
                 .Select(x => x.Document);
         }
 
@@ -116,7 +116,7 @@ namespace Marten.V4Internals
         {
             return _operations
                 .OfType<IDocumentStorageOperation>()
-                .Where(x => x.Role() == StorageRole.Update)
+                .Where(x => x.Role() == StorageRole.Update || x.Role() == StorageRole.Upsert)
                 .Select(x => x.Document)
                 .OfType<T>();
 

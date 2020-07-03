@@ -353,7 +353,7 @@ namespace Marten.V4Internals.Sessions
             });
         }
 
-        public IUnitOfWork PendingChanges => throw new NotImplementedException();
+        public IUnitOfWork PendingChanges => _unitOfWork;
 
         public void StoreObjects(IEnumerable<object> documents)
         {

@@ -12,16 +12,16 @@ namespace Marten.V4Internals
 
     public abstract class DeleteOne<T, TId>: IDeletion
     {
-        private readonly TId _id;
-
         public DeleteOne(TId id)
         {
-            _id = id;
+            Id = id;
         }
 
         public abstract void ConfigureCommand(CommandBuilder builder, IMartenSession session);
 
         public Type DocumentType => typeof(T);
+
+        public TId Id { get; }
 
         public void Postprocess(DbDataReader reader, IList<Exception> exceptions)
         {
