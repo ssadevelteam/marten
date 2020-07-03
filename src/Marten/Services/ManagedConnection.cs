@@ -429,5 +429,7 @@ namespace Marten.Services
         {
             _connection?.Dispose();
         }
+
+
     }
 }

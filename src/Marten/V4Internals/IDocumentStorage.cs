@@ -26,6 +26,8 @@ namespace Marten.V4Internals
 
     public interface IDocumentStorage<T> : IDocumentStorage
     {
+        object IdentityFor(T document);
+
         Type IdType { get; }
         Guid? VersionFor(T document, IMartenSession session);
 

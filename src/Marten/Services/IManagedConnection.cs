@@ -47,5 +47,6 @@ namespace Marten.Services
 
         DbDataReader ExecuteReader(NpgsqlCommand command);
         Task<DbDataReader> ExecuteReaderAsync(NpgsqlCommand command, CancellationToken token);
+
     }
 }

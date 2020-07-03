@@ -30,6 +30,11 @@ namespace Marten.V4Internals
             _defaultWhere = _mapping.DefaultWhereFragment();
         }
 
+        object IDocumentStorage<T>.IdentityFor(T document)
+        {
+            return _parent.Identity(document);
+        }
+
         public string FromObject { get; }
         public Type SelectedType => typeof(T);
 

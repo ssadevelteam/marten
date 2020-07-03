@@ -111,27 +111,28 @@ namespace Marten.Storage
             if (entity == null)
                 throw new ArgumentNullException(nameof(entity));
 
-            var handler = new EntityMetadataQueryHandler(entity, StorageFor(typeof(T)),
-                MappingFor(typeof(T)).As<DocumentMapping>());
-
-            using (var connection = OpenConnection())
-            {
-                return connection.Fetch(handler, null, null, this);
-            }
+            throw new NotImplementedException();
+            // var handler = new EntityMetadataQueryHandler(entity, StorageFor(typeof(T)),
+            //     MappingFor(typeof(T)).As<DocumentMapping>());
+            //
+            // using (var connection = OpenConnection())
+            // {
+            //     return connection.Fetch(handler, null, null, this);
+            // }
         }
 
         public async Task<DocumentMetadata> MetadataForAsync<T>(T entity, CancellationToken token = new CancellationToken())
         {
             if (entity == null)
                 throw new ArgumentNullException(nameof(entity));
-
-            var handler = new EntityMetadataQueryHandler(entity, StorageFor(typeof(T)),
-                MappingFor(typeof(T)).As<DocumentMapping>());
-
-            using (var connection = OpenConnection())
-            {
-                return await connection.FetchAsync(handler, null, null, this, token).ConfigureAwait(false);
-            }
+throw new NotImplementedException();
+            // var handler = new EntityMetadataQueryHandler(entity, StorageFor(typeof(T)),
+            //     MappingFor(typeof(T)).As<DocumentMapping>());
+            //
+            // using (var connection = OpenConnection())
+            // {
+            //     return await connection.FetchAsync(handler, null, null, this, token).ConfigureAwait(false);
+            // }
         }
 
         public NpgsqlConnection CreateConnection()

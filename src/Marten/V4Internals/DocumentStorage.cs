@@ -50,6 +50,11 @@ namespace Marten.V4Internals
             QueryableDocument = document;
         }
 
+        object IDocumentStorage<T>.IdentityFor(T document)
+        {
+            return Identity(document);
+        }
+
         public Type SelectedType => typeof(T);
 
         public IQueryableDocument QueryableDocument { get; }
