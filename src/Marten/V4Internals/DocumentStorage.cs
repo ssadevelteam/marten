@@ -73,11 +73,9 @@ namespace Marten.V4Internals
         public abstract void Store(IMartenSession session, T document);
         public abstract void Store(IMartenSession session, T document, Guid? version);
         public abstract void Eject(IMartenSession session, T document);
-        public abstract IStorageOperation Update(T document, IMartenSession session);
-        public abstract IStorageOperation Insert(T document, IMartenSession session);
-        public abstract IStorageOperation Upsert(T document, IMartenSession session);
-
-        public abstract IStorageOperation UpsertForTenant(T document, IMartenSession session, ITenant tenant);
+        public abstract IStorageOperation Update(T document, IMartenSession session, ITenant tenant);
+        public abstract IStorageOperation Insert(T document, IMartenSession session, ITenant tenant);
+        public abstract IStorageOperation Upsert(T document, IMartenSession session, ITenant tenant);
 
         public abstract IStorageOperation Overwrite(T document, IMartenSession session);
         public abstract IStorageOperation DeleteForDocument(T document);

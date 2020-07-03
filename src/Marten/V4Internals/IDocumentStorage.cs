@@ -34,11 +34,9 @@ namespace Marten.V4Internals
 
         void Eject(IMartenSession session, T document);
 
-        IStorageOperation Update(T document, IMartenSession session);
-        IStorageOperation Insert(T document, IMartenSession session);
-        IStorageOperation Upsert(T document, IMartenSession session);
-
-        IStorageOperation UpsertForTenant(T document, IMartenSession session, ITenant tenant);
+        IStorageOperation Update(T document, IMartenSession session, ITenant tenant);
+        IStorageOperation Insert(T document, IMartenSession session, ITenant tenant);
+        IStorageOperation Upsert(T document, IMartenSession session, ITenant tenant);
 
         IStorageOperation Overwrite(T document, IMartenSession session);
 

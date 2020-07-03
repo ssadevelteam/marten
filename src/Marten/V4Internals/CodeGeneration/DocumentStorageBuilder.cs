@@ -153,6 +153,13 @@ return new Marten.Generated.{operations.DeleteByWhere.TypeName}({{0}});
             var operationType = (GeneratedType)typeof(DocumentOperations).GetProperty(methodName).GetValue(operations);
             var method = type.MethodFor(methodName);
 
+            var tenantDeclaration = "";
+            if (_mapping.TenancyStyle == TenancyStyle.Conjoined)
+            {
+                var tenantField = operationType.AllInjectedFields.Single(x => x.ArgType == typeof(ITenant));
+                tenantDeclaration = ", tenant";
+            }
+
             if (_mapping.IsHierarchy())
             {
                 method.Frames
@@ -163,6 +170,7 @@ return new Marten.Generated.{operationType.TypeName}
     {{1}}.Versions.ForType<{_mapping.DocumentType.FullNameInCode()},
     {_mapping.IdType.FullNameInCode()}>(),
     {{2}}
+    {tenantDeclaration}
 );"
                         , new Use(_mapping.DocumentType), Use.Type<IMartenSession>(), Use.Type<DocumentMapping>());
             }
@@ -175,6 +183,7 @@ return new Marten.Generated.{operationType.TypeName}
     {{0}}, Identity({{0}}),
     {{1}}.Versions.ForType<{_mapping.DocumentType.FullNameInCode()},
     {_mapping.IdType.FullNameInCode()}>()
+    {tenantDeclaration}
 );"
                         , new Use(_mapping.DocumentType), Use.Type<IMartenSession>());
             }

@@ -24,7 +24,7 @@ namespace Marten.Schema.Arguments
         public override void GenerateCode(GeneratedMethod method, GeneratedType type, int i, Argument parameters,
             DocumentMapping mapping)
         {
-            method.Frames.Code($"{{0}}[{{1}}].Value = {{2}}.{nameof(IMartenSession.Tenant)}.{nameof(ITenant.TenantId)};", parameters, i, Use.Type<IMartenSession>());
+            method.Frames.Code($"{{0}}[{{1}}].Value = {{2}}.{nameof(ITenant.TenantId)};", parameters, i, Use.Type<ITenant>());
             method.Frames.Code("{0}[{1}].NpgsqlDbType = {2};", parameters, i, DbType);
         }
 

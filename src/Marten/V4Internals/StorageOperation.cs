@@ -5,12 +5,23 @@ using System.Threading;
 using System.Threading.Tasks;
 using Marten.Schema.Identity;
 using Marten.Services;
+using Marten.Storage;
 using Marten.Util;
 using Npgsql;
 using NpgsqlTypes;
 
 namespace Marten.V4Internals
 {
+    public abstract class TenantOverrideStorageOperation<T, TId>: StorageOperation<T, TId>
+    {
+        protected readonly ITenant _tenant;
+
+        protected TenantOverrideStorageOperation(T document, TId id, Dictionary<TId, Guid> versions, ITenant tenant) : base(document, id, versions)
+        {
+            _tenant = tenant;
+        }
+    }
+
     public abstract class StorageOperation<T, TId> : IDocumentStorageOperation
     {
         private readonly T _document;

@@ -214,24 +214,24 @@ namespace Marten.Testing.V4Internals
         {
             var slot = CreateSlot();
 
-            slot.Lightweight.Upsert(Document, new StubMartenSession()).ShouldNotBeNull();
-            slot.IdentityMap.Upsert(Document, new StubMartenSession()).ShouldNotBeNull();
+            slot.Lightweight.Upsert(Document, new StubMartenSession(), Substitute.For<ITenant>()).ShouldNotBeNull();
+            slot.IdentityMap.Upsert(Document, new StubMartenSession(), Substitute.For<ITenant>()).ShouldNotBeNull();
         }
 
         public void CanBuildUpdateOperation()
         {
             var slot = CreateSlot();
 
-            slot.Lightweight.Update(Document, new StubMartenSession()).ShouldNotBeNull();
-            slot.IdentityMap.Update(Document, new StubMartenSession()).ShouldNotBeNull();
+            slot.Lightweight.Update(Document, new StubMartenSession(), Substitute.For<ITenant>()).ShouldNotBeNull();
+            slot.IdentityMap.Update(Document, new StubMartenSession(), Substitute.For<ITenant>()).ShouldNotBeNull();
         }
 
         public void CanBuildInsertOperation()
         {
             var slot = CreateSlot();
 
-            slot.Lightweight.Insert(Document, new StubMartenSession()).ShouldNotBeNull();
-            slot.IdentityMap.Insert(Document, new StubMartenSession()).ShouldNotBeNull();
+            slot.Lightweight.Insert(Document, new StubMartenSession(), Substitute.For<ITenant>()).ShouldNotBeNull();
+            slot.IdentityMap.Insert(Document, new StubMartenSession(), Substitute.For<ITenant>()).ShouldNotBeNull();
         }
 
         public void CanBuildOverwriteOperation()
@@ -240,8 +240,8 @@ namespace Marten.Testing.V4Internals
 
             var slot = CreateSlot();
 
-            slot.Lightweight.Insert(Document, new StubMartenSession()).ShouldNotBeNull();
-            slot.IdentityMap.Insert(Document, new StubMartenSession()).ShouldNotBeNull();
+            slot.Lightweight.Insert(Document, new StubMartenSession(), Substitute.For<ITenant>()).ShouldNotBeNull();
+            slot.IdentityMap.Insert(Document, new StubMartenSession(), Substitute.For<ITenant>()).ShouldNotBeNull();
         }
 
         public void CanBuildDeleteByDocument()

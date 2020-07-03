@@ -51,9 +51,16 @@ namespace Marten.V4Internals
             var baseType = typeof(StorageOperation<,>).MakeGenericType(_mapping.DocumentType, _mapping.IdType);
             var type = assembly.AddType(ClassName, baseType);
 
+
+
             if (_mapping.IsHierarchy())
             {
                 type.AllInjectedFields.Add(new InjectedField(typeof(DocumentMapping), "mapping"));
+            }
+
+            if (_mapping.TenancyStyle == TenancyStyle.Conjoined)
+            {
+                type.AllInjectedFields.Add(new InjectedField(typeof(ITenant)));
             }
 
             type.MethodFor("Role").Frames.Return(Constant.ForEnum(_role));

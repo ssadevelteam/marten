@@ -218,7 +218,7 @@ namespace Marten.V4Internals.Sessions
 
                 foreach (var entity in entities)
                 {
-                    var upsert = storage.Upsert(entity, this);
+                    var upsert = storage.Upsert(entity, this, Tenant);
 
                     // Put it in the identity map -- if necessary
                     storage.Store(this, entity);
@@ -254,7 +254,7 @@ namespace Marten.V4Internals.Sessions
 
             foreach (var entity in entities)
             {
-                var op = storage.UpsertForTenant(entity, this, tenant);
+                var op = storage.Upsert(entity, this, tenant);
                 storage.Store(this, entity);
                 _unitOfWork.Add(op);
             }
@@ -266,7 +266,7 @@ namespace Marten.V4Internals.Sessions
 
             var storage = storageFor<T>();
             storage.Store(this, entity, version);
-            var op = storage.Upsert(entity, this);
+            var op = storage.Upsert(entity, this, Tenant);
             _unitOfWork.Add(op);
         }
 
@@ -300,7 +300,7 @@ namespace Marten.V4Internals.Sessions
                 foreach (var entity in entities)
                 {
                     storage.Store(this, entity);
-                    var op = storage.Insert(entity, this);
+                    var op = storage.Insert(entity, this, Tenant);
                     _unitOfWork.Add(op);
                 }
             }
@@ -336,7 +336,7 @@ namespace Marten.V4Internals.Sessions
                 foreach (var entity in entities)
                 {
                     storage.Store(this, entity);
-                    var op = storage.Update(entity, this);
+                    var op = storage.Update(entity, this, Tenant);
                     _unitOfWork.Add(op);
                 }
             }

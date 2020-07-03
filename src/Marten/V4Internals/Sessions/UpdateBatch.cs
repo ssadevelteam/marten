@@ -27,7 +27,7 @@ namespace Marten.V4Internals.Sessions
             if (_operations.Count < session.Options.UpdateBatchSize)
             {
                 var command = buildCommand(session, _operations);
-                var reader = session.Database.ExecuteReader(command);
+                using var reader = session.Database.ExecuteReader(command);
                 applyCallbacks(_operations, reader);
             }
             else
@@ -43,7 +43,7 @@ namespace Marten.V4Internals.Sessions
             if (_operations.Count < session.Options.UpdateBatchSize)
             {
                 var command = buildCommand(session, _operations);
-                var reader = await session.Database.ExecuteReaderAsync(command, token).ConfigureAwait(false);
+                using var reader = await session.Database.ExecuteReaderAsync(command, token).ConfigureAwait(false);
                 await applyCallbacksAsync(_operations, reader, token).ConfigureAwait(false);
             }
             else
@@ -88,9 +88,11 @@ namespace Marten.V4Internals.Sessions
         {
             var command = new NpgsqlCommand();
             var builder = new CommandBuilder(command);
+
             foreach (var operation in operations)
             {
                 operation.ConfigureCommand(builder, session);
+                builder.Append(';');
             }
 
             // Duplication here!

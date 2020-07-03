@@ -98,24 +98,19 @@ namespace Marten.V4Internals
             _parent.Eject(session, document);
         }
 
-        public IStorageOperation Update(T document, IMartenSession session)
+        public IStorageOperation Update(T document, IMartenSession session, ITenant tenant)
         {
-            return _parent.Update(document, session);
+            return _parent.Update(document, session, tenant);
         }
 
-        public IStorageOperation Insert(T document, IMartenSession session)
+        public IStorageOperation Insert(T document, IMartenSession session, ITenant tenant)
         {
-            return _parent.Insert(document, session);
+            return _parent.Insert(document, session, tenant);
         }
 
-        public IStorageOperation Upsert(T document, IMartenSession session)
+        public IStorageOperation Upsert(T document, IMartenSession session, ITenant tenant)
         {
-            return _parent.Upsert(document, session);
-        }
-
-        public IStorageOperation UpsertForTenant(T document, IMartenSession session, ITenant tenant)
-        {
-            return _parent.UpsertForTenant(document, session, tenant);
+            return _parent.Upsert(document, session, tenant);
         }
 
         public IStorageOperation Overwrite(T document, IMartenSession session)
