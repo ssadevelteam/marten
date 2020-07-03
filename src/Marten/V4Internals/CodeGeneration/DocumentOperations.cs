@@ -16,6 +16,11 @@ namespace Marten.V4Internals
                     .BuildType(assembly);
             Update = new DocumentFunctionOperationBuilder(mapping, new UpdateFunction(mapping), StorageRole.Update)
                     .BuildType(assembly);
+
+
+
+
+
             QueryOnlySelector = new SelectorBuilder(mapping, StorageStyle.QueryOnly).BuildType(assembly);
             LightweightSelector = new SelectorBuilder(mapping, StorageStyle.Lightweight).BuildType(assembly);
             IdentityMapSelector = new SelectorBuilder(mapping, StorageStyle.IdentityMap).BuildType(assembly);
@@ -40,5 +45,6 @@ namespace Marten.V4Internals
         public GeneratedType QueryOnlySelector { get; set; }
         public GeneratedType LightweightSelector { get; set; }
         public GeneratedType IdentityMapSelector { get; set; }
+
     }
 }

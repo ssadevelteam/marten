@@ -111,6 +111,7 @@ namespace Marten.V4Internals.Sessions
         {
             assertNotDisposed();
 
+            processChangeTrackers();
             if (!_unitOfWork.HasOutstandingWork()) return;
 
             Database.BeginTransaction();
@@ -118,6 +119,7 @@ namespace Marten.V4Internals.Sessions
             // TODO -- apply inline projections
 
             _unitOfWork.Sort(Options);
+
 
             foreach (var listener in Listeners)
             {
@@ -136,7 +138,7 @@ namespace Marten.V4Internals.Sessions
                 throw;
             }
 
-            clearDirtyChecking();
+            resetDirtyChecking(_unitOfWork);
 
             EjectPatchedTypes(_unitOfWork);
             Logger.RecordSavedChanges(this, _unitOfWork);
@@ -150,7 +152,12 @@ namespace Marten.V4Internals.Sessions
             _unitOfWork = new UnitOfWork();
         }
 
-        protected virtual void clearDirtyChecking()
+        protected virtual void processChangeTrackers()
+        {
+            // Nothing
+        }
+
+        protected virtual void resetDirtyChecking(UnitOfWork unitOfWork)
         {
             // Nothing
         }
@@ -159,6 +166,7 @@ namespace Marten.V4Internals.Sessions
         {
             assertNotDisposed();
 
+            processChangeTrackers();
             if (!_unitOfWork.HasOutstandingWork()) return;
 
             await Database.BeginTransactionAsync(token).ConfigureAwait(false);
@@ -184,7 +192,7 @@ namespace Marten.V4Internals.Sessions
                 throw;
             }
 
-            clearDirtyChecking();
+            resetDirtyChecking(_unitOfWork);
 
             EjectPatchedTypes(_unitOfWork);
             Logger.RecordSavedChanges(this, _unitOfWork);
@@ -464,11 +472,14 @@ namespace Marten.V4Internals.Sessions
         {
             storageFor<T>().Eject(this, document);
             _unitOfWork.Eject(document);
+
+            ChangeTrackers.RemoveAll(x => ReferenceEquals(document, x.Document));
         }
 
         public virtual void EjectAllOfType(Type type)
         {
             ItemMap.Remove(type);
+            ChangeTrackers.RemoveAll(x => x.Document.GetType().CanBeCastTo(type));
         }
 
         public void EjectPatchedTypes(IUnitOfWork changes)

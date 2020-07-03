@@ -12,6 +12,7 @@ using Marten.Services;
 using Marten.Services.BatchQuerying;
 using Marten.Storage;
 using Marten.Util;
+using Marten.V4Internals.DirtyTracking;
 using Marten.V4Internals.Linq;
 using Npgsql;
 
@@ -43,6 +44,8 @@ namespace Marten.V4Internals.Sessions
                 listener.DocumentLoaded(id, document);
             }
         }
+
+        public IList<IChangeTracker> ChangeTrackers { get; } = new List<IChangeTracker>();
 
         public IList<IDocumentSessionListener> Listeners { get; } = new List<IDocumentSessionListener>();
 

@@ -1,18 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Threading;
-using System.Threading.Tasks;
 using Marten.Services;
 using Marten.Storage;
-using Marten.Util;
-using Npgsql;
-using Remotion.Linq.Clauses;
+using Marten.V4Internals.DirtyTracking;
 
 namespace Marten.V4Internals
 {
-    public interface IMartenSession : IDisposable
+    public interface IMartenSession: IDisposable
     {
         ISerializer Serializer { get; }
         Dictionary<Type, object> ItemMap { get; }
@@ -21,14 +15,15 @@ namespace Marten.V4Internals
         VersionTracker Versions { get; }
 
         IManagedConnection Database { get; }
-        IDocumentStorage StorageFor(Type documentType);
 
         StoreOptions Options { get; }
+
+        IList<IChangeTracker> ChangeTrackers { get; }
+        IDocumentStorage StorageFor(Type documentType);
 
 
         void MarkAsAddedForStorage(object id, object document);
 
         void MarkAsDocumentLoaded(object id, object document);
     }
-
 }

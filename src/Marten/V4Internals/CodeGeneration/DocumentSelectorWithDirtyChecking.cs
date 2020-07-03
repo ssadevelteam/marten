@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Marten.Schema;
+using Marten.V4Internals.DirtyTracking;
 
 namespace Marten.V4Internals
 {
@@ -11,6 +12,7 @@ namespace Marten.V4Internals
         protected readonly ISerializer _serializer;
         protected readonly Dictionary<TId, T> _identityMap;
         protected readonly Dictionary<TId, Guid> _versions;
+        protected readonly IMartenSession _session;
 
         public DocumentSelectorWithDirtyChecking(IMartenSession session, DocumentMapping mapping)
         {
@@ -26,6 +28,15 @@ namespace Marten.V4Internals
                 _identityMap = new Dictionary<TId, T>();
                 session.ItemMap[typeof(T)] = _identityMap;
             }
+
+            _session = session;
         }
+
+        public void StoreTracker(IMartenSession session, T document)
+        {
+            var tracker = new ChangeTracker<T>(session, document);
+            session.ChangeTrackers.Add(tracker);
+        }
+
     }
 }

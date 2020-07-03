@@ -7,21 +7,12 @@ using Marten.Schema.Identity;
 using Marten.Services;
 using Marten.Storage;
 using Marten.Util;
+using Marten.V4Internals.DirtyTracking;
 using Npgsql;
 using NpgsqlTypes;
 
 namespace Marten.V4Internals
 {
-    public abstract class TenantOverrideStorageOperation<T, TId>: StorageOperation<T, TId>
-    {
-        protected readonly ITenant _tenant;
-
-        protected TenantOverrideStorageOperation(T document, TId id, Dictionary<TId, Guid> versions, ITenant tenant) : base(document, id, versions)
-        {
-            _tenant = tenant;
-        }
-    }
-
     public abstract class StorageOperation<T, TId> : IDocumentStorageOperation
     {
         private readonly T _document;
@@ -38,6 +29,10 @@ namespace Marten.V4Internals
 
         public object Document => _document;
 
+        public IChangeTracker ToTracker(IMartenSession session)
+        {
+            return new ChangeTracker<T>(session, _document);
+        }
 
         // TODO -- improve Lamar to make it possible to use protected members
         public abstract string CommandText();

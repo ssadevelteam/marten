@@ -15,6 +15,7 @@ using Marten.Testing.Documents;
 using Marten.Testing.Harness;
 using Marten.Util;
 using Marten.V4Internals;
+using Marten.V4Internals.DirtyTracking;
 using Npgsql;
 using NSubstitute;
 using Remotion.Linq.Clauses;
@@ -53,8 +54,6 @@ namespace Marten.Testing.V4Internals
 
         void CanBuildBulkLoader();
 
-        //void HasSourceCode();
-
     }
 
     public class DocWithVersionField
@@ -78,6 +77,8 @@ namespace Marten.Testing.V4Internals
         public ITenant Tenant { get; } = Substitute.For<ITenant>();
         public VersionTracker Versions { get; } = new VersionTracker();
         public IManagedConnection Database { get; }
+        public IList<IChangeTracker> ChangeTrackers { get; } = new List<IChangeTracker>();
+
         public IDocumentStorage StorageFor(Type documentType)
         {
             throw new NotImplementedException();
@@ -279,6 +280,7 @@ namespace Marten.Testing.V4Internals
         {
             CreateSlot().BulkLoader.ShouldNotBeNull();
         }
+
 
         public void HasSourceCode()
         {

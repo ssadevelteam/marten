@@ -27,6 +27,11 @@ namespace Marten.V4Internals
             frames.Code("_identityMap[id] = document;");
         }
 
+        public static void StoreTracker(this FramesCollection frames)
+        {
+            frames.Code("StoreTracker({0}, document);", Use.Type<IMartenSession>());
+        }
+
         public static void CheckExistingFirst(this FramesCollection frames)
         {
             frames.Code("if (_identityMap.TryGetValue(id, out var existing)) return existing;");

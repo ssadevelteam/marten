@@ -56,6 +56,7 @@ namespace Marten.V4Internals
 
         public Type SourceType => typeof(T);
 
+
         public abstract TId AssignIdentity(T document, ITenant tenant);
 
         public DbObjectName TableName { get; }
