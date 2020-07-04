@@ -24,7 +24,7 @@ namespace Marten.V4Internals.Linq
         public LinqHandlerBuilder(IMartenSession session, Expression expression, ResultOperatorBase additionalOperator = null)
         {
             _session = session;
-            Model = MartenQueryParser.Flyweight.GetParsedQuery(expression);
+            Model = MartenQueryParser.TransformQueryFlyweight.GetParsedQuery(expression);
             if (additionalOperator != null) Model.ResultOperators.Add(additionalOperator);
 
             var storage = session.StorageFor(Model.SourceType());
@@ -64,9 +64,6 @@ namespace Marten.V4Internals.Linq
                     else
                     {
                         throw new NotImplementedException($"Marten does not (yet) support the {method.Method.DeclaringType.FullNameInCode()}.{method.Method.Name}() method as a Linq selector");
-
-
-
                     }
 
                     break;
