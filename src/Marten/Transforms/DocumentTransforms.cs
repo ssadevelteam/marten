@@ -8,6 +8,7 @@ using Marten.Schema;
 using Marten.Schema.Identity;
 using Marten.Storage;
 using Marten.Util;
+using Marten.V4Internals.Linq;
 using Remotion.Linq;
 using Remotion.Linq.Clauses;
 
@@ -110,23 +111,23 @@ namespace Marten.Transforms
 
         private IWhereFragment findWhereFragment<T>(Expression<Func<T, bool>> @where, IDocumentMapping mapping)
         {
-            throw new NotImplementedException("Redo");
-            // QueryModel queryModel;
-            // using (var session = _store.QuerySession())
-            // {
-            //     queryModel = session.Query<T>().Where(@where).As<MartenQueryable<T>>().ToQueryModel();
-            // }
-            //
-            // var wheres = queryModel.BodyClauses.OfType<WhereClause>().ToArray();
-            // if (wheres.Length == 0)
-            // {
-            //     throw new InvalidOperationException();
-            // }
-            //
-            // var whereFragment = _store.Parser.ParseWhereFragment(mapping.ToQueryableDocument(), wheres.First().Predicate);
-            // mapping.ToQueryableDocument().FilterDocuments(queryModel, whereFragment);
-            //
-            // return whereFragment;
+            QueryModel queryModel;
+            using (var session = _store.QuerySession())
+            {
+                var expression = session.Query<T>().Where(@where).Expression;
+                queryModel = MartenQueryParser.Flyweight.GetParsedQuery(expression);
+            }
+
+            var wheres = queryModel.BodyClauses.OfType<WhereClause>().ToArray();
+            if (wheres.Length == 0)
+            {
+                throw new InvalidOperationException();
+            }
+
+            var whereFragment = _store.Parser.ParseWhereFragment(mapping.ToQueryableDocument(), wheres.First().Predicate);
+            mapping.ToQueryableDocument().FilterDocuments(queryModel, whereFragment);
+
+            return whereFragment;
         }
 
         public void Document<T>(string transformName, string id)
