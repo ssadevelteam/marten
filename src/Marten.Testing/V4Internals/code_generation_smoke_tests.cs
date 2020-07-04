@@ -95,6 +95,11 @@ namespace Marten.Testing.V4Internals
 
         }
 
+        public IDocumentStorage<T> StorageFor<T>()
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<T> ExecuteQuery<T>(IQueryHandler<T> handler, CancellationToken token)
         {
             throw new NotImplementedException();

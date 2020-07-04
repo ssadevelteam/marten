@@ -25,5 +25,6 @@ namespace Marten.V4Internals
         void MarkAsAddedForStorage(object id, object document);
 
         void MarkAsDocumentLoaded(object id, object document);
+        IDocumentStorage<T> StorageFor<T>();
     }
 }

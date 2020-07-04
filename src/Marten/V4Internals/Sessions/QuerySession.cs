@@ -86,19 +86,19 @@ namespace Marten.V4Internals.Sessions
         {
             public IDocumentStorage Find(QuerySession session)
             {
-                return session.storageFor<T>();
+                return session.StorageFor<T>();
             }
         }
 
         protected IDocumentStorage<T, TId> storageFor<T, TId>()
         {
-            var storage = storageFor<T>();
+            var storage = StorageFor<T>();
             if (storage is IDocumentStorage<T, TId> s) return s;
 
             throw new InvalidOperationException($"The identity type for {typeof(T).FullName} is {storage.IdType.FullName}, but {typeof(TId).FullName} was used as the Id type");
         }
 
-        protected IDocumentStorage<T> storageFor<T>()
+        public IDocumentStorage<T> StorageFor<T>()
         {
             return selectStorage(_providers.StorageFor<T>());
         }
@@ -147,7 +147,7 @@ namespace Marten.V4Internals.Sessions
         {
             assertNotDisposed();
 
-            var storage = storageFor<T>();
+            var storage = StorageFor<T>();
 
             T document = default;
             if (storage is IDocumentStorage<T, int> i)
@@ -175,7 +175,7 @@ namespace Marten.V4Internals.Sessions
         {
             assertNotDisposed();
 
-            var storage = storageFor<T>();
+            var storage = StorageFor<T>();
 
             T document = default;
             if (storage is IDocumentStorage<T, int> i)
@@ -341,7 +341,7 @@ namespace Marten.V4Internals.Sessions
         {
             assertNotDisposed();
 
-            var storage = storageFor<T>();
+            var storage = StorageFor<T>();
             if (storage is IDocumentStorage<T, int> i)
             {
                 return i.LoadMany(ids, this);
@@ -374,7 +374,7 @@ namespace Marten.V4Internals.Sessions
         {
             assertNotDisposed();
 
-            var storage = storageFor<T>();
+            var storage = StorageFor<T>();
             if (storage is IDocumentStorage<T, int> i)
             {
                 return i.LoadManyAsync(ids, this, token);
@@ -479,10 +479,10 @@ namespace Marten.V4Internals.Sessions
 
 
 
-        public IJsonLoader Json => new JsonLoader(Database, Tenant);
+        public IJsonLoader Json => new JsonLoader(this);
         public Guid? VersionFor<TDoc>(TDoc entity)
         {
-            return storageFor<TDoc>().VersionFor(entity, this);
+            return StorageFor<TDoc>().VersionFor(entity, this);
         }
 
         public IReadOnlyList<TDoc> Search<TDoc>(string searchTerm, string regConfig = FullTextIndex.DefaultRegConfig)
@@ -530,7 +530,7 @@ namespace Marten.V4Internals.Sessions
             assertNotDisposed();
             if (entity == null) throw new ArgumentNullException(nameof(entity));
 
-            var storage = storageFor<T>();
+            var storage = StorageFor<T>();
             var id = storage.IdentityFor(entity);
             var handler = new EntityMetadataQueryHandler(id, (IDocumentMapping) storage.Fields);
 
@@ -542,7 +542,7 @@ namespace Marten.V4Internals.Sessions
             assertNotDisposed();
             if (entity == null) throw new ArgumentNullException(nameof(entity));
 
-            var storage = storageFor<T>();
+            var storage = StorageFor<T>();
             var id = storage.IdentityFor(entity);
             var handler = new EntityMetadataQueryHandler(id, (IDocumentMapping) storage.Fields);
 

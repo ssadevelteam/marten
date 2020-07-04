@@ -30,17 +30,17 @@ namespace Marten.V4Internals.Sessions
         public void Delete<T>(T entity)
         {
             assertNotDisposed();
-            var deletion = storageFor<T>().DeleteForDocument(entity);
+            var deletion = StorageFor<T>().DeleteForDocument(entity);
             _unitOfWork.Add(deletion);
 
-            storageFor<T>().Eject(this, entity);
+            StorageFor<T>().Eject(this, entity);
         }
 
         public void Delete<T>(int id)
         {
             assertNotDisposed();
 
-            var storage = storageFor<T>();
+            var storage = StorageFor<T>();
 
             IStorageOperation deletion = null;
             if (storage is IDocumentStorage<T, int> i)
@@ -101,7 +101,7 @@ namespace Marten.V4Internals.Sessions
             var parser = new MartenExpressionParser(Options.Serializer(), Options);
 
             // TODO -- this could be cleaner maybe?
-            var documentStorage = storageFor<T>();
+            var documentStorage = StorageFor<T>();
             var @where = parser.ParseWhereFragment(documentStorage.Fields, expression);
             var deletion = documentStorage.DeleteForWhere(@where);
             _unitOfWork.Add(deletion);
@@ -233,7 +233,7 @@ namespace Marten.V4Internals.Sessions
             }
             else
             {
-                var storage = storageFor<T>();
+                var storage = StorageFor<T>();
 
                 foreach (var entity in entities)
                 {
@@ -286,7 +286,7 @@ namespace Marten.V4Internals.Sessions
         {
             assertNotDisposed();
 
-            var storage = storageFor<T>();
+            var storage = StorageFor<T>();
             storage.Store(this, entity, version);
             var op = storage.Upsert(entity, this, Tenant);
             _unitOfWork.Add(op);
@@ -317,7 +317,7 @@ namespace Marten.V4Internals.Sessions
             }
             else
             {
-                var storage = storageFor<T>();
+                var storage = StorageFor<T>();
 
                 foreach (var entity in entities)
                 {
@@ -353,7 +353,7 @@ namespace Marten.V4Internals.Sessions
             }
             else
             {
-                var storage = storageFor<T>();
+                var storage = StorageFor<T>();
 
                 foreach (var entity in entities)
                 {
@@ -439,7 +439,7 @@ namespace Marten.V4Internals.Sessions
             var queryable = Query<T>().Where(filter);
             var model = MartenQueryParser.Flyweight.GetParsedQuery(queryable.Expression);
 
-            var storage = storageFor<T>();
+            var storage = StorageFor<T>();
 
             // TODO -- parser needs to be a singleton in the system
             var @where = storage.BuildWhereFragment(model, new MartenExpressionParser(Serializer, Options));
@@ -470,7 +470,7 @@ namespace Marten.V4Internals.Sessions
 
         public virtual void Eject<T>(T document)
         {
-            storageFor<T>().Eject(this, document);
+            StorageFor<T>().Eject(this, document);
             _unitOfWork.Eject(document);
 
             ChangeTrackers.RemoveAll(x => ReferenceEquals(document, x.Document));
