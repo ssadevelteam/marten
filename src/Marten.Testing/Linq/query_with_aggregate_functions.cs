@@ -64,7 +64,7 @@ namespace Marten.Testing.Linq
             theSession.Store(new Target { Color = Colors.Green, Number = -5 });
             theSession.Store(new Target { Color = Colors.Blue, Number = 4 });
 
-            theSession.SaveChanges();
+            await theSession.SaveChangesAsync();
             var maxNumber = await theSession.Query<Target>().MinAsync(t => t.Number).ConfigureAwait(false);
             maxNumber.ShouldBe(-5);
         }
@@ -92,7 +92,7 @@ namespace Marten.Testing.Linq
             theSession.Store(new Target { Color = Colors.Green, Number = -5 });
             theSession.Store(new Target { Color = Colors.Blue, Number = 2 });
 
-            theSession.SaveChanges();
+            await theSession.SaveChangesAsync();
             var maxNumber = await theSession.Query<Target>().AverageAsync(t => t.Number).ConfigureAwait(false);
             maxNumber.ShouldBe(10);
         }

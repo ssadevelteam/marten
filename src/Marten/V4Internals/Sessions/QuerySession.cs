@@ -8,6 +8,7 @@ using LamarCodeGeneration;
 using Marten.Linq;
 using Marten.Linq.QueryHandlers;
 using Marten.Schema;
+using Marten.Schema.Arguments;
 using Marten.Services;
 using Marten.Services.BatchQuerying;
 using Marten.Storage;
@@ -522,6 +523,72 @@ namespace Marten.V4Internals.Sessions
         public Task<IReadOnlyList<TDoc>> WebStyleSearchAsync<TDoc>(string searchTerm, string regConfig = FullTextIndex.DefaultRegConfig, CancellationToken token = default)
         {
             return Query<TDoc>().Where(d => d.WebStyleSearch(searchTerm, regConfig)).ToListAsync(token: token);
+        }
+
+        public DocumentMetadata MetadataFor<T>(T entity)
+        {
+            assertNotDisposed();
+            if (entity == null) throw new ArgumentNullException(nameof(entity));
+
+            var storage = storageFor<T>();
+            var id = storage.IdentityFor(entity);
+            var handler = new EntityMetadataQueryHandler(id, (IDocumentMapping) storage.Fields);
+
+            return ExecuteHandler(handler);
+        }
+
+        public Task<DocumentMetadata> MetadataForAsync<T>(T entity, CancellationToken token = default(CancellationToken))
+        {
+            assertNotDisposed();
+            if (entity == null) throw new ArgumentNullException(nameof(entity));
+
+            var storage = storageFor<T>();
+            var id = storage.IdentityFor(entity);
+            var handler = new EntityMetadataQueryHandler(id, (IDocumentMapping) storage.Fields);
+
+            return ExecuteHandlerAsync(handler, token);
+        }
+
+        // TODO -- there's some duplication in the code below and how it builds up a command
+        // and executes it.
+        public async Task<T> ExecuteHandlerAsync<T>(IQueryHandler<T> handler, CancellationToken token)
+        {
+            var cmd = new NpgsqlCommand();
+            var builder = new CommandBuilder(cmd);
+            handler.ConfigureCommand(builder, this);
+
+            cmd.CommandText = builder.ToString();
+
+            // TODO -- Like this to be temporary
+            if (cmd.CommandText.Contains(CommandBuilder.TenantIdArg))
+            {
+                cmd.AddNamedParameter(TenantIdArgument.ArgName, Tenant.TenantId);
+            }
+
+            using (var reader = await Database.ExecuteReaderAsync(cmd, token).ConfigureAwait(false))
+            {
+                return await handler.HandleAsync(reader, this, token).ConfigureAwait(false);
+            }
+        }
+
+        public T ExecuteHandler<T>(IQueryHandler<T> handler)
+        {
+            var cmd = new NpgsqlCommand();
+            var builder = new CommandBuilder(cmd);
+            handler.ConfigureCommand(builder, this);
+
+            cmd.CommandText = builder.ToString();
+
+            // TODO -- Like this to be temporary
+            if (cmd.CommandText.Contains(CommandBuilder.TenantIdArg))
+            {
+                cmd.AddNamedParameter(TenantIdArgument.ArgName, Tenant.TenantId);
+            }
+
+            using (var reader = Database.ExecuteReader(cmd))
+            {
+                return handler.Handle(reader, this);
+            }
         }
     }
 }

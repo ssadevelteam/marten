@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Marten.Schema;
 using Marten.Services;
+using Marten.Storage;
 using Marten.Testing.Documents;
 using Marten.Testing.Harness;
 using Shouldly;
@@ -460,7 +461,11 @@ namespace Marten.Testing.Acceptance
                 session.SaveChanges();
             }
 
-            var metadata = theStore.Tenancy.Default.MetadataFor(doc1);
+            DocumentMetadata metadata;
+            using (var session = theStore.QuerySession())
+            {
+                metadata = session.MetadataFor(doc1);
+            }
 
             using (var session = theStore.OpenSession())
             {
@@ -489,7 +494,11 @@ namespace Marten.Testing.Acceptance
                 await session.SaveChangesAsync().ConfigureAwait(false);
             }
 
-            var metadata = theStore.Tenancy.Default.MetadataFor(doc1);
+            DocumentMetadata metadata;
+            using (var session = theStore.QuerySession())
+            {
+                metadata = await session.MetadataForAsync(doc1).ConfigureAwait(false);
+            }
 
             using (var session = theStore.OpenSession())
             {

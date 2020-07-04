@@ -255,47 +255,6 @@ namespace Marten.Storage
             sequence.SetFloor(floor);
         }
 
-        /// <summary>
-        ///     Fetch the entity version and last modified time from the database
-        /// </summary>
-        /// <param name="entity"></param>
-        /// <returns></returns>
-        public DocumentMetadata MetadataFor<T>(T entity)
-        {
-            throw new NotImplementedException();
-            // if (entity == null)
-            //     throw new ArgumentNullException(nameof(entity));
-            //
-            // var mapping = MappingFor(typeof(T));
-            // var handler = new EntityMetadataQueryHandler(entity, StorageFor(typeof(T)),
-            //     mapping);
-            //
-            // using (var connection = OpenConnection())
-            // {
-            //     return connection.Fetch(handler, null, null, this);
-            // }
-        }
 
-        /// <summary>
-        ///     Fetch the entity version and last modified time from the database
-        /// </summary>
-        /// <param name="entity"></param>
-        /// <param name="token"></param>
-        /// <returns></returns>
-        public async Task<DocumentMetadata> MetadataForAsync<T>(T entity,
-            CancellationToken token = default(CancellationToken))
-        {
-            throw new NotImplementedException();
-            // if (entity == null)
-            //     throw new ArgumentNullException(nameof(entity));
-            //
-            // var handler = new EntityMetadataQueryHandler(entity, StorageFor(typeof(T)),
-            //     MappingFor(typeof(T)));
-            //
-            // using (var connection = OpenConnection())
-            // {
-            //     return await connection.FetchAsync(handler, null, null, this, token).ConfigureAwait(false);
-            // }
-        }
     }
 }

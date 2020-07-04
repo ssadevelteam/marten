@@ -95,22 +95,6 @@ namespace Marten.Storage
         void ResetHiloSequenceFloor<T>(long floor);
 
         /// <summary>
-        ///     Fetch the entity version and last modified time from the database
-        /// </summary>
-        /// <param name="entity"></param>
-        /// <returns></returns>
-        DocumentMetadata MetadataFor<T>(T entity);
-
-        /// <summary>
-        ///     Fetch the entity version and last modified time from the database
-        /// </summary>
-        /// <param name="entity"></param>
-        /// <param name="token"></param>
-        /// <returns></returns>
-        Task<DocumentMetadata> MetadataForAsync<T>(T entity,
-            CancellationToken token = default(CancellationToken));
-
-        /// <summary>
         /// Fetch a connection to the tenant database
         /// </summary>
         /// <returns></returns>
