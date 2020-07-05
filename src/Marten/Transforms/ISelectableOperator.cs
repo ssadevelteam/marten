@@ -1,6 +1,7 @@
 using Marten.Linq;
 using Marten.Schema;
 using Marten.Storage;
+using Marten.V4Internals;
 
 namespace Marten.Transforms
 {

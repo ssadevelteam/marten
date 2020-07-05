@@ -1,3 +1,4 @@
+using System;
 using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
@@ -6,6 +7,7 @@ using Marten.Linq;
 using Marten.Schema;
 using Marten.Services;
 using Marten.Util;
+using Marten.V4Internals;
 using Npgsql;
 
 namespace Marten.Transforms
@@ -21,16 +23,18 @@ namespace Marten.Transforms
             _fieldName = $"{transform.Identifier}({dataLocator}) as json";
         }
 
-        public T Resolve(DbDataReader reader, IIdentityMap map, QueryStatistics stats)
+        public T Resolve(DbDataReader reader)
         {
-            var json = reader.GetTextReader(0);
-            return map.Serializer.FromJson<T>(json);
+            throw new NotImplementedException();
+            // var json = reader.GetTextReader(0);
+            // return map.Serializer.FromJson<T>(json);
         }
 
-        public async Task<T> ResolveAsync(DbDataReader reader, IIdentityMap map, QueryStatistics stats, CancellationToken token)
+        public async Task<T> ResolveAsync(DbDataReader reader, CancellationToken token)
         {
-            var json = await reader.As<NpgsqlDataReader>().GetTextReaderAsync(0).ConfigureAwait(false);
-            return map.Serializer.FromJson<T>(json);
+            throw new NotImplementedException();
+            // var json = await reader.As<NpgsqlDataReader>().GetTextReaderAsync(0).ConfigureAwait(false);
+            // return map.Serializer.FromJson<T>(json);
         }
 
         public string[] SelectFields()

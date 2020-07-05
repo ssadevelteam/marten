@@ -5,6 +5,7 @@ using Marten.Linq;
 using Marten.Schema;
 using Marten.Services;
 using Marten.Util;
+using Marten.V4Internals;
 
 namespace Marten.Transforms
 {
@@ -19,12 +20,12 @@ namespace Marten.Transforms
             _fieldName = $"{transform.Identifier}({dataLocator}) as json";
         }
 
-        public string Resolve(DbDataReader reader, IIdentityMap map, QueryStatistics stats)
+        public string Resolve(DbDataReader reader)
         {
             return reader.GetString(0);
         }
 
-        public async Task<string> ResolveAsync(DbDataReader reader, IIdentityMap map, QueryStatistics stats, CancellationToken token)
+        public async Task<string> ResolveAsync(DbDataReader reader, CancellationToken token)
         {
             return await reader.GetFieldValueAsync<string>(0, token).ConfigureAwait(false);
         }

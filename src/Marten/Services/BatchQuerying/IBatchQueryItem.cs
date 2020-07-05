@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Marten.Linq;
 using Marten.Linq.QueryHandlers;
+using Marten.V4Internals;
 
 namespace Marten.Services.BatchQuerying
 {
@@ -12,8 +13,8 @@ namespace Marten.Services.BatchQuerying
 
         QueryStatistics Stats { get; }
 
-        Task Read(DbDataReader reader, IIdentityMap map, CancellationToken token);
+        Task ReadAsync(DbDataReader reader, IMartenSession session, CancellationToken token);
 
-        void Read(DbDataReader reader, IIdentityMap map);
+        void Read(DbDataReader reader, IMartenSession session);
     }
 }

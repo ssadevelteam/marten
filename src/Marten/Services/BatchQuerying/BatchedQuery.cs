@@ -8,6 +8,7 @@ using Marten.Events;
 using Marten.Linq;
 using Marten.Linq.QueryHandlers;
 using Marten.Util;
+using Marten.V4Internals;
 using Npgsql;
 
 namespace Marten.Services.BatchQuerying
@@ -59,7 +60,8 @@ namespace Marten.Services.BatchQuerying
 
         private NpgsqlCommand buildCommand()
         {
-            return CommandBuilder.ToBatchCommand(_parent.Tenant, _items.Select(x => x.Handler));
+            throw new NotImplementedException();
+            //return CommandBuilder.ToBatchCommand(_parent.Tenant, _items.Select(x => x.Handler));
         }
 
         public async Task Execute(CancellationToken token = default(CancellationToken))
@@ -74,7 +76,8 @@ namespace Marten.Services.BatchQuerying
             {
                 using (var reader = await command.ExecuteReaderAsync(tk).ConfigureAwait(false))
                 {
-                    await _items[0].Read(reader, map, token).ConfigureAwait(false);
+                    throw new NotImplementedException();
+                    //await _items[0].Read(reader, map, token).ConfigureAwait(false);
 
                     var others = _items.Skip(1).ToArray();
 
@@ -85,7 +88,7 @@ namespace Marten.Services.BatchQuerying
                         if (!hasNext)
                             throw new InvalidOperationException("There is no next result to read over.");
 
-                        await item.Read(reader, map, token).ConfigureAwait(false);
+                        //await item.Read(reader, map, token).ConfigureAwait(false);
                     }
                 }
 
@@ -105,17 +108,18 @@ namespace Marten.Services.BatchQuerying
             {
                 using (var reader = command.ExecuteReader())
                 {
-                    _items[0].Read(reader, map);
-
-                    _items.Skip(1).Each(item =>
-                    {
-                        var hasNext = reader.NextResult();
-
-                        if (!hasNext)
-                            throw new InvalidOperationException("There is no next result to read over.");
-
-                        item.Read(reader, map);
-                    });
+                    throw new NotImplementedException();
+                    // _items[0].Read(reader, map);
+                    //
+                    // _items.Skip(1).Each(item =>
+                    // {
+                    //     var hasNext = reader.NextResult();
+                    //
+                    //     if (!hasNext)
+                    //         throw new InvalidOperationException("There is no next result to read over.");
+                    //
+                    //     item.Read(reader, map);
+                    // });
                 }
             });
         }
@@ -160,8 +164,6 @@ namespace Marten.Services.BatchQuerying
 
         public Task<T> AddItem<T>(IQueryHandler<T> handler, QueryStatistics stats)
         {
-            _parent.Tenant.EnsureStorageExists(handler.SourceType);
-
             var item = new BatchQueryItem<T>(handler, stats);
             _items.Add(item);
 

@@ -27,8 +27,6 @@ namespace Marten.Linq.QueryHandlers
             _serializer = serializer;
         }
 
-        public Type SourceType => _handler.SourceType;
-
         public void ConfigureCommand(CommandBuilder builder, IMartenSession session)
         {
             var sql = _template.CommandText;
@@ -52,14 +50,14 @@ namespace Marten.Linq.QueryHandlers
             builder.Append(sql);
         }
 
-        public T Handle(DbDataReader reader, IIdentityMap map, QueryStatistics stats)
+        public T Handle(DbDataReader reader, IMartenSession session)
         {
-            return _handler.Handle(reader, map, stats);
+            return _handler.Handle(reader, session);
         }
 
-        public Task<T> HandleAsync(DbDataReader reader, IIdentityMap map, QueryStatistics stats, CancellationToken token)
+        public Task<T> HandleAsync(DbDataReader reader, IMartenSession session, CancellationToken token)
         {
-            return _handler.HandleAsync(reader, map, stats, token);
+            return _handler.HandleAsync(reader, session, token);
         }
     }
 }

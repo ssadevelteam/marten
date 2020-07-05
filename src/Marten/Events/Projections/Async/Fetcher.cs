@@ -50,14 +50,14 @@ namespace Marten.Events.Projections.Async
             _map = new NulloIdentityMap(store.Advanced.Serializer);
 
             EventTypeNames = eventTypes.Select(x => store.Events.EventMappingFor(x).Alias).ToArray();
-
-            _sql =
-    $@"
-select seq_id from {_selector.Events.DatabaseSchemaName}.mt_events where seq_id > :last and seq_id <= :limit and extract(epoch from age(transaction_timestamp(), {_selector.Events.DatabaseSchemaName}.mt_events.timestamp)) >= :buffer order by seq_id;
-{_selector.ToSelectClause(null)} where seq_id > :last and seq_id <= :limit and type = ANY(:types) and extract(epoch from age(transaction_timestamp(), {_selector.Events.DatabaseSchemaName}.mt_events.timestamp)) >= :buffer order by seq_id;
-select min(seq_id) from {_selector.Events.DatabaseSchemaName}.mt_events where seq_id > :limit and type = ANY(:types) and extract(epoch from age(transaction_timestamp(), {_selector.Events.DatabaseSchemaName}.mt_events.timestamp)) >= :buffer;
-select max(seq_id) from {_selector.Events.DatabaseSchemaName}.mt_events where seq_id >= :limit and extract(epoch from age(transaction_timestamp(), {_selector.Events.DatabaseSchemaName}.mt_events.timestamp)) >= :buffer
-".Replace(" as d", "");
+throw new NotImplementedException("Think we use EventSelector that implements both the ISelectClause and ISelector<IEvent> interfaces");
+//             _sql =
+//     $@"
+// select seq_id from {_selector.Events.DatabaseSchemaName}.mt_events where seq_id > :last and seq_id <= :limit and extract(epoch from age(transaction_timestamp(), {_selector.Events.DatabaseSchemaName}.mt_events.timestamp)) >= :buffer order by seq_id;
+// {_selector.ToSelectClause(null)} where seq_id > :last and seq_id <= :limit and type = ANY(:types) and extract(epoch from age(transaction_timestamp(), {_selector.Events.DatabaseSchemaName}.mt_events.timestamp)) >= :buffer order by seq_id;
+// select min(seq_id) from {_selector.Events.DatabaseSchemaName}.mt_events where seq_id > :limit and type = ANY(:types) and extract(epoch from age(transaction_timestamp(), {_selector.Events.DatabaseSchemaName}.mt_events.timestamp)) >= :buffer;
+// select max(seq_id) from {_selector.Events.DatabaseSchemaName}.mt_events where seq_id >= :limit and extract(epoch from age(transaction_timestamp(), {_selector.Events.DatabaseSchemaName}.mt_events.timestamp)) >= :buffer
+// ".Replace(" as d", "");
         }
 
         public Fetcher(DocumentStore store, DaemonSettings settings, IProjection projection, IDaemonLogger logger, IDaemonErrorHandler errorHandler)
@@ -202,7 +202,8 @@ select max(seq_id) from {_selector.Events.DatabaseSchemaName}.mt_events where se
                 {
                     await reader.NextResultAsync(_token).ConfigureAwait(false);
 
-                    events = await _selector.ReadAsync(reader, _map, null, _token).ConfigureAwait(false);
+                    throw new NotImplementedException("Redo");
+                    //events = await _selector.ReadAsync(reader, _token).ConfigureAwait(false);
                 }
                 else
                 {

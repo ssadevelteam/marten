@@ -6,6 +6,7 @@ using Baseline;
 using Marten.Linq.Compiled;
 using Marten.Schema;
 using Marten.Util;
+using Marten.V4Internals;
 using Remotion.Linq;
 using Remotion.Linq.Clauses.ResultOperators;
 
@@ -196,30 +197,31 @@ namespace Marten.Linq.QueryHandlers
 
             var handler = _store.HandlerFactory.BuildHandler<TOut>(model, stats);
 
-            var cmd = CommandBuilder.ToCommand(_store.Tenancy.Default, handler);
-            for (int i = 0; i < setters.Count && i < cmd.Parameters.Count; i++)
-            {
-                setters[i].ReplaceValue(cmd.Parameters[i]);
-            }
-
-            var cachedQuery = new CachedQuery
-            {
-                Command = cmd,
-                ParameterSetters = setters,
-                Handler = handler,
-            };
-
-            if (model.HasOperator<StatsResultOperator>())
-            {
-                var prop = queryType.GetProperties().FirstOrDefault(x => x.PropertyType == typeof(QueryStatistics));
-                if (prop != null)
-                {
-                    cachedQuery.StatisticsFinder =
-                        typeof(QueryStatisticsFinder<>).CloseAndBuildAs<IQueryStatisticsFinder>(prop, queryType);
-                }
-            }
-
-            return cachedQuery;
+            throw new NotImplementedException();
+            //var cmd = CommandBuilder.ToCommand(_store.Tenancy.Default, handler);
+            // for (int i = 0; i < setters.Count && i < cmd.Parameters.Count; i++)
+            // {
+            //     setters[i].ReplaceValue(cmd.Parameters[i]);
+            // }
+            //
+            // var cachedQuery = new CachedQuery
+            // {
+            //     Command = cmd,
+            //     ParameterSetters = setters,
+            //     Handler = handler,
+            // };
+            //
+            // if (model.HasOperator<StatsResultOperator>())
+            // {
+            //     var prop = queryType.GetProperties().FirstOrDefault(x => x.PropertyType == typeof(QueryStatistics));
+            //     if (prop != null)
+            //     {
+            //         cachedQuery.StatisticsFinder =
+            //             typeof(QueryStatisticsFinder<>).CloseAndBuildAs<IQueryStatisticsFinder>(prop, queryType);
+            //     }
+            // }
+            //
+            // return cachedQuery;
         }
 
         private static void validateCompiledQuery(QueryModel model)

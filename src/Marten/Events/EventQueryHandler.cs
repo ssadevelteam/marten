@@ -11,20 +11,20 @@ using Marten.V4Internals;
 
 namespace Marten.Events
 {
-    internal interface IEventQueryHandler: Linq.QueryHandlers.IQueryHandler<IReadOnlyList<IEvent>>
+    internal interface IEventQueryHandler: IQueryHandler<IReadOnlyList<IEvent>>
     {
     }
 
     internal class EventQueryHandler<TIdentity>: IEventQueryHandler
     {
-        private readonly Linq.ISelector<IEvent> _selector;
+        private readonly ISelector<IEvent> _selector;
         private readonly TIdentity _streamId;
         private readonly DateTime? _timestamp;
         private readonly int _version;
         private readonly TenancyStyle _tenancyStyle;
         private readonly string _tenantId;
 
-        public EventQueryHandler(Linq.ISelector<IEvent> selector, TIdentity streamId, int version = 0, DateTime? timestamp = null, TenancyStyle tenancyStyle = TenancyStyle.Single, string tenantId = null)
+        public EventQueryHandler(ISelector<IEvent> selector, TIdentity streamId, int version = 0, DateTime? timestamp = null, TenancyStyle tenancyStyle = TenancyStyle.Single, string tenantId = null)
         {
             if (timestamp != null && timestamp.Value.Kind != DateTimeKind.Utc)
             {
@@ -48,7 +48,8 @@ namespace Marten.Events
 
         public void ConfigureCommand(CommandBuilder sql, IMartenSession session)
         {
-            _selector.WriteSelectClause(sql, null);
+            throw new NotImplementedException();
+            //_selector.WriteSelectClause(sql, null);
 
             var param = sql.AddParameter(_streamId);
             sql.Append(" where stream_id = :");
@@ -78,14 +79,16 @@ namespace Marten.Events
             sql.Append(" order by version");
         }
 
-        public IReadOnlyList<IEvent> Handle(DbDataReader reader, IIdentityMap map, QueryStatistics stats)
+        public IReadOnlyList<IEvent> Handle(DbDataReader reader, IMartenSession session)
         {
-            return _selector.Read(reader, map, stats);
+            throw new NotImplementedException();
         }
 
-        public Task<IReadOnlyList<IEvent>> HandleAsync(DbDataReader reader, IIdentityMap map, QueryStatistics stats, CancellationToken token)
+        public Task<IReadOnlyList<IEvent>> HandleAsync(DbDataReader reader, IMartenSession session, CancellationToken token)
         {
-            return _selector.ReadAsync(reader, map, stats, token);
+            throw new NotImplementedException();
         }
+
+
     }
 }

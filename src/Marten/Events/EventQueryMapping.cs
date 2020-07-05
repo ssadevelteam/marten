@@ -4,6 +4,7 @@ using System.Linq.Expressions;
 using Marten.Linq;
 using Marten.Linq.Fields;
 using Marten.Schema;
+using Marten.V4Internals;
 
 namespace Marten.Events
 {
@@ -47,7 +48,8 @@ namespace Marten.Events
 
         public override string[] SelectFields()
         {
-            return Selector.SelectFields();
+            throw new NotImplementedException();
+            //return Selector.SelectFields();
         }
     }
 }

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Baseline;
 using Marten.Linq.Compiled;
+using Marten.V4Internals;
 using Npgsql;
 
 namespace Marten.Linq.QueryHandlers

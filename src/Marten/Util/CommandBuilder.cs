@@ -6,6 +6,7 @@ using System.Text;
 using Marten.Linq.QueryHandlers;
 using Marten.Schema.Arguments;
 using Marten.Storage;
+using Marten.V4Internals;
 using Npgsql;
 using NpgsqlTypes;
 
@@ -51,7 +52,6 @@ namespace Marten.Util
             return cmd;
         }
 
-        [Obsolete("Think this goes away in v4")]
         public static NpgsqlCommand ToCommand(ITenant tenant, IQueryHandler handler)
         {
             var command = new NpgsqlCommand();

@@ -3,6 +3,7 @@ using System.Linq.Expressions;
 using Marten.Linq;
 using Marten.Schema;
 using Marten.Storage;
+using Marten.V4Internals;
 using Remotion.Linq.Clauses;
 using Remotion.Linq.Clauses.ResultOperators;
 using Remotion.Linq.Clauses.StreamedData;

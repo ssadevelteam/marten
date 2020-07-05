@@ -9,7 +9,7 @@ using Marten.V4Internals;
 
 namespace Marten.Events
 {
-    internal class SingleEventQueryHandler: Linq.QueryHandlers.IQueryHandler<IEvent>
+    internal class SingleEventQueryHandler: IQueryHandler<IEvent>
     {
         private readonly Guid _id;
         private readonly EventSelector _selector;
@@ -29,18 +29,16 @@ namespace Marten.Events
             sql.Append(param.ParameterName);
         }
 
-        public Type SourceType => typeof(IEvent);
-
-        public IEvent Handle(DbDataReader reader, IIdentityMap map, QueryStatistics stats)
+        public IEvent Handle(DbDataReader reader, IMartenSession session)
         {
-            return reader.Read() ? _selector.Resolve(reader, map, stats) : null;
+            return reader.Read() ? _selector.Resolve(reader) : null;
         }
 
-        public async Task<IEvent> HandleAsync(DbDataReader reader, IIdentityMap map, QueryStatistics stats,
+        public async Task<IEvent> HandleAsync(DbDataReader reader, IMartenSession session,
             CancellationToken token)
         {
             return await reader.ReadAsync(token).ConfigureAwait(false)
-                ? await _selector.ResolveAsync(reader, map, stats, token).ConfigureAwait(false)
+                ? await _selector.ResolveAsync(reader, token).ConfigureAwait(false)
                 : null;
         }
     }
