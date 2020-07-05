@@ -10,7 +10,7 @@ namespace Marten.Linq
     {
         public bool TryMatch(MethodCallExpression expression, out ResultOperatorBase op)
         {
-            if (AsJsonExpressionNode.SupportedMethods.Contains(expression.Method))
+            if (expression.Method.Name == nameof(CompiledQueryExtensions.AsJson))
             {
                 op = AsJsonResultOperator.Flyweight;
                 return true;
