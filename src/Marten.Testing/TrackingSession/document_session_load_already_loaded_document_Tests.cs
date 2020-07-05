@@ -12,8 +12,10 @@ namespace Marten.Testing.TrackingSession
     {
         [Theory]
         [SessionTypes]
-        public void when_loading_then_the_document_should_be_returned()
+        public void when_loading_then_the_document_should_be_returned(DocumentTracking tracking)
         {
+            DocumentTracking = tracking;
+
             var user = new User { FirstName = "Tim", LastName = "Cools" };
             theSession.Store(user);
             theSession.SaveChanges();

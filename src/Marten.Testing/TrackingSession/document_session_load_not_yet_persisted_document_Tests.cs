@@ -8,7 +8,7 @@ using Xunit;
 namespace Marten.Testing.TrackingSession
 {
 
-    public class document_session_load_not_yet_persisted_document_Tests<T> : IntegrationContext
+    public class document_session_load_not_yet_persisted_document_Tests : IntegrationContext
     {
         [Theory]
         [SessionTypes]
