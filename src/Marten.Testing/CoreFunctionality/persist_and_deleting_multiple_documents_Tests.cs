@@ -7,7 +7,7 @@ using Xunit;
 namespace Marten.Testing.CoreFunctionality
 {
 
-    public class persist_and_deleting_multiple_documents_Tests<T> : IntegrationContext
+    public class persist_and_deleting_multiple_documents_Tests : IntegrationContext
     {
         [Theory]
         [SessionTypes]

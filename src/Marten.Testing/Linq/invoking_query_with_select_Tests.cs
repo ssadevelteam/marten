@@ -111,7 +111,7 @@ namespace Marten.Testing.Linq
 
             theSession.Query<User>().OrderBy(x => x.FirstName).Select(x => new UserName { Name = x.FirstName })
                 .FirstOrDefault()
-                .Name.ShouldBe("Bill");
+                ?.Name.ShouldBe("Bill");
         }
 
         // ENDSAMPLE
