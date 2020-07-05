@@ -23,9 +23,13 @@ namespace Marten.V4Internals.Linq
         public Type SelectedType => typeof(string);
 
         public string FromObject { get; }
+
+        public string SelectionText { get; set; } = "select d.data from ";
+
+
         public void WriteSelectClause(CommandBuilder sql)
         {
-            sql.Append("select d.data from ");
+            sql.Append(SelectionText);
             sql.Append(FromObject);
             sql.Append(" as d");
         }

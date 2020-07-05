@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using Baseline;
 using Marten.Linq;
 using Marten.Linq.Fields;
+using Marten.Transforms;
 using Marten.Util;
 using Marten.V4Internals.Linq.QueryHandlers;
 using Remotion.Linq.Clauses;
@@ -267,5 +268,7 @@ namespace Marten.V4Internals.Linq
         {
             SelectClause = new JsonSelectClause(SelectClause);
         }
+
+
     }
 }

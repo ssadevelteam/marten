@@ -6,6 +6,21 @@ using Remotion.Linq.Parsing.Structure.IntermediateModel;
 
 namespace Marten.Linq
 {
+    public class AsJsonMatcher: IMethodCallMatcher
+    {
+        public bool TryMatch(MethodCallExpression expression, out ResultOperatorBase op)
+        {
+            if (AsJsonExpressionNode.SupportedMethods.Contains(expression.Method))
+            {
+                op = AsJsonResultOperator.Flyweight;
+                return true;
+            }
+
+            op = null;
+            return false;
+        }
+    }
+
     public class AsJsonExpressionNode: ResultOperatorExpressionNodeBase
     {
         public static MethodInfo[] SupportedMethods =
@@ -18,7 +33,7 @@ namespace Marten.Linq
         protected override ResultOperatorBase CreateResultOperator(
             ClauseGenerationContext clauseGenerationContext)
         {
-            return new AsJsonResultOperator(null);
+            return AsJsonResultOperator.Flyweight;
         }
 
         public override Expression Resolve(
@@ -31,5 +46,7 @@ namespace Marten.Linq
                 expressionToBeResolved,
                 clauseGenerationContext);
         }
+
+
     }
 }

@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 using Baseline;
 using LamarCodeGeneration;
 using Marten.Linq;
+using Marten.Transforms;
 using Marten.Util;
 using Marten.V4Internals.Linq.Includes;
 using Marten.V4Internals.Linq.QueryHandlers;
@@ -21,10 +22,17 @@ namespace Marten.V4Internals.Linq
     {
         private readonly IMartenSession _session;
 
+        private static IList<IMethodCallMatcher> _methodMatchers = new List<IMethodCallMatcher>
+        {
+            new AsJsonMatcher(),
+            new TransformToJsonMatcher(),
+            new TransformToOtherMatcher()
+        };
+
         public LinqHandlerBuilder(IMartenSession session, Expression expression, ResultOperatorBase additionalOperator = null)
         {
             _session = session;
-            Model = MartenQueryParser.TransformQueryFlyweight.GetParsedQuery(expression);
+            Model = MartenQueryParser.Flyweight.GetParsedQuery(expression);
             if (additionalOperator != null) Model.ResultOperators.Add(additionalOperator);
 
             var storage = session.StorageFor(Model.SourceType());
@@ -57,11 +65,19 @@ namespace Marten.V4Internals.Linq
 
                 case ExpressionType.Call:
                     var method = (MethodCallExpression)Model.SelectClause.Selector;
-                    if (method.Method.Name == nameof(CompiledQueryExtensions.AsJson))
+
+                    bool matched = false;
+                    foreach (var matcher in _methodMatchers)
                     {
-                        CurrentStatement.ToJsonSelector();
+                        if (matcher.TryMatch(method, out var op))
+                        {
+                            AddResultOperator(op);
+                            matched = true;
+                            break;
+                        }
                     }
-                    else
+
+                    if (!matched)
                     {
                         throw new NotImplementedException($"Marten does not (yet) support the {method.Method.DeclaringType.FullNameInCode()}.{method.Method.Name}() method as a Linq selector");
                     }
@@ -97,9 +113,7 @@ namespace Marten.V4Internals.Linq
 
 
                         break;
-                    case AsJsonResultOperator json:
-                        CurrentStatement.ToJsonSelector();
-                        break;
+
                     default:
                         throw new NotSupportedException();
                 }
@@ -127,6 +141,10 @@ namespace Marten.V4Internals.Linq
         {
             switch (resultOperator)
             {
+                case ISelectableOperator selectable:
+                    CurrentStatement = selectable.ModifyStatement(CurrentStatement, _session);
+                    break;
+
                 case TakeResultOperator take:
                     CurrentStatement.Limit = (int)take.Count.Value();
                     break;
@@ -179,10 +197,6 @@ namespace Marten.V4Internals.Linq
 
                 case MaxResultOperator _:
                     CurrentStatement.ApplyAggregateOperator("MAX");
-                    break;
-
-                case AsJsonResultOperator _:
-                    CurrentStatement.ToJsonSelector();
                     break;
 
                 default:

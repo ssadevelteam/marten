@@ -5,6 +5,7 @@ using Marten.Linq;
 using Marten.Schema;
 using Marten.Storage;
 using Marten.V4Internals;
+using Marten.V4Internals.Linq;
 using Remotion.Linq.Clauses;
 using Remotion.Linq.Clauses.ResultOperators;
 using Remotion.Linq.Clauses.StreamedData;
@@ -35,10 +36,18 @@ namespace Marten.Transforms
             return input;
         }
 
-        public ISelector<T> BuildSelector<T>(string dataLocator, ITenant schema, IQueryableDocument document)
+        public Statement ModifyStatement(Statement statement, IMartenSession session)
         {
-            var transform = schema.TransformFor(_transformName);
-            return new TransformToJsonSelector(dataLocator, transform, document).As<ISelector<T>>();
+            var transform = session.Tenant.TransformFor(_transformName);
+
+            var clause = new JsonSelectClause(statement.SelectClause)
+            {
+                SelectionText = $"select {transform.Identifier}(d.data) from "
+            };
+
+            statement.SelectClause = clause;
+
+            return statement;
         }
     }
 }
