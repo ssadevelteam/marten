@@ -10,7 +10,7 @@ using Xunit;
 
 namespace Marten.Testing.Linq
 {
-    public class query_running_through_the_IdentityMap_Tests : IntegrationContextWithIdentityMap<IdentityMap>
+    public class query_running_through_the_IdentityMap_Tests : IntegrationContext
     {
         private User user1;
         private User user2;
@@ -19,6 +19,8 @@ namespace Marten.Testing.Linq
 
         public query_running_through_the_IdentityMap_Tests(DefaultStoreFixture fixture) : base(fixture)
         {
+            DocumentTracking = DocumentTracking.IdentityOnly;
+
             // SAMPLE: using-store-with-multiple-docs
             user1 = new User {FirstName = "Jeremy"};
             user2 = new User {FirstName = "Jens"};

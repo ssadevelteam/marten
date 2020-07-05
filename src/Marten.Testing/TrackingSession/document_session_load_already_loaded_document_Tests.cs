@@ -7,22 +7,11 @@ using Xunit;
 
 namespace Marten.Testing.TrackingSession
 {
-    public class document_session_load_already_loaded_document_with_IdentityMap_Tests : document_session_load_already_loaded_document_Tests<IdentityMap>
-    {
-        public document_session_load_already_loaded_document_with_IdentityMap_Tests(DefaultStoreFixture fixture) : base(fixture)
-        {
-        }
-    }
-    public class document_session_load_already_loaded_document_with_DirtyTracking_Tests : document_session_load_already_loaded_document_Tests<DirtyTrackingIdentityMap>
-    {
-        public document_session_load_already_loaded_document_with_DirtyTracking_Tests(DefaultStoreFixture fixture) : base(fixture)
-        {
-        }
-    }
 
-    public abstract class document_session_load_already_loaded_document_Tests<T> : IntegrationContextWithIdentityMap<T> where T : IIdentityMap
+    public class document_session_load_already_loaded_document_Tests : IntegrationContext
     {
-        [Fact]
+        [Theory]
+        [SessionTypes]
         public void when_loading_then_the_document_should_be_returned()
         {
             var user = new User { FirstName = "Tim", LastName = "Cools" };
@@ -38,9 +27,12 @@ namespace Marten.Testing.TrackingSession
             }
         }
 
-        [Fact]
-        public void when_loading_by_ids_then_the_same_document_should_be_returned()
+        [Theory]
+        [SessionTypes]
+        public void when_loading_by_ids_then_the_same_document_should_be_returned(DocumentTracking tracking)
         {
+            DocumentTracking = tracking;
+
             var user = new User { FirstName = "Tim", LastName = "Cools" };
             theSession.Store(user);
             theSession.SaveChanges();
@@ -55,7 +47,7 @@ namespace Marten.Testing.TrackingSession
             }
         }
 
-        protected document_session_load_already_loaded_document_Tests(DefaultStoreFixture fixture) : base(fixture)
+        public document_session_load_already_loaded_document_Tests(DefaultStoreFixture fixture) : base(fixture)
         {
         }
     }

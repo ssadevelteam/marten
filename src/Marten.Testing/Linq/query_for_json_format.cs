@@ -42,7 +42,7 @@ namespace Marten.Testing.Linq
         }
     }
 
-    public class query_for_json_format : IntegrationContextWithIdentityMap<NulloIdentityMap>
+    public class query_for_json_format : IntegrationContext
     {
 
         [Fact]

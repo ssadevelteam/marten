@@ -12,7 +12,7 @@ using Xunit;
 
 namespace Marten.Testing.Linq
 {
-    public class invoking_query_with_statistics: IntegrationContextWithIdentityMap<NulloIdentityMap>
+    public class invoking_query_with_statistics: IntegrationContext
     {
         public invoking_query_with_statistics(DefaultStoreFixture fixture) : base(fixture)
         {

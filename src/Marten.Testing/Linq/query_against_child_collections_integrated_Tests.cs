@@ -13,7 +13,7 @@ using Xunit;
 namespace Marten.Testing.Linq
 {
     [ControlledQueryStoryteller]
-    public class query_against_child_collections_integrated_Tests : IntegrationContextWithIdentityMap<NulloIdentityMap>
+    public class query_against_child_collections_integrated_Tests : IntegrationContext
     {
         public query_against_child_collections_integrated_Tests(DefaultStoreFixture fixture) : base(fixture)
         {

@@ -13,7 +13,7 @@ using Xunit;
 
 namespace Marten.Testing.Util
 {
-    public class update_batch_Tests : IntegrationContextWithIdentityMap<NulloIdentityMap>
+    public class update_batch_Tests : IntegrationContext
     {
         private readonly DocumentMapping theMapping;
 

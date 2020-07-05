@@ -132,21 +132,6 @@ namespace Marten.Events
             return document.As<IEvent>().Id;
         }
 
-        public void Remove(IIdentityMap map, object entity)
-        {
-            throw new InvalidOperationException("Use IDocumentSession.Events for all persistence of IEvent objects");
-        }
-
-        public void Delete(IIdentityMap map, object id)
-        {
-            throw new InvalidOperationException("Use IDocumentSession.Events for all persistence of IEvent objects");
-        }
-
-        public void Store(IIdentityMap map, object id, object entity)
-        {
-            throw new InvalidOperationException("Use IDocumentSession.Events for all persistence of IEvent objects");
-        }
-
         public IStorageOperation DeletionForId(object id)
         {
             throw new NotSupportedException("You cannot delete events at this time");
@@ -162,65 +147,66 @@ namespace Marten.Events
             throw new NotSupportedException("You cannot delete events at this time");
         }
 
-        public T Resolve(int startingIndex, DbDataReader reader, IIdentityMap map)
-        {
-            var id = reader.GetGuid(startingIndex);
-            var json = reader.GetTextReader(startingIndex + 1);
-
-            return map.Get<T>(id, json, null);
-        }
-
-        public async Task<T> ResolveAsync(int startingIndex, DbDataReader reader, IIdentityMap map, CancellationToken token)
-        {
-            var id = await reader.GetFieldValueAsync<Guid>(startingIndex, token).ConfigureAwait(false);
-
-            var json = await reader.As<NpgsqlDataReader>().GetTextReaderAsync(startingIndex + 1).ConfigureAwait(false);
-
-            return map.Get<T>(id, json, null);
-        }
-
-        public T Resolve(IIdentityMap map, IQuerySession session, object id)
-        {
-            if (map.Has<T>(id))
-                return map.Retrieve<T>(id);
-
-            var cmd = LoaderCommand(id);
-            cmd.Connection = session.Connection;
-            using (var reader = cmd.ExecuteReader())
-            {
-                if (!reader.Read())
-                    return null;
-
-                var json = reader.GetTextReader(0);
-                var doc = session.Serializer.FromJson<T>(json);
-                map.Store(id, doc);
-
-                return doc;
-            }
-        }
-
-        public async Task<T> ResolveAsync(IIdentityMap map, IQuerySession session, CancellationToken token, object id)
-        {
-            if (map.Has<T>(id))
-                return map.Retrieve<T>(id);
-
-            var cmd = LoaderCommand(id);
-            cmd.Connection = session.Connection;
-
-            using (var reader = await cmd.ExecuteReaderAsync(token).ConfigureAwait(false))
-            {
-                var found = await reader.ReadAsync(token).ConfigureAwait(false);
-
-                if (!found)
-                    return null;
-
-                var json = reader.GetTextReader(0);
-                //var json = await reader.GetFieldValueAsync<string>(0, token).ConfigureAwait(false);
-                var doc = session.Serializer.FromJson<T>(json);
-                map.Store(id, doc);
-
-                return doc;
-            }
-        }
+        // TODO -- we'll have to put these back some how for Linq queries against the events again.
+        // public T Resolve(int startingIndex, DbDataReader reader, IIdentityMap map)
+        // {
+        //     var id = reader.GetGuid(startingIndex);
+        //     var json = reader.GetTextReader(startingIndex + 1);
+        //
+        //     return map.Get<T>(id, json, null);
+        // }
+        //
+        // public async Task<T> ResolveAsync(int startingIndex, DbDataReader reader, IIdentityMap map, CancellationToken token)
+        // {
+        //     var id = await reader.GetFieldValueAsync<Guid>(startingIndex, token).ConfigureAwait(false);
+        //
+        //     var json = await reader.As<NpgsqlDataReader>().GetTextReaderAsync(startingIndex + 1).ConfigureAwait(false);
+        //
+        //     return map.Get<T>(id, json, null);
+        // }
+        //
+        // public T Resolve(IIdentityMap map, IQuerySession session, object id)
+        // {
+        //     if (map.Has<T>(id))
+        //         return map.Retrieve<T>(id);
+        //
+        //     var cmd = LoaderCommand(id);
+        //     cmd.Connection = session.Connection;
+        //     using (var reader = cmd.ExecuteReader())
+        //     {
+        //         if (!reader.Read())
+        //             return null;
+        //
+        //         var json = reader.GetTextReader(0);
+        //         var doc = session.Serializer.FromJson<T>(json);
+        //         map.Store(id, doc);
+        //
+        //         return doc;
+        //     }
+        // }
+        //
+        // public async Task<T> ResolveAsync(IIdentityMap map, IQuerySession session, CancellationToken token, object id)
+        // {
+        //     if (map.Has<T>(id))
+        //         return map.Retrieve<T>(id);
+        //
+        //     var cmd = LoaderCommand(id);
+        //     cmd.Connection = session.Connection;
+        //
+        //     using (var reader = await cmd.ExecuteReaderAsync(token).ConfigureAwait(false))
+        //     {
+        //         var found = await reader.ReadAsync(token).ConfigureAwait(false);
+        //
+        //         if (!found)
+        //             return null;
+        //
+        //         var json = reader.GetTextReader(0);
+        //         //var json = await reader.GetFieldValueAsync<string>(0, token).ConfigureAwait(false);
+        //         var doc = session.Serializer.FromJson<T>(json);
+        //         map.Store(id, doc);
+        //
+        //         return doc;
+        //     }
+        // }
     }
 }

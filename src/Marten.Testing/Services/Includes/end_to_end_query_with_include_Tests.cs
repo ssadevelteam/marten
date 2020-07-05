@@ -18,7 +18,7 @@ using User = Marten.Testing.Documents.User;
 
 namespace Marten.Testing.Services.Includes
 {
-    public class end_to_end_query_with_include_Tests : IntegrationContextWithIdentityMap<IdentityMap>
+    public class end_to_end_query_with_include_Tests : IntegrationContext
     {
         private readonly ITestOutputHelper _output;
 
@@ -746,6 +746,8 @@ namespace Marten.Testing.Services.Includes
         public end_to_end_query_with_include_Tests(DefaultStoreFixture fixture, ITestOutputHelper output) : base(fixture)
         {
             _output = output;
+
+            DocumentTracking = DocumentTracking.IdentityOnly;
         }
     }
 }

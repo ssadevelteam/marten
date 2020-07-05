@@ -16,7 +16,7 @@ using User = Marten.Testing.Documents.User;
 
 namespace Marten.Testing.Services.Includes
 {
-    public class end_to_end_query_with_compiled_include_Tests : IntegrationContextWithIdentityMap<IdentityMap>
+    public class end_to_end_query_with_compiled_include_Tests : IntegrationContext
     {
         // SAMPLE: compiled_include
         [Fact]
@@ -178,6 +178,7 @@ public class IssueByTitleIncludingUsers : ICompiledQuery<Issue>
         // ENDSAMPLE
         public end_to_end_query_with_compiled_include_Tests(DefaultStoreFixture fixture) : base(fixture)
         {
+            DocumentTracking = DocumentTracking.IdentityOnly;
         }
     }
 }

@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Marten.Testing.Linq
 {
-    public class previewing_the_command_from_a_queryable_Tests : IntegrationContextWithIdentityMap<NulloIdentityMap>
+    public class previewing_the_command_from_a_queryable_Tests : IntegrationContext
     {
         [Fact]
         public void preview_basic_select_command()
@@ -80,7 +80,7 @@ namespace Marten.Testing.Linq
         }
     }
 
-    public class previewing_the_command_from_a_queryable_inb_different_schema_Tests : IntegrationContextWithIdentityMap<NulloIdentityMap>
+    public class previewing_the_command_from_a_queryable_inb_different_schema_Tests : IntegrationContext
     {
         public previewing_the_command_from_a_queryable_inb_different_schema_Tests(DefaultStoreFixture fixture) : base(fixture)
         {

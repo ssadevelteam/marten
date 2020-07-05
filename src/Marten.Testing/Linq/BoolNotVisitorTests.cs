@@ -6,7 +6,7 @@ using Xunit;
 
 namespace Marten.Testing.Linq
 {
-    public class BoolNotVisitorTests : IntegrationContextWithIdentityMap<NulloIdentityMap>
+    public class BoolNotVisitorTests : IntegrationContext
     {
         public class TestClass
         {

@@ -9,7 +9,7 @@ using Xunit;
 
 namespace Marten.Schema.Testing
 {
-    public class do_not_overwrite_tables_with_searchable_fields_Tests : IntegrationContextWithIdentityMap<NulloIdentityMap>
+    public class do_not_overwrite_tables_with_searchable_fields_Tests : IntegrationContext
     {
         private void searchable(Expression<Func<Target, object>> expression)
         {

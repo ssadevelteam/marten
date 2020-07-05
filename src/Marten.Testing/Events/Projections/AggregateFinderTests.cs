@@ -55,7 +55,7 @@ namespace Marten.Testing.Events.Projections
         }
     }
 
-    public class AggregateFinder_Async: IntegrationContextWithIdentityMap<IdentityMap>
+    public class AggregateFinder_Async: IntegrationContext
     {
         [Fact]
         public async Task find_when_stream_is_new_async()

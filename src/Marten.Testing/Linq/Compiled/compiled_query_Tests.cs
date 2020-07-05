@@ -12,7 +12,7 @@ using Xunit;
 
 namespace Marten.Testing.Linq.Compiled
 {
-    public class compiled_query_Tests: IntegrationContextWithIdentityMap<NulloIdentityMap>
+    public class compiled_query_Tests: IntegrationContext
     {
         private readonly User _user1;
         private readonly User _user5;

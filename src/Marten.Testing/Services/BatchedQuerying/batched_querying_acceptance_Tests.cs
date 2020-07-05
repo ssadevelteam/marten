@@ -16,7 +16,7 @@ namespace Marten.Testing.Services.BatchedQuerying
 {
 
 
-    public class batched_querying_with_aggregate_functions : IntegrationContextWithIdentityMap<NulloIdentityMap>
+    public class batched_querying_with_aggregate_functions : IntegrationContext
     {
         [Fact]
         public async Task can_run_aggregate_functions()
@@ -46,7 +46,7 @@ namespace Marten.Testing.Services.BatchedQuerying
 
 
     // TODO -- I vote to move this to ST specs for perf reasons
-    public class batched_querying_acceptance_Tests : IntegrationContextWithIdentityMap<IdentityMap>
+    public class batched_querying_acceptance_Tests : IntegrationContext
     {
         private readonly Target target1 = Target.Random();
         private readonly Target target2 = Target.Random();

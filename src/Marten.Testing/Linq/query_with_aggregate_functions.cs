@@ -11,7 +11,7 @@ using Xunit;
 
 namespace Marten.Testing.Linq
 {
-    public class query_with_aggregate_functions : IntegrationContextWithIdentityMap<NulloIdentityMap>
+    public class query_with_aggregate_functions : IntegrationContext
     {
         // SAMPLE: using_max
         [Fact]

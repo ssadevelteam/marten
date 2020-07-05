@@ -80,7 +80,7 @@ namespace Marten.Testing.Events
     }
 
     // SAMPLE: fetching_stream_state
-    public class fetching_stream_state: IntegrationContextWithIdentityMap<NulloIdentityMap>
+    public class fetching_stream_state: IntegrationContext
     {
         private Guid theStreamId;
 

@@ -16,17 +16,15 @@ namespace Marten.Services.BatchQuerying
     public class BatchedQuery: IBatchedQuery, IBatchEvents
     {
         private static readonly MartenQueryParser QueryParser = new MartenQueryParser();
-        private readonly IIdentityMap _identityMap;
         private readonly IList<IBatchQueryItem> _items = new List<IBatchQueryItem>();
         private readonly IQuerySession _parent;
         private readonly DocumentStore _store;
         private readonly IManagedConnection _runner;
 
-        public BatchedQuery(DocumentStore store, IManagedConnection runner, IIdentityMap identityMap, IQuerySession parent)
+        public BatchedQuery(DocumentStore store, IManagedConnection runner, IQuerySession parent)
         {
             _store = store;
             _runner = runner;
-            _identityMap = identityMap;
             _parent = parent;
         }
 
@@ -66,8 +64,6 @@ namespace Marten.Services.BatchQuerying
 
         public async Task Execute(CancellationToken token = default(CancellationToken))
         {
-            var map = _identityMap.ForQuery();
-
             if (!_items.Any())
                 return;
 
@@ -98,8 +94,6 @@ namespace Marten.Services.BatchQuerying
 
         public void ExecuteSynchronously()
         {
-            var map = _identityMap.ForQuery();
-
             if (!_items.Any())
                 return;
 
@@ -172,9 +166,6 @@ namespace Marten.Services.BatchQuerying
 
         private Task<T> load<T>(object id) where T : class
         {
-            if (_identityMap.Has<T>(id))
-                return Task.FromResult(_identityMap.Retrieve<T>(id));
-
             var mapping = _parent.Tenant.MappingFor(typeof(T)).ToQueryableDocument();
 
             throw new NotImplementedException();

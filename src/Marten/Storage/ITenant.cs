@@ -68,7 +68,6 @@ namespace Marten.Storage
         /// <summary>
         /// Used to create new Hilo sequences
         /// </summary>
-        [Obsolete("Goes away in v4")]
         ISequences Sequences { get; }
 
         [Obsolete("Goes away in v4")]

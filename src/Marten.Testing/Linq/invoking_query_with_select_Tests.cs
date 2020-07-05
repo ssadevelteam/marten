@@ -10,7 +10,7 @@ using Xunit;
 
 namespace Marten.Testing.Linq
 {
-    public class invoking_query_with_select_Tests: IntegrationContextWithIdentityMap<NulloIdentityMap>
+    public class invoking_query_with_select_Tests: IntegrationContext
     {
         // SAMPLE: one_field_projection
         [Fact]

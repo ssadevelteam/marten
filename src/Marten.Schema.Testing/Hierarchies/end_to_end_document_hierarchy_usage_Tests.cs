@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Marten.Schema.Testing.Documents;
@@ -7,8 +8,12 @@ using Xunit;
 
 namespace Marten.Schema.Testing.Hierarchies
 {
-    public class delete_by_where_for_hierarchy_Tests: end_to_end_document_hierarchy_usage_Tests<NulloIdentityMap>
+    public class delete_by_where_for_hierarchy_Tests: end_to_end_document_hierarchy_usage_Tests
     {
+        protected delete_by_where_for_hierarchy_Tests()
+        {
+            DocumentTracking = DocumentTracking.None;
+        }
 
         [Fact]
         public void can_delete_all_subclass()
@@ -51,8 +56,12 @@ namespace Marten.Schema.Testing.Hierarchies
         }
     }
 
-    public class persist_and_load_for_hierarchy_Tests: end_to_end_document_hierarchy_usage_Tests<IdentityMap>
+    public class persist_and_load_for_hierarchy_Tests: end_to_end_document_hierarchy_usage_Tests
     {
+        protected persist_and_load_for_hierarchy_Tests()
+        {
+            DocumentTracking = DocumentTracking.IdentityOnly;
+        }
 
         [Fact]
         public void persist_and_delete_subclass()
@@ -158,11 +167,13 @@ namespace Marten.Schema.Testing.Hierarchies
 
     }
 
-    public class query_through_mixed_population_Tests: end_to_end_document_hierarchy_usage_Tests<IdentityMap>
+    public class query_through_mixed_population_Tests: end_to_end_document_hierarchy_usage_Tests
     {
         public query_through_mixed_population_Tests()
         {
+            DocumentTracking = DocumentTracking.IdentityOnly;
             loadData();
+
         }
 
         [Fact]
@@ -321,8 +332,121 @@ namespace Marten.Schema.Testing.Hierarchies
         }
     }
 
-    public abstract class end_to_end_document_hierarchy_usage_Tests<T>: IntegrationContextWithIdentityMap<T>
-        where T : IIdentityMap
+    public class Bug_1247_end_to_end_query_with_include_and_document_hierarchy_Tests: end_to_end_document_hierarchy_usage_Tests
+    {
+        protected Bug_1247_end_to_end_query_with_include_and_document_hierarchy_Tests()
+        {
+            DocumentTracking = DocumentTracking.IdentityOnly;
+        }
+
+        [Fact]
+        public void include_to_list_using_outer_join()
+        {
+            var user1 = new User();
+            var user2 = new User();
+
+            var issue1 = new Issue { AssigneeId = user1.Id, Title = "Garage Door is busted1" };
+            var issue2 = new Issue { AssigneeId = user2.Id, Title = "Garage Door is busted2" };
+            var issue3 = new Issue { AssigneeId = user2.Id, Title = "Garage Door is busted3" };
+            var issue4 = new Issue { AssigneeId = null, Title = "Garage Door is busted4" };
+
+            theSession.Store(user1, user2);
+            theSession.Store(issue1, issue2, issue3, issue4);
+            theSession.SaveChanges();
+
+            using (var query = theStore.QuerySession())
+            {
+                var list = new List<User>();
+
+                var issues = query.Query<Issue>().Include<User>(x => x.AssigneeId, list).ToArray();
+
+                list.Count.ShouldBe(3);
+
+                list.Any(x => x.Id == user1.Id);
+                list.Any(x => x.Id == user2.Id);
+                list.Any(x => x == null);
+
+                issues.Length.ShouldBe(4);
+            }
+        }
+
+        [Fact]
+        public async Task include_to_list_using_outer_join_async()
+        {
+            var user1 = new User();
+            var user2 = new User();
+
+            var issue1 = new Issue { AssigneeId = user1.Id, Title = "Garage Door is busted1" };
+            var issue2 = new Issue { AssigneeId = user2.Id, Title = "Garage Door is busted2" };
+            var issue3 = new Issue { AssigneeId = user2.Id, Title = "Garage Door is busted3" };
+            var issue4 = new Issue { AssigneeId = null, Title = "Garage Door is busted4" };
+
+            theSession.Store(user1, user2);
+            theSession.Store(issue1, issue2, issue3, issue4);
+            theSession.SaveChanges();
+
+            using (var query = theStore.QuerySession())
+            {
+                var list = new List<User>();
+
+                var issues = await query.Query<Issue>().Include<User>(x => x.AssigneeId, list).ToListAsync();
+
+                list.Count.ShouldBe(3);
+
+                list.Any(x => x.Id == user1.Id).ShouldBeTrue();
+                list.Any(x => x.Id == user2.Id).ShouldBeTrue();
+                list.Any(x => x == null);
+
+                issues.Count.ShouldBe(4);
+            }
+        }
+
+    }
+
+    public class Bug_1484_store_overloads_Tests: end_to_end_document_hierarchy_usage_Tests
+    {
+        protected Bug_1484_store_overloads_Tests()
+        {
+            DocumentTracking = DocumentTracking.IdentityOnly;
+        }
+
+        [Fact]
+        public void persist_and_count_single_entity()
+        {
+            theSession.Store(admin1);
+            theSession.SaveChanges();
+
+            theSession.Query<AdminUser>().Count().ShouldBe(1);
+        }
+
+        [Fact]
+        public void persist_mutliple_entites_as_params_and_count()
+        {
+            theSession.Store(admin1, admin2);
+            theSession.SaveChanges();
+
+            theSession.Query<AdminUser>().Count().ShouldBe(2);
+        }
+
+        [Fact]
+        public void persist_mutliple_entites_as_array_and_count()
+        {
+            theSession.Store(new[] { admin1, admin2 });
+            theSession.SaveChanges();
+
+            theSession.Query<AdminUser>().Count().ShouldBe(2);
+        }
+        [Fact]
+        public void persist_mutliple_entites_as_enumerable_and_count()
+        {
+            theSession.Store(new[] { admin1, admin2 }.AsEnumerable());
+            theSession.SaveChanges();
+
+            theSession.Query<AdminUser>().Count().ShouldBe(2);
+        }
+    }
+
+    public class end_to_end_document_hierarchy_usage_Tests: IntegrationContext
     {
         protected AdminUser admin1 = new AdminUser
         {

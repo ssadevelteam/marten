@@ -18,7 +18,6 @@ namespace Marten.Events.Projections.Async
     {
         private readonly IDaemonLogger _logger;
         private readonly IDaemonErrorHandler _errorHandler;
-        private readonly NulloIdentityMap _map;
         private readonly DaemonSettings _settings;
         private readonly AsyncOptions _options;
         private readonly IEventSelector _selector;
@@ -46,8 +45,6 @@ namespace Marten.Events.Projections.Async
             _selector = store.Events.StreamIdentity == StreamIdentity.AsGuid
                 ? (IEventSelector)new EventSelector(store.Events, store.Advanced.Serializer)
                 : new StringIdentifiedEventSelector(store.Events, store.Advanced.Serializer);
-
-            _map = new NulloIdentityMap(store.Advanced.Serializer);
 
             EventTypeNames = eventTypes.Select(x => store.Events.EventMappingFor(x).Alias).ToArray();
 throw new NotImplementedException("Think we use EventSelector that implements both the ISelectClause and ISelector<IEvent> interfaces");
