@@ -89,6 +89,7 @@ namespace Marten.Testing.Services.BatchedQuerying
 
         public batched_querying_acceptance_Tests(DefaultStoreFixture fixture) : base(fixture)
         {
+            DocumentTracking = DocumentTracking.IdentityOnly;
             StoreOptions(_ =>
             {
                 _.Schema.For<User>().AddSubClass(typeof (AdminUser)).AddSubClass(typeof (SuperUser))
