@@ -10,7 +10,8 @@ namespace Marten.Testing.CoreFunctionality
     public class document_session_update_existing_document_without_dirty_checking_Tests : IntegrationContext
     {
         [Theory]
-        [SessionTypes]
+        [InlineData(Marten.DocumentTracking.IdentityOnly)]
+        [InlineData(Marten.DocumentTracking.None)]
         public void store_a_document(DocumentTracking tracking)
         {
             DocumentTracking = tracking;
@@ -29,7 +30,8 @@ namespace Marten.Testing.CoreFunctionality
         }
 
         [Theory]
-        [SessionTypes]
+        [InlineData(Marten.DocumentTracking.IdentityOnly)]
+        [InlineData(Marten.DocumentTracking.None)]
         public void store_and_update_a_document_then_document_should_not_be_updated(DocumentTracking tracking)
         {
             DocumentTracking = tracking;
@@ -59,7 +61,8 @@ namespace Marten.Testing.CoreFunctionality
         }
 
         [Theory]
-        [SessionTypes]
+        [InlineData(Marten.DocumentTracking.IdentityOnly)]
+        [InlineData(Marten.DocumentTracking.None)]
         public void store_and_update_a_document_in_same_session_then_document_should_not_be_updated(DocumentTracking tracking)
         {
             DocumentTracking = tracking;
@@ -82,7 +85,8 @@ namespace Marten.Testing.CoreFunctionality
         }
 
         [Theory]
-        [SessionTypes]
+        [InlineData(Marten.DocumentTracking.IdentityOnly)]
+        [InlineData(Marten.DocumentTracking.None)]
         public void store_reload_and_update_a_document_in_same_session_then_document_should_not_be_updated(DocumentTracking tracking)
         {
             DocumentTracking = tracking;
