@@ -28,7 +28,12 @@ namespace Marten.V4Internals
 
         public sealed override void Store(IMartenSession session, T document)
         {
-            var id = AssignIdentity(document, session.Tenant);
+            store(session, document, out var id);
+        }
+
+        private void store(IMartenSession session, T document, out TId id)
+        {
+            id = AssignIdentity(document, session.Tenant);
             session.MarkAsAddedForStorage(id, document);
 
             if (session.ItemMap.TryGetValue(typeof(T), out var items))
@@ -37,10 +42,16 @@ namespace Marten.V4Internals
                 {
                     if (d.ContainsKey(id))
                     {
-                        throw new InvalidOperationException($"Document '{typeof(T).FullNameInCode()}' with same Id already added to the session.");
+                        if (!ReferenceEquals(d[id], document))
+                        {
+                            throw new InvalidOperationException(
+                                $"Document '{typeof(T).FullNameInCode()}' with same Id already added to the session.");
+                        }
                     }
-
-                    d[id] = document;
+                    else
+                    {
+                        d[id] = document;
+                    }
                 }
                 else
                 {
@@ -56,25 +67,7 @@ namespace Marten.V4Internals
 
         public sealed override void Store(IMartenSession session, T document, Guid? version)
         {
-            var id = AssignIdentity(document, session.Tenant);
-            session.MarkAsAddedForStorage(id, document);
-
-            if (session.ItemMap.TryGetValue(typeof(T), out var items))
-            {
-                if (items is Dictionary<TId, T> d)
-                {
-                    d[id] = document;
-                }
-                else
-                {
-                    throw new InvalidOperationException($"Invalid id of type {typeof(TId)} for document type {typeof(T)}");
-                }
-            }
-            else
-            {
-                var dict = new Dictionary<TId, T> {{id, document}};
-                session.ItemMap.Add(typeof(T), dict);
-            }
+            store(session, document, out var id);
 
             if (version != null)
             {

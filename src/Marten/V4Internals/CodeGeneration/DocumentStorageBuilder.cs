@@ -156,7 +156,6 @@ return new Marten.Generated.{operations.DeleteByWhere.TypeName}({{0}});
             var tenantDeclaration = "";
             if (_mapping.TenancyStyle == TenancyStyle.Conjoined)
             {
-                var tenantField = operationType.AllInjectedFields.Single(x => x.ArgType == typeof(ITenant));
                 tenantDeclaration = ", tenant";
             }
 

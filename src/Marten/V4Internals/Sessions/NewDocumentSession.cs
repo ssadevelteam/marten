@@ -237,14 +237,12 @@ namespace Marten.V4Internals.Sessions
 
                 foreach (var entity in entities)
                 {
-                    var upsert = storage.Upsert(entity, this, Tenant);
-
                     // Put it in the identity map -- if necessary
                     storage.Store(this, entity);
 
+                    var upsert = storage.Upsert(entity, this, Tenant);
+
                     _unitOfWork.Add(upsert);
-
-
                 }
             }
         }
