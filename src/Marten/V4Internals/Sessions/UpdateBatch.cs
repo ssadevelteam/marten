@@ -24,6 +24,10 @@ namespace Marten.V4Internals.Sessions
 
         public void ApplyChanges(IMartenSession session)
         {
+
+
+
+
             if (_operations.Count < session.Options.UpdateBatchSize)
             {
                 var command = buildCommand(session, _operations);
@@ -32,7 +36,21 @@ namespace Marten.V4Internals.Sessions
             }
             else
             {
-                throw new NotImplementedException("Not yet doing BIG batch sizes");
+                var count = 0;
+
+                while (count < _operations.Count)
+                {
+                    var operations = _operations
+                        .Skip(count)
+                        .Take(session.Options.UpdateBatchSize)
+                        .ToArray();
+
+                    var command = buildCommand(session, operations);
+                    using var reader = session.Database.ExecuteReader(command);
+                    applyCallbacks(operations, reader);
+
+                    count += session.Options.UpdateBatchSize;
+                }
             }
 
             if (_exceptions.Any()) throw new AggregateException(_exceptions);
@@ -48,7 +66,21 @@ namespace Marten.V4Internals.Sessions
             }
             else
             {
-                throw new NotImplementedException("Not yet doing BIG batch sizes");
+                var count = 0;
+
+                while (count < _operations.Count)
+                {
+                    var operations = _operations
+                        .Skip(count)
+                        .Take(session.Options.UpdateBatchSize)
+                        .ToArray();
+
+                    var command = buildCommand(session, operations);
+                    using var reader = await session.Database.ExecuteReaderAsync(command, token).ConfigureAwait(false);
+                    await applyCallbacksAsync(operations, reader, token).ConfigureAwait(false);
+
+                    count += session.Options.UpdateBatchSize;
+                }
             }
 
             if (_exceptions.Any()) throw new AggregateException(_exceptions);
