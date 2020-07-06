@@ -26,5 +26,10 @@ namespace Marten.V4Internals
 
         void MarkAsDocumentLoaded(object id, object document);
         IDocumentStorage<T> StorageFor<T>();
+
+        /// <summary>
+        /// Override whether or not this session honors optimistic concurrency checks
+        /// </summary>
+        ConcurrencyChecks Concurrency { get; }
     }
 }

@@ -103,7 +103,7 @@ namespace Marten.V4Internals.Sessions
             return selectStorage(_providers.StorageFor<T>());
         }
 
-
+        public ConcurrencyChecks Concurrency { get; } = ConcurrencyChecks.Enabled;
 
 
         public void Dispose()

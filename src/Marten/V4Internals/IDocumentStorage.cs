@@ -40,7 +40,7 @@ namespace Marten.V4Internals
         IStorageOperation Insert(T document, IMartenSession session, ITenant tenant);
         IStorageOperation Upsert(T document, IMartenSession session, ITenant tenant);
 
-        IStorageOperation Overwrite(T document, IMartenSession session);
+        IStorageOperation Overwrite(T document, IMartenSession session, ITenant tenant);
 
 
         IStorageOperation DeleteForDocument(T document);

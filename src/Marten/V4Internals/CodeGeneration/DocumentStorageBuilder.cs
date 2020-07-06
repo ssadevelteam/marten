@@ -5,6 +5,7 @@ using LamarCodeGeneration;
 using LamarCodeGeneration.Frames;
 using Marten.Linq;
 using Marten.Schema;
+using Marten.Services;
 using Marten.Storage;
 using Marten.V4Internals.Linq;
 
@@ -121,9 +122,21 @@ namespace Marten.V4Internals
 
         private void buildStorageOperationMethods(DocumentOperations operations, GeneratedType type)
         {
-            buildOperationMethod(type, operations, "Upsert");
-            buildOperationMethod(type, operations, "Insert");
-            buildOperationMethod(type, operations, "Update");
+            if (_mapping.UseOptimisticConcurrency)
+            {
+                buildConditionalOperationBasedOnConcurrencyChecks(type, operations, "Upsert");
+                buildOperationMethod(type, operations, "Insert");
+                buildOperationMethod(type, operations, "Overwrite");
+                buildConditionalOperationBasedOnConcurrencyChecks(type, operations, "Update");
+            }
+            else
+            {
+                buildOperationMethod(type, operations, "Upsert");
+                buildOperationMethod(type, operations, "Insert");
+                buildOperationMethod(type, operations, "Update");
+            }
+
+
 
             if (_mapping.UseOptimisticConcurrency)
             {
@@ -147,12 +160,34 @@ return new Marten.Generated.{operations.DeleteByWhere.TypeName}({{0}});
 ", Use.Type<IWhereFragment>());
         }
 
+        private void buildConditionalOperationBasedOnConcurrencyChecks(GeneratedType type,
+            DocumentOperations operations, string methodName)
+        {
+            var operationType = (GeneratedType)typeof(DocumentOperations).GetProperty(methodName).GetValue(operations);
+            var overwriteType = operations.Overwrite;
+
+            var method = type.MethodFor(methodName);
+
+            method.Frames.Code($"BLOCK:if (session.{nameof(IDocumentSession.Concurrency)} == {{0}})",
+                ConcurrencyChecks.Disabled);
+            writeReturnOfOperation(method, overwriteType);
+            method.Frames.Code("END");
+            method.Frames.Code("BLOCK:else");
+            writeReturnOfOperation(method, operationType);
+            method.Frames.Code("END");
+        }
+
         // TODO -- just inject the type alias and simplify the operation classes
         private void buildOperationMethod(GeneratedType type, DocumentOperations operations, string methodName)
         {
             var operationType = (GeneratedType)typeof(DocumentOperations).GetProperty(methodName).GetValue(operations);
             var method = type.MethodFor(methodName);
 
+            writeReturnOfOperation(method, operationType);
+        }
+
+        private void writeReturnOfOperation(GeneratedMethod method, GeneratedType operationType)
+        {
             var tenantDeclaration = "";
             if (_mapping.TenancyStyle == TenancyStyle.Conjoined)
             {
@@ -187,6 +222,5 @@ return new Marten.Generated.{operationType.TypeName}
                         , new Use(_mapping.DocumentType), Use.Type<IMartenSession>());
             }
         }
-
     }
 }

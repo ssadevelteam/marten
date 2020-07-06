@@ -100,6 +100,8 @@ namespace Marten.Testing.V4Internals
             throw new NotImplementedException();
         }
 
+        public ConcurrencyChecks Concurrency { get; } = ConcurrencyChecks.Enabled;
+
         public Task<T> ExecuteQuery<T>(IQueryHandler<T> handler, CancellationToken token)
         {
             throw new NotImplementedException();

@@ -83,7 +83,7 @@ namespace Marten.V4Internals
         public abstract IStorageOperation Insert(T document, IMartenSession session, ITenant tenant);
         public abstract IStorageOperation Upsert(T document, IMartenSession session, ITenant tenant);
 
-        public abstract IStorageOperation Overwrite(T document, IMartenSession session);
+        public abstract IStorageOperation Overwrite(T document, IMartenSession session, ITenant tenant);
         public abstract IStorageOperation DeleteForDocument(T document);
         public abstract IStorageOperation DeleteForWhere(IWhereFragment where);
 
