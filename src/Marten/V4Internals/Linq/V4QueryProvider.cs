@@ -69,7 +69,6 @@ namespace Marten.V4Internals.Linq
             var builder = new LinqHandlerBuilder(_session, expression, op);
             var handler = builder.BuildHandler<TResult>(Statistics, Includes);
 
-            // TODO -- worry about QueryStatistics later
             return ExecuteHandlerAsync(handler, token);
         }
 

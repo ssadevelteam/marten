@@ -4,6 +4,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Marten.Linq;
 using Marten.Linq.Fields;
+using Marten.Storage;
 using Remotion.Linq;
 
 namespace Marten.Schema
@@ -21,6 +22,8 @@ namespace Marten.Schema
         DuplicatedField[] DuplicatedFields { get; }
 
         Type DocumentType { get; }
+
+        TenancyStyle TenancyStyle { get; }
     }
 
 }

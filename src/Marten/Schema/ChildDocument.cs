@@ -2,6 +2,7 @@ using System;
 using System.Reflection;
 using Marten.Linq;
 using Marten.Linq.Fields;
+using Marten.Storage;
 using Remotion.Linq;
 
 namespace Marten.Schema
@@ -14,6 +15,7 @@ namespace Marten.Schema
         }
 
         public Type DocumentType { get; set; }
+        public TenancyStyle TenancyStyle => TenancyStyle.Single;
 
         public IWhereFragment FilterDocuments(QueryModel model, IWhereFragment query)
         {

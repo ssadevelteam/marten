@@ -267,7 +267,7 @@ namespace Marten.V4Internals.Sessions
 
         public IBatchedQuery CreateBatchQuery()
         {
-            throw new NotImplementedException();
+            return new BatchedQuery(Database, this);
         }
 
         public NpgsqlConnection Connection => Database.Connection;

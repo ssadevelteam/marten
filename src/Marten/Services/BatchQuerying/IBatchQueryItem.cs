@@ -11,8 +11,6 @@ namespace Marten.Services.BatchQuerying
     {
         IQueryHandler Handler { get; }
 
-        QueryStatistics Stats { get; }
-
         Task ReadAsync(DbDataReader reader, IMartenSession session, CancellationToken token);
 
         void Read(DbDataReader reader, IMartenSession session);

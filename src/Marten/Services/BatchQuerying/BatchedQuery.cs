@@ -4,12 +4,17 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Baseline;
+using LamarCodeGeneration;
 using Marten.Events;
 using Marten.Linq;
 using Marten.Linq.QueryHandlers;
+using Marten.Schema.Arguments;
 using Marten.Util;
 using Marten.V4Internals;
+using Marten.V4Internals.Linq;
+using Marten.V4Internals.Sessions;
 using Npgsql;
+using Remotion.Linq.Clauses;
 
 namespace Marten.Services.BatchQuerying
 {
@@ -17,13 +22,11 @@ namespace Marten.Services.BatchQuerying
     {
         private static readonly MartenQueryParser QueryParser = new MartenQueryParser();
         private readonly IList<IBatchQueryItem> _items = new List<IBatchQueryItem>();
-        private readonly IQuerySession _parent;
-        private readonly DocumentStore _store;
+        private readonly QuerySession _parent;
         private readonly IManagedConnection _runner;
 
-        public BatchedQuery(DocumentStore store, IManagedConnection runner, IQuerySession parent)
+        public BatchedQuery(IManagedConnection runner, QuerySession parent)
         {
-            _store = store;
             _runner = runner;
             _parent = parent;
         }
@@ -32,12 +35,22 @@ namespace Marten.Services.BatchQuerying
 
         public Task<T> Load<T>(string id) where T : class
         {
-            return load<T>(id);
+            return load<T, string>(id);
         }
 
-        public Task<T> Load<T>(ValueType id) where T : class
+        public Task<T> Load<T>(int id) where T : class
         {
-            return load<T>(id);
+            return load<T, int>(id);
+        }
+
+        public Task<T> Load<T>(long id) where T : class
+        {
+            return load<T, long>(id);
+        }
+
+        public Task<T> Load<T>(Guid id) where T : class
+        {
+            return load<T, Guid>(id);
         }
 
         public IBatchLoadByKeys<TDoc> LoadMany<TDoc>() where TDoc : class
@@ -47,8 +60,7 @@ namespace Marten.Services.BatchQuerying
 
         public Task<IReadOnlyList<T>> Query<T>(string sql, params object[] parameters) where T : class
         {
-            throw new NotImplementedException();
-            //return AddItem(new UserSuppliedQueryHandler<T>(_store, sql, parameters), null);
+            return AddItem(new UserSuppliedQueryHandler<T>(_parent, sql, parameters));
         }
 
         public IBatchedQueryable<T> Query<T>() where T : class
@@ -58,8 +70,25 @@ namespace Marten.Services.BatchQuerying
 
         private NpgsqlCommand buildCommand()
         {
-            throw new NotImplementedException();
-            //return CommandBuilder.ToBatchCommand(_parent.Tenant, _items.Select(x => x.Handler));
+            var command = new NpgsqlCommand();
+            var builder = new CommandBuilder(command);
+
+            foreach (var item in _items)
+            {
+                item.Handler.ConfigureCommand(builder, _parent);
+                builder.Append(";");
+            }
+
+            // TODO -- this needs to be temporary
+            if (command.CommandText.Contains(TenantIdArgument.ArgName))
+            {
+                command.AddNamedParameter(TenantIdArgument.ArgName, _parent.Tenant.TenantId);
+            }
+
+            // TODO --- duplication
+            command.CommandText = builder.ToString();
+
+            return command;
         }
 
         public async Task Execute(CancellationToken token = default(CancellationToken))
@@ -72,8 +101,7 @@ namespace Marten.Services.BatchQuerying
             {
                 using (var reader = await command.ExecuteReaderAsync(tk).ConfigureAwait(false))
                 {
-                    throw new NotImplementedException();
-                    //await _items[0].Read(reader, map, token).ConfigureAwait(false);
+                    await _items[0].ReadAsync(reader, _parent, token).ConfigureAwait(false);
 
                     var others = _items.Skip(1).ToArray();
 
@@ -84,7 +112,7 @@ namespace Marten.Services.BatchQuerying
                         if (!hasNext)
                             throw new InvalidOperationException("There is no next result to read over.");
 
-                        //await item.Read(reader, map, token).ConfigureAwait(false);
+                        await item.ReadAsync(reader, _parent, token).ConfigureAwait(false);
                     }
                 }
 
@@ -102,145 +130,143 @@ namespace Marten.Services.BatchQuerying
             {
                 using (var reader = command.ExecuteReader())
                 {
-                    throw new NotImplementedException();
-                    // _items[0].Read(reader, map);
-                    //
-                    // _items.Skip(1).Each(item =>
-                    // {
-                    //     var hasNext = reader.NextResult();
-                    //
-                    //     if (!hasNext)
-                    //         throw new InvalidOperationException("There is no next result to read over.");
-                    //
-                    //     item.Read(reader, map);
-                    // });
+                    _items[0].Read(reader, _parent);
+
+                    foreach (var item in _items.Skip(1))
+                    {
+                        var hasNext = reader.NextResult();
+
+                        if (!hasNext)
+                            throw new InvalidOperationException("There is no next result to read over.");
+
+                        item.Read(reader, _parent);
+                    }
                 }
             });
         }
 
         public Task<TResult> Query<TDoc, TResult>(ICompiledQuery<TDoc, TResult> query)
         {
-            QueryStatistics stats;
-            var handler = _store.HandlerFactory.HandlerFor(query, out stats);
-            return AddItem(handler, stats);
+            throw new NotImplementedException();
+            // QueryStatistics stats;
+            // var handler = _store.HandlerFactory.HandlerFor(query, out stats);
+            //return AddItem(handler);
         }
 
         public Task<T> AggregateStream<T>(Guid streamId, int version = 0, DateTime? timestamp = null)
             where T : class
         {
-            var inner = new EventQueryHandler<Guid>(new EventSelector(_store.Events, _store.Serializer), streamId, version,
-                timestamp, _store.Events.TenancyStyle, _parent.Tenant.TenantId);
-            var aggregator = _store.Events.AggregateFor<T>();
-            var handler = new AggregationQueryHandler<T>(aggregator, inner);
-
-            return AddItem(handler, null);
+            throw new NotImplementedException();
+            // var inner = new EventQueryHandler<Guid>(new EventSelector(_store.Events, _store.Serializer), streamId, version,
+            //     timestamp, _store.Events.TenancyStyle, _parent.Tenant.TenantId);
+            // var aggregator = _store.Events.AggregateFor<T>();
+            // var handler = new AggregationQueryHandler<T>(aggregator, inner);
+            //
+            // return AddItem(handler);
         }
 
         public Task<IEvent> Load(Guid id)
         {
-            var handler = new SingleEventQueryHandler(id, _store.Events, _store.Serializer);
-            return AddItem(handler, null);
+            var handler = new SingleEventQueryHandler(id, _parent.Options.Events, _parent.Serializer);
+            return AddItem(handler);
         }
 
         public Task<StreamState> FetchStreamState(Guid streamId)
         {
-            var handler = new StreamStateByGuidHandler(_store.Events, streamId, _parent.Tenant.TenantId);
-            return AddItem(handler, null);
+            var handler = new StreamStateByGuidHandler(_parent.Options.Events, streamId, _parent.Tenant.TenantId);
+            return AddItem(handler);
         }
 
         public Task<IReadOnlyList<IEvent>> FetchStream(Guid streamId, int version = 0, DateTime? timestamp = null)
         {
-            var selector = new EventSelector(_store.Events, _store.Serializer);
-            var handler = new EventQueryHandler<Guid>(selector, streamId, version, timestamp, _store.Events.TenancyStyle, _parent.Tenant.TenantId);
+            var selector = new EventSelector(_parent.Options.Events, _parent.Serializer);
+            var handler = new EventQueryHandler<Guid>(selector, streamId, version, timestamp, _parent.Options.Events.TenancyStyle, _parent.Tenant.TenantId);
 
-            return AddItem(handler, null);
+            return AddItem(handler);
         }
 
-        public Task<T> AddItem<T>(IQueryHandler<T> handler, QueryStatistics stats)
+        public Task<T> AddItem<T>(IQueryHandler<T> handler)
         {
-            var item = new BatchQueryItem<T>(handler, stats);
+            var item = new BatchQueryItem<T>(handler);
             _items.Add(item);
 
             return item.Result;
         }
 
-        private Task<T> load<T>(object id) where T : class
+        private Task<T> load<T, TId>(TId id) where T : class
         {
-            var mapping = _parent.Tenant.MappingFor(typeof(T)).ToQueryableDocument();
+            var storage = _parent.StorageFor<T>();
+            if (storage is IDocumentStorage<T, TId> s)
+            {
+                var handler = new LoadByIdHandler<T, TId>(s, id);
+                return AddItem(handler);
+            }
 
-            throw new NotImplementedException();
-            //return AddItem(new LoadByIdHandler<T>(_parent.Tenant.StorageFor<T>(), mapping, id), null);
+            var idType = storage.IdType;
+
+            throw new InvalidOperationException($"The id type for {typeof(T).FullNameInCode()} is {idType.NameInCode()}, but was used with id type {typeof(TId).NameInCode()}");
+        }
+
+        private Task<TResult> addItem<TDoc, TResult>(IQueryable<TDoc> queryable, ResultOperatorBase op)
+        {
+            var handler = queryable.As<V4Queryable<TDoc>>().BuildHandler<TResult>(op);
+            return AddItem(handler);
         }
 
         public Task<bool> Any<TDoc>(IMartenQueryable<TDoc> queryable)
         {
-            throw new NotImplementedException();
-            //return AddItem(queryable.ToLinqQuery().ToAny(), null);
+            return addItem<TDoc, bool>(queryable, LinqConstants.AnyOperator);
         }
 
         public Task<long> Count<TDoc>(IMartenQueryable<TDoc> queryable)
         {
-            throw new NotImplementedException();
-            //return AddItem(queryable.ToLinqQuery().ToCount<long>(), null);
+            return addItem<TDoc, long>(queryable, LinqConstants.LongCountOperator);
         }
 
         internal Task<IReadOnlyList<T>> Query<T>(IMartenQueryable<T> queryable)
         {
-            var expression = queryable.Expression;
-
-            var query = QueryParser.GetParsedQuery(expression);
-
-            throw new NotImplementedException();
-            //return AddItem(new LinqQuery<T>(_store, query, queryable.Includes.ToArray(), queryable.Statistics).ToList(), queryable.Statistics);
+            var handler = queryable.As<V4Queryable<T>>().BuildHandler<IReadOnlyList<T>>();
+            return AddItem(handler);
         }
 
         public Task<T> First<T>(IMartenQueryable<T> queryable)
         {
-
-            throw new NotImplementedException();
-            //return AddItem(OneResultHandler<T>.First(query), queryable.Statistics);
+            return addItem<T, T>(queryable, LinqConstants.FirstOperator);
         }
 
         public Task<T> FirstOrDefault<T>(IMartenQueryable<T> queryable)
         {
-            throw new NotImplementedException();
-            //return AddItem(OneResultHandler<T>.FirstOrDefault(query), queryable.Statistics);
+            return addItem<T, T>(queryable, LinqConstants.FirstOrDefaultOperator);
         }
 
         public Task<T> Single<T>(IMartenQueryable<T> queryable)
         {
-            throw new NotImplementedException();
-            //return AddItem(OneResultHandler<T>.Single(query), queryable.Statistics);
+            return addItem<T, T>(queryable, LinqConstants.SingleOperator);
         }
 
         public Task<T> SingleOrDefault<T>(IMartenQueryable<T> queryable)
         {
-            throw new NotImplementedException();
-            //return AddItem(OneResultHandler<T>.SingleOrDefault(query), queryable.Statistics);
+            return addItem<T, T>(queryable, LinqConstants.SingleOrDefaultOperator);
         }
 
         public Task<TResult> Min<TResult>(IQueryable<TResult> queryable)
         {
-            throw new NotImplementedException();
-            //return AddItem(AggregateQueryHandler<TResult>.Min(linqQuery), null);
+            return addItem<TResult, TResult>(queryable, LinqConstants.MinOperator);
         }
 
         public Task<TResult> Max<TResult>(IQueryable<TResult> queryable)
         {
-            throw new NotImplementedException();
-            //return AddItem(AggregateQueryHandler<TResult>.Max(linqQuery), null);
+            return addItem<TResult, TResult>(queryable, LinqConstants.MaxOperator);
         }
 
         public Task<TResult> Sum<TResult>(IQueryable<TResult> queryable)
         {
-            throw new NotImplementedException();
-            //return AddItem(AggregateQueryHandler<TResult>.Sum(linqQuery), null);
+            return addItem<TResult, TResult>(queryable, LinqConstants.SumOperator);
         }
 
         public Task<double> Average<T>(IQueryable<T> queryable)
         {
-            throw new NotImplementedException();
-            //return AddItem(AggregateQueryHandler<double>.Average(linqQuery), null);
+            return addItem<T, double>(queryable, LinqConstants.AverageOperator);
         }
 
         public class BatchLoadByKeys<TDoc>: IBatchLoadByKeys<TDoc> where TDoc : class
@@ -252,24 +278,20 @@ namespace Marten.Services.BatchQuerying
                 _parent = parent;
             }
 
-            public Task<IList<TDoc>> ById<TKey>(params TKey[] keys)
+            public Task<IReadOnlyList<TDoc>> ById<TKey>(params TKey[] keys)
             {
                 return load(keys);
             }
 
-            public Task<IList<TDoc>> ByIdList<TKey>(IEnumerable<TKey> keys)
+            public Task<IReadOnlyList<TDoc>> ByIdList<TKey>(IEnumerable<TKey> keys)
             {
                 return load(keys.ToArray());
             }
 
-            private Task<IList<TDoc>> load<TKey>(TKey[] keys)
+            private Task<IReadOnlyList<TDoc>> load<TKey>(TKey[] keys)
             {
-                // var tenant = _parent._parent.Tenant;
-                // var resolver = tenant.StorageFor<TDoc>();
-                // var mapping = tenant.MappingFor(typeof(TDoc)).ToQueryableDocument();
-
-                throw new NotImplementedException();
-                //return _parent.AddItem(new LoadByIdArrayHandler<TDoc, TKey>(resolver, mapping, keys), null);
+                var storage = _parent._parent.StorageFor<TDoc>();
+                return _parent.AddItem(new LoadByIdArrayHandler<TDoc, TKey>(storage, keys));
             }
         }
     }

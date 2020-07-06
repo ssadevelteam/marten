@@ -11,15 +11,13 @@ namespace Marten.Services.BatchQuerying
     {
         private readonly IQueryHandler<T> _handler;
 
-        public BatchQueryItem(IQueryHandler<T> handler, QueryStatistics stats)
+        public BatchQueryItem(IQueryHandler<T> handler)
         {
             _handler = handler;
 
             Completion = new TaskCompletionSource<T>();
-            Stats = stats;
         }
 
-        public QueryStatistics Stats { get; }
 
         public TaskCompletionSource<T> Completion { get; }
         public Task<T> Result => Completion.Task;

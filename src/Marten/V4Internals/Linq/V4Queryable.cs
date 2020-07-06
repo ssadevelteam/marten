@@ -7,12 +7,14 @@ using System.Threading.Tasks;
 using LamarCodeGeneration;
 using LamarCodeGeneration.Util;
 using Marten.Linq;
+using Marten.Linq.QueryHandlers;
 using Marten.Services;
 using Marten.Transforms;
 using Marten.Util;
 using Marten.V4Internals.Linq.Includes;
 using Npgsql;
 using Remotion.Linq;
+using Remotion.Linq.Clauses;
 using Remotion.Linq.Clauses.ResultOperators;
 
 namespace Marten.V4Internals.Linq
@@ -42,6 +44,12 @@ namespace Marten.V4Internals.Linq
             _provider = Provider.As<V4QueryProvider>();
         }
 
+        internal IQueryHandler<TResult> BuildHandler<TResult>(ResultOperatorBase op = null)
+        {
+            var builder = new LinqHandlerBuilder(_session, Expression, op);
+            return builder.BuildHandler<TResult>(Statistics, _provider.Includes);
+        }
+
         public QueryStatistics Statistics
         {
             get => _provider.Statistics;
@@ -55,80 +63,67 @@ namespace Marten.V4Internals.Linq
 
         public Task<bool> AnyAsync(CancellationToken token)
         {
-            // TODO -- flyweight for the operator
-            return _provider.ExecuteAsync<bool>(Expression, token, new AnyResultOperator());
+            return _provider.ExecuteAsync<bool>(Expression, token, LinqConstants.AnyOperator);
         }
 
         public Task<int> CountAsync(CancellationToken token)
         {
-            // TODO -- flyweight for the operator
-            return _provider.ExecuteAsync<int>(Expression, token, new CountResultOperator());
+            return _provider.ExecuteAsync<int>(Expression, token, LinqConstants.CountOperator);
         }
 
         public Task<long> CountLongAsync(CancellationToken token)
         {
-            // TODO -- flyweight for the operator
-            return _provider.ExecuteAsync<long>(Expression, token, new LongCountResultOperator());
+            return _provider.ExecuteAsync<long>(Expression, token, LinqConstants.LongCountOperator);
         }
 
         public Task<TResult> FirstAsync<TResult>(CancellationToken token)
         {
-            // TODO -- flyweight for the operator
-            return _provider.ExecuteAsync<TResult>(Expression, token, new FirstResultOperator(false));
+            return _provider.ExecuteAsync<TResult>(Expression, token, LinqConstants.FirstOperator);
         }
 
         public Task<TResult> FirstOrDefaultAsync<TResult>(CancellationToken token)
         {
-            // TODO -- flyweight for the operator
-            return _provider.ExecuteAsync<TResult>(Expression, token, new FirstResultOperator(true));
+            return _provider.ExecuteAsync<TResult>(Expression, token, LinqConstants.FirstOrDefaultOperator);
         }
 
         public Task<TResult> SingleAsync<TResult>(CancellationToken token)
         {
-            // TODO -- flyweight for the operator
-            return _provider.ExecuteAsync<TResult>(Expression, token, new SingleResultOperator(false));
+            return _provider.ExecuteAsync<TResult>(Expression, token, LinqConstants.SingleOperator);
         }
 
         public Task<TResult> SingleOrDefaultAsync<TResult>(CancellationToken token)
         {
-            // TODO -- flyweight for the operator
-            return _provider.ExecuteAsync<TResult>(Expression, token, new SingleResultOperator(true));
+            return _provider.ExecuteAsync<TResult>(Expression, token, LinqConstants.SingleOrDefaultOperator);
         }
 
         public Task<TResult> SumAsync<TResult>(CancellationToken token)
         {
-            // TODO -- flyweight for the operator
-            return _provider.ExecuteAsync<TResult>(Expression, token, new SumResultOperator());
+            return _provider.ExecuteAsync<TResult>(Expression, token, LinqConstants.SumOperator);
         }
 
         public Task<TResult> MinAsync<TResult>(CancellationToken token)
         {
-            // TODO -- flyweight for the operator
-            return _provider.ExecuteAsync<TResult>(Expression, token, new MinResultOperator());
+            return _provider.ExecuteAsync<TResult>(Expression, token, LinqConstants.MinOperator);
         }
 
         public Task<TResult> MaxAsync<TResult>(CancellationToken token)
         {
-            // TODO -- flyweight for the operator
-            return _provider.ExecuteAsync<TResult>(Expression, token, new MaxResultOperator());
+            return _provider.ExecuteAsync<TResult>(Expression, token, LinqConstants.MaxOperator);
         }
 
         public Task<double> AverageAsync(CancellationToken token)
         {
-            // TODO -- flyweight for the operator
-            return _provider.ExecuteAsync<double>(Expression, token, new AverageResultOperator());
+            return _provider.ExecuteAsync<double>(Expression, token, LinqConstants.AverageOperator);
         }
 
         public string ToJsonArray()
         {
-            // TODO -- flyweight for the operator
-            return _provider.Execute<string>(Expression, new AsJsonResultOperator(null));
+            return _provider.Execute<string>(Expression, LinqConstants.AsJsonOperator);
         }
 
         public Task<string> ToJsonArrayAsync(CancellationToken token)
         {
-            // TODO -- flyweight for the operator
-            return _provider.ExecuteAsync<string>(Expression, token, new AsJsonResultOperator(null));
+            return _provider.ExecuteAsync<string>(Expression, token, LinqConstants.AsJsonOperator);
         }
 
         public QueryPlan Explain(FetchType fetchType = FetchType.FetchMany,

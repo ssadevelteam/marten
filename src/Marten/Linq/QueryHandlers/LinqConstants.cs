@@ -1,4 +1,6 @@
 using Marten.V4Internals.Linq;
+using Remotion.Linq.Clauses;
+using Remotion.Linq.Clauses.ResultOperators;
 
 namespace Marten.Linq.QueryHandlers
 {
@@ -9,5 +11,21 @@ namespace Marten.Linq.QueryHandlers
 
         internal static readonly V4Internals.ISelector<string> StringValueSelector =
             new ScalarStringSelectClause(string.Empty, string.Empty);
+
+        internal static readonly ResultOperatorBase AnyOperator = new AnyResultOperator();
+        internal static readonly ResultOperatorBase CountOperator = new CountResultOperator();
+        internal static readonly ResultOperatorBase LongCountOperator = new LongCountResultOperator();
+        internal static readonly ResultOperatorBase SumOperator = new SumResultOperator();
+        internal static readonly ResultOperatorBase MinOperator = new MinResultOperator();
+        internal static readonly ResultOperatorBase MaxOperator = new MaxResultOperator();
+        internal static readonly ResultOperatorBase AverageOperator = new AverageResultOperator();
+        internal static readonly ResultOperatorBase AsJsonOperator = new AsJsonResultOperator(null);
+
+        internal static readonly ResultOperatorBase FirstOperator = new FirstResultOperator(false);
+        internal static readonly ResultOperatorBase SingleOperator = new SingleResultOperator(false);
+        internal static readonly ResultOperatorBase FirstOrDefaultOperator = new FirstResultOperator(true);
+        internal static readonly ResultOperatorBase SingleOrDefaultOperator = new SingleResultOperator(true);
+
+
     }
 }
