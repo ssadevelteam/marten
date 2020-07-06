@@ -78,6 +78,8 @@ namespace Marten.Testing.Linq
         [Fact]
         public void query_by_date()
         {
+            DocumentTracking = DocumentTracking.IdentityOnly;
+
             var targets = Target.GenerateRandomData(6).ToArray();
             theSession.Store(targets);
 

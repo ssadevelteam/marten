@@ -45,8 +45,6 @@ namespace Marten.V4Internals
             parameters[0].NpgsqlDbType = DbType();
             parameters[0].Value = _id;
 
-
-
             ConfigureParameters(parameters, _document, session);
         }
 
