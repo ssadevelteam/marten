@@ -1,6 +1,8 @@
 using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
+using Marten.Linq;
+using Marten.Storage;
 using Marten.Util;
 using Marten.V4Internals;
 
@@ -19,12 +21,17 @@ namespace Marten
 
         public void ConfigureCommand(CommandBuilder builder, IMartenSession session)
         {
-            builder.Append("select data from ");
+            builder.Append("select d.data from ");
             builder.Append(_storage.FromObject);
-            builder.Append(" where id = :");
+            builder.Append(" as d where id = :");
 
             var parameter = builder.AddParameter(_id);
             builder.Append(parameter.ParameterName);
+
+            if (_storage.QueryableDocument.TenancyStyle == TenancyStyle.Conjoined)
+            {
+                builder.Append($" and {TenantWhereFragment.Filter}");
+            }
         }
 
         public string Handle(DbDataReader reader, IMartenSession session)
