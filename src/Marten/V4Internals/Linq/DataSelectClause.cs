@@ -1,37 +1,43 @@
 using System;
+using Baseline;
 using Marten.Linq;
 using Marten.Util;
 
 namespace Marten.V4Internals.Linq
 {
-    public class DataSelectClause<T> : ISelectClause
+    public class DataSelectClause<T> : ISelectClause, IScalarSelectClause
     {
         public DataSelectClause(string from)
         {
             FromObject = from;
         }
 
-        public DataSelectClause(string from, string selectionText)
+        public DataSelectClause(string from, string field)
         {
             FromObject = from;
-            SelectionText = selectionText;
+            FieldName = field;
         }
 
         public Type SelectedType => typeof(T);
 
-        public string SelectionText { get; protected set; } = "select d.data from ";
+        public string FieldName { get; set; } = "d.data";
 
         public string FromObject { get; }
         public void WriteSelectClause(CommandBuilder sql)
         {
-            sql.Append(SelectionText);
+            if (FieldName.IsNotEmpty())
+            {
+                sql.Append("select ");
+                sql.Append(FieldName);
+                sql.Append(" as data from ");
+            }
             sql.Append(FromObject);
             sql.Append(" as d");
         }
 
         public string[] SelectFields()
         {
-            return new string[] {"data"};
+            return new string[] {FieldName};
         }
 
         public ISelector BuildSelector(IMartenSession session)
@@ -50,6 +56,11 @@ namespace Marten.V4Internals.Linq
         public ISelectClause UseStatistics(QueryStatistics statistics)
         {
             return new StatsSelectClause<T>(this, statistics);
+        }
+
+        public void ApplyOperator(string op)
+        {
+            FieldName = $"{op}({FieldName})";
         }
     }
 }

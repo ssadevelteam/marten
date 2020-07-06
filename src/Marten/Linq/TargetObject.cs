@@ -30,7 +30,7 @@ namespace Marten.Linq
         public string ToSelectField(IFieldMapping mapping)
         {
             var jsonBuildObjectArgs = _setters.Select(x => x.ToJsonBuildObjectPair(mapping)).Join(", ");
-            return $"jsonb_build_object({jsonBuildObjectArgs}) as json";
+            return $"jsonb_build_object({jsonBuildObjectArgs})";
         }
 
         private class SetterBinding

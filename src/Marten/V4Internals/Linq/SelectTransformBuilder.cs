@@ -78,7 +78,7 @@ namespace Marten.V4Internals.Linq
             public string ToSelectField(IFieldMapping fields)
             {
                 var jsonBuildObjectArgs = _setters.Select(x => x.ToJsonBuildObjectPair(fields)).Join(", ");
-                return $"jsonb_build_object({jsonBuildObjectArgs}) as json";
+                return $"jsonb_build_object({jsonBuildObjectArgs})";
             }
 
             private class SetterBinding

@@ -184,7 +184,7 @@ namespace Marten.V4Internals.Linq
         {
             if (elementType.IsSimple())
             {
-                var selection = $"select jsonb_array_elements_text({collectionField.JSONBLocator}) as data from ";
+                var selection = $"jsonb_array_elements_text({collectionField.JSONBLocator})";
 
                 SelectClause = typeof(DataSelectClause<>).CloseAndBuildAs<ISelectClause>(SelectClause.FromObject, selection,
                     elementType);
@@ -203,7 +203,7 @@ namespace Marten.V4Internals.Linq
 
             if (isComplex)
             {
-                var selection = $"select jsonb_array_elements({collectionField.JSONBLocator}) as data from ";
+                var selection = $"jsonb_array_elements({collectionField.JSONBLocator})";
                 SelectClause = typeof(DataSelectClause<>).CloseAndBuildAs<ISelectClause>(SelectClause.FromObject, selection,
                     elementType);
 
@@ -222,7 +222,7 @@ namespace Marten.V4Internals.Linq
             }
             else
             {
-                var selection = $"select jsonb_array_elements_text({collectionField.JSONBLocator}) as data from ";
+                var selection = $"jsonb_array_elements_text({collectionField.JSONBLocator})";
                 SelectClause = typeof(DataSelectClause<>).CloseAndBuildAs<ISelectClause>(SelectClause.FromObject, selection,
                     elementType);
 
@@ -254,8 +254,7 @@ namespace Marten.V4Internals.Linq
             var builder = new SelectTransformBuilder(select, Fields);
             var transformField = builder.SelectedFieldExpression;
 
-            var selectionText = $"select {transformField} from ";
-            SelectClause = typeof(DataSelectClause<>).CloseAndBuildAs<ISelectClause>(SelectClause.FromObject, selectionText, select.Selector.Type);
+            SelectClause = typeof(DataSelectClause<>).CloseAndBuildAs<ISelectClause>(SelectClause.FromObject, transformField, select.Selector.Type);
         }
 
 

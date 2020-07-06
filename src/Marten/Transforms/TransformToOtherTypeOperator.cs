@@ -37,7 +37,11 @@ namespace Marten.Transforms
         {
             var transform = session.Tenant.TransformFor(_transformName);
 
-            var clause = new DataSelectClause<T>(statement.SelectClause.FromObject, $"select {transform.Identifier}(d.data) from ");
+            var clause = new DataSelectClause<T>(statement.SelectClause.FromObject)
+            {
+                FieldName = $"{transform.Identifier}(d.data)"
+            };
+
             statement.SelectClause = clause;
 
             return statement;
