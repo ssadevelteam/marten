@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using LamarCodeGeneration;
 using Marten.Schema;
 using Npgsql;
 
@@ -34,6 +35,11 @@ namespace Marten.V4Internals
             {
                 if (items is Dictionary<TId, T> d)
                 {
+                    if (d.ContainsKey(id))
+                    {
+                        throw new InvalidOperationException($"Document '{typeof(T).FullNameInCode()}' with same Id already added to the session.");
+                    }
+
                     d[id] = document;
                 }
                 else

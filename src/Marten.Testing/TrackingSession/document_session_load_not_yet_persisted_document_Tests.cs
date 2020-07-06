@@ -11,7 +11,8 @@ namespace Marten.Testing.TrackingSession
     public class document_session_load_not_yet_persisted_document_Tests : IntegrationContext
     {
         [Theory]
-        [SessionTypes]
+        [InlineData(Marten.DocumentTracking.DirtyTracking)]
+        [InlineData(Marten.DocumentTracking.IdentityOnly)]
         public void then_the_document_should_be_returned(DocumentTracking tracking)
         {
             DocumentTracking = tracking;
@@ -26,7 +27,8 @@ namespace Marten.Testing.TrackingSession
         }
 
         [Theory]
-        [SessionTypes]
+        [InlineData(Marten.DocumentTracking.DirtyTracking)]
+        [InlineData(Marten.DocumentTracking.IdentityOnly)]
         public void given_document_is_already_added_then_document_should_be_returned(DocumentTracking tracking)
         {
             DocumentTracking = tracking;
@@ -42,7 +44,8 @@ namespace Marten.Testing.TrackingSession
         }
 
         [Theory]
-        [SessionTypes]
+        [InlineData(Marten.DocumentTracking.DirtyTracking)]
+        [InlineData(Marten.DocumentTracking.IdentityOnly)]
         public void given_document_with_same_id_is_already_added_then_exception_should_occur(DocumentTracking tracking)
         {
             DocumentTracking = tracking;
