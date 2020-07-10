@@ -4,6 +4,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Baseline;
 using Marten.Events;
+using Marten.Linq;
 using Marten.Linq.Fields;
 using Marten.Schema;
 using Marten.Schema.Identity;
@@ -13,6 +14,8 @@ using Marten.Storage;
 using Marten.Transforms;
 using Marten.Util;
 using Marten.V4Internals;
+using Marten.V4Internals.Compiled;
+using Marten.V4Internals.Sessions;
 using Npgsql;
 
 namespace Marten
@@ -418,6 +421,22 @@ namespace Marten
             {
                 return ForAllDocuments(_ => _.TenancyStyle = TenancyStyle.Conjoined);
             }
+        }
+
+        private ImHashMap<Type, ICompiledQuerySource> _querySources = ImHashMap<Type, ICompiledQuerySource>.Empty;
+
+        internal ICompiledQuerySource GetCompiledQuerySourceFor<TDoc, TOut>(ICompiledQuery<TDoc,TOut> query, IMartenSession session)
+        {
+            if (_querySources.TryFind(query.GetType(), out var source))
+            {
+                return source;
+            }
+
+            var plan = QueryCompiler.BuildPlan(session, query);
+            source = new CompiledQuerySourceBuilder(plan).Build();
+            _querySources = _querySources.AddOrUpdate(query.GetType(), source);
+
+            return source;
         }
     }
 

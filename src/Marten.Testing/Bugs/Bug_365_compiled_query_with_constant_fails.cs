@@ -57,7 +57,7 @@ namespace Marten.Testing.Bugs
                 DateTime = dateTime;
             }
 
-            public Expression<Func<IQueryable<Route>, IEnumerable<Route>>> QueryIs()
+            public Expression<Func<IMartenQueryable<Route>, IEnumerable<Route>>> QueryIs()
             {
                 return query => query.Where(route => route.Status == RouteStatus.Planned && route.Date > DateTime);
             }

@@ -144,7 +144,7 @@ namespace Marten.V4Internals.Linq
             var storage = (IDocumentStorage<TInclude>)_session.StorageFor(typeof(TInclude));
             var identityField = _session.StorageFor(typeof(T)).Fields.FieldFor(idSource);
 
-            var include = new Include<TInclude>(_provider.Includes.Count, storage, identityField, callback);
+            var include = new IncludePlan<TInclude>(_provider.Includes.Count, storage, identityField, callback);
             _provider.Includes.Add(include);
 
             return this;
@@ -170,7 +170,7 @@ namespace Marten.V4Internals.Linq
                     dictionary[id] = item;
                 }
 
-                var include = new Include<TInclude>(_provider.Includes.Count, storage, identityField, Callback);
+                var include = new IncludePlan<TInclude>(_provider.Includes.Count, storage, identityField, Callback);
                 _provider.Includes.Add(include);
             }
             else

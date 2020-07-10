@@ -4,7 +4,7 @@ using Marten.Schema;
 
 namespace Marten.V4Internals
 {
-    public abstract class DocumentSelectorWithIdentityMap<T, TId>
+    public abstract class DocumentSelectorWithIdentityMap<T, TId> : IDocumentSelector
     {
         protected readonly DocumentMapping _mapping;
         protected readonly ISerializer _serializer;

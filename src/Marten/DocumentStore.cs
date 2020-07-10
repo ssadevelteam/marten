@@ -100,16 +100,12 @@ namespace Marten
 
             Parser = new MartenExpressionParser(Serializer, options);
 
-            HandlerFactory = new QueryHandlerFactory(this);
-
             options.InitialData.Each(x => x.Populate(this));
         }
 
         public ITenancy Tenancy => Options.Tenancy;
 
         public EventGraph Events => Options.Events;
-
-        internal IQueryHandlerFactory HandlerFactory { get; }
 
         internal MartenExpressionParser Parser { get; }
 

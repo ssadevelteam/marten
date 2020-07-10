@@ -6,7 +6,7 @@ using Marten.V4Internals.DirtyTracking;
 namespace Marten.V4Internals
 {
     // TODO -- this isn't real yet
-    public abstract class DocumentSelectorWithDirtyChecking<T, TId>
+    public abstract class DocumentSelectorWithDirtyChecking<T, TId> : IDocumentSelector
     {
         protected readonly DocumentMapping _mapping;
         protected readonly ISerializer _serializer;

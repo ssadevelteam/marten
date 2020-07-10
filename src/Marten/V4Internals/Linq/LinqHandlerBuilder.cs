@@ -29,10 +29,13 @@ namespace Marten.V4Internals.Linq
             new TransformToOtherMatcher()
         };
 
-        public LinqHandlerBuilder(IMartenSession session, Expression expression, ResultOperatorBase additionalOperator = null)
+        public LinqHandlerBuilder(IMartenSession session, Expression expression, ResultOperatorBase additionalOperator = null, bool forCompiled = false)
         {
             _session = session;
-            Model = MartenQueryParser.Flyweight.GetParsedQuery(expression);
+            Model = forCompiled
+                ? MartenQueryParser.TransformQueryFlyweight.GetParsedQuery(expression)
+                : MartenQueryParser.Flyweight.GetParsedQuery(expression);
+
             if (additionalOperator != null) Model.ResultOperators.Add(additionalOperator);
 
             var storage = session.StorageFor(Model.SourceType());
@@ -199,12 +202,31 @@ namespace Marten.V4Internals.Linq
                     CurrentStatement.ApplyAggregateOperator("MAX");
                     break;
 
+                case IncludeResultOperator _:
+                    // TODO -- ignoring this for now, but should do something with it later maybe?
+                    break;
+
+                case ToJsonArrayResultOperator _:
+                    CurrentStatement.ToJsonSelector();
+                    break;
+
                 default:
                     throw new NotSupportedException("Don't yet know how to deal with " + resultOperator);
             }
         }
 
-        public IQueryHandler<TResult> BuildHandler<TResult>(QueryStatistics statistics, IList<IInclude> includes)
+        public IQueryHandler<TResult> BuildHandler<TResult>(QueryStatistics statistics, IList<IIncludePlan> includes)
+        {
+            BuildDatabaseCommand<TResult>(statistics, includes);
+
+            var handler = buildHandlerForCurrentStatement<TResult>();
+
+            return includes.Any()
+                ? new IncludeQueryHandler<TResult>(handler, includes.Select(x => x.BuildReader(_session)).ToArray())
+                : handler;
+        }
+
+        public void BuildDatabaseCommand<TResult>(QueryStatistics statistics, IList<IIncludePlan> includes)
         {
             if (statistics != null)
             {
@@ -219,12 +241,6 @@ namespace Marten.V4Internals.Linq
             {
                 TopStatement = new IncludeIdentitySelectorStatement((DocumentStatement) TopStatement, includes);
             }
-
-            var handler = buildHandlerForCurrentStatement<TResult>();
-
-            return includes.Any()
-                ? new IncludeQueryHandler<TResult>(handler, includes.Select(x => x.BuildReader(_session)).ToArray())
-                : handler;
         }
 
         private IQueryHandler<TResult> buildHandlerForCurrentStatement<TResult>()

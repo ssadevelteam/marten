@@ -1,6 +1,8 @@
 using System;
+using System.Net;
 using Marten.Linq;
 using Marten.Util;
+using Marten.V4Internals;
 using Npgsql;
 
 namespace Marten.Services
@@ -25,10 +27,17 @@ namespace Marten.Services
         /// <returns></returns>
         public NpgsqlCommand PreviewCommand<TDoc, TReturn>(ICompiledQuery<TDoc, TReturn> query)
         {
-            QueryStatistics stats;
-            var handler = _store.HandlerFactory.HandlerFor(query, out stats);
+            using var session = _store.QuerySession();
+            var source = _store.Options.GetCompiledQuerySourceFor(query, (IMartenSession) session);
+            var handler = source.Build(query, (IMartenSession) session);
 
-            return CommandBuilder.ToCommand(_store.Tenancy.Default, handler);
+            var command = new NpgsqlCommand();
+            var builder = new CommandBuilder(command);
+            handler.ConfigureCommand(builder, (IMartenSession) session);
+
+            command.CommandText = builder.ToString();
+
+            return command;
         }
 
         /// <summary>

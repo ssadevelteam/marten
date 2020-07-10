@@ -77,7 +77,7 @@ namespace Marten.Testing.Bugs
 
     public class PageOfTargets: ICompiledListQuery<Target>
     {
-        public Expression<Func<IQueryable<Target>, IEnumerable<Target>>> QueryIs()
+        public Expression<Func<IMartenQueryable<Target>, IEnumerable<Target>>> QueryIs()
         {
             return q => q.Where(x => x.Color == Color).OrderBy(x => x.Id).Skip(Start).Take(Take);
         }
@@ -89,7 +89,7 @@ namespace Marten.Testing.Bugs
 
     public class WrongOrderedPageOfTargets: ICompiledListQuery<Target>
     {
-        public Expression<Func<IQueryable<Target>, IEnumerable<Target>>> QueryIs()
+        public Expression<Func<IMartenQueryable<Target>, IEnumerable<Target>>> QueryIs()
         {
             return q => q.Where(x => x.Color == Color).OrderBy(x => x.Id).Take(Take).Skip(Start);
         }

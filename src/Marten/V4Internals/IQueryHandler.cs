@@ -1,6 +1,7 @@
 using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
+using Marten.Linq;
 using Marten.Util;
 
 namespace Marten.V4Internals
@@ -16,5 +17,11 @@ namespace Marten.V4Internals
         T Handle(DbDataReader reader, IMartenSession session);
 
         Task<T> HandleAsync(DbDataReader reader, IMartenSession session, CancellationToken token);
+    }
+
+    public interface IMaybeStatefulHandler
+    {
+        bool DependsOnDocumentSelector();
+        IQueryHandler CloneForSession(IMartenSession session, QueryStatistics statistics);
     }
 }

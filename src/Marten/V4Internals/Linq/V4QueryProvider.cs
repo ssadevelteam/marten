@@ -112,7 +112,7 @@ namespace Marten.V4Internals.Linq
             }
         }
 
-        public IList<IInclude> Includes { get; } = new List<IInclude>();
+        public IList<IIncludePlan> Includes { get; } = new List<IIncludePlan>();
 
     }
 }

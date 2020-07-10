@@ -7,7 +7,7 @@ using Marten.Util;
 
 namespace Marten.V4Internals.Linq.QueryHandlers
 {
-    public class OneResultHandler<T>: IQueryHandler<T>
+    public class OneResultHandler<T>: IQueryHandler<T>, IMaybeStatefulHandler
     {
         private const string NoElementsMessage = "Sequence contains no elements";
         private const string MoreThanOneElementMessage = "Sequence contains more than one element";
@@ -67,6 +67,19 @@ namespace Marten.V4Internals.Linq.QueryHandlers
                 throw new InvalidOperationException(MoreThanOneElementMessage);
 
             return result;
+        }
+
+        public bool DependsOnDocumentSelector()
+        {
+            // There will be from dynamic codegen
+            // ReSharper disable once SuspiciousTypeConversion.Global
+            return _selector is IDocumentSelector;
+        }
+
+        public IQueryHandler CloneForSession(IMartenSession session, QueryStatistics statistics)
+        {
+            var selector = (ISelector<T>)session.StorageFor<T>().BuildSelector(session);
+            return new OneResultHandler<T>(null, selector, _canBeNull, _canBeMultiples);
         }
     }
 }

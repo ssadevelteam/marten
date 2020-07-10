@@ -7,7 +7,7 @@ using Marten.Util;
 
 namespace Marten.V4Internals.Linq.QueryHandlers
 {
-    public class ListWithStatsQueryHandler<T>: IQueryHandler<IReadOnlyList<T>>, IQueryHandler<IEnumerable<T>>
+    public class ListWithStatsQueryHandler<T>: IQueryHandler<IReadOnlyList<T>>, IQueryHandler<IEnumerable<T>>, IMaybeStatefulHandler
     {
         private readonly int _countIndex;
         private readonly Statement _statement;
@@ -90,6 +90,20 @@ namespace Marten.V4Internals.Linq.QueryHandlers
             }
 
             return list;
+        }
+
+        public bool DependsOnDocumentSelector()
+        {
+            // There will be from dynamic codegen
+            // ReSharper disable once SuspiciousTypeConversion.Global
+            return _selector is IDocumentSelector;
+        }
+
+        public IQueryHandler CloneForSession(IMartenSession session, QueryStatistics statistics)
+        {
+            var selector = (ISelector<T>)session.StorageFor<T>().BuildSelector(session);
+
+            return new ListWithStatsQueryHandler<T>(_countIndex, null, selector, statistics);
         }
     }
 }

@@ -289,12 +289,18 @@ namespace Marten.V4Internals.Sessions
 
         public TOut Query<TDoc, TOut>(ICompiledQuery<TDoc, TOut> query)
         {
-            throw new NotImplementedException();
+            var source = Options.GetCompiledQuerySourceFor(query, this);
+            var handler = (IQueryHandler<TOut>)source.Build(query, this);
+
+            return ExecuteHandler(handler);
         }
 
         public Task<TOut> QueryAsync<TDoc, TOut>(ICompiledQuery<TDoc, TOut> query, CancellationToken token = default(CancellationToken))
         {
-            throw new NotImplementedException();
+            var source = Options.GetCompiledQuerySourceFor(query, this);
+            var handler = (IQueryHandler<TOut>)source.Build(query, this);
+
+            return ExecuteHandlerAsync(handler, token);
         }
 
         public IReadOnlyList<T> LoadMany<T>(params string[] ids)

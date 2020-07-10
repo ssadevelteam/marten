@@ -32,10 +32,14 @@ namespace Marten.Testing.Linq
             public int PageNumber { get; set; }
             public int PageSize { get; set; }
 
-            public Expression<Func<IQueryable<Target>, IEnumerable<Target>>> QueryIs()
+            public QueryStatistics Statistics { get; } = new QueryStatistics();
+
+            public Expression<Func<IMartenQueryable<Target>, IEnumerable<Target>>> QueryIs()
             {
-                return query => query.Stats<Target, TargetPaginationQuery>(x => x.Stats)
-                    .Where(x => x.Number > 10).Skip(PageNumber).Take(PageSize);
+                return query => query
+                    .Where(x => x.Number > 10)
+                    .Skip(PageNumber)
+                    .Take(PageSize);
             }
         }
 

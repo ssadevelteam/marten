@@ -10,33 +10,34 @@ namespace Marten.V4Internals.Linq
 {
     public class StatsSelectClause<T> : ISelectClause
     {
-        private readonly ISelectClause _inner;
         private readonly QueryStatistics _statistics;
 
         public StatsSelectClause(ISelectClause inner, QueryStatistics statistics)
         {
-            _inner = inner;
+            Inner = inner;
             _statistics = statistics;
         }
 
-        public Type SelectedType => _inner.SelectedType;
+        public ISelectClause Inner { get; }
 
-        public string FromObject => _inner.FromObject;
+        public Type SelectedType => Inner.SelectedType;
+
+        public string FromObject => Inner.FromObject;
 
         public void WriteSelectClause(CommandBuilder sql)
         {
             sql.Append("select ");
-            sql.Append(_inner.SelectFields().Join(", "));
+            sql.Append(Inner.SelectFields().Join(", "));
             sql.Append(", ");
             sql.Append(LinqConstants.StatsColumn);
             sql.Append(" from ");
-            sql.Append(_inner.FromObject);
+            sql.Append(Inner.FromObject);
             sql.Append(" as d");
         }
 
         public string[] SelectFields()
         {
-            return _inner.SelectFields().Concat(new string[]{LinqConstants.StatsColumn}).ToArray();
+            return Inner.SelectFields().Concat(new string[]{LinqConstants.StatsColumn}).ToArray();
         }
 
         public ISelector BuildSelector(IMartenSession session)
@@ -47,9 +48,9 @@ namespace Marten.V4Internals.Linq
         public IQueryHandler<TResult> BuildHandler<TResult>(IMartenSession session, Statement topStatement,
             Statement currentStatement)
         {
-            var selector = (ISelector<T>)_inner.BuildSelector(session);
+            var selector = (ISelector<T>)Inner.BuildSelector(session);
 
-            var handler = new ListWithStatsQueryHandler<T>(_inner.SelectFields().Length, topStatement, selector, _statistics);
+            var handler = new ListWithStatsQueryHandler<T>(Inner.SelectFields().Length, topStatement, selector, _statistics);
 
             if (handler is IQueryHandler<TResult> h) return h;
 

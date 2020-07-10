@@ -147,10 +147,10 @@ namespace Marten.Services.BatchQuerying
 
         public Task<TResult> Query<TDoc, TResult>(ICompiledQuery<TDoc, TResult> query)
         {
-            throw new NotImplementedException();
-            // QueryStatistics stats;
-            // var handler = _store.HandlerFactory.HandlerFor(query, out stats);
-            //return AddItem(handler);
+            var source = _parent.Options.GetCompiledQuerySourceFor(query, _parent);
+            var handler = (IQueryHandler<TResult>)source.Build(query, _parent);
+
+            return AddItem(handler);
         }
 
         public Task<T> AggregateStream<T>(Guid streamId, int version = 0, DateTime? timestamp = null)

@@ -20,7 +20,7 @@ namespace Marten.Linq
     // SAMPLE: ICompiledQuery
     public interface ICompiledQuery<TDoc, TOut>
     {
-        Expression<Func<IQueryable<TDoc>, TOut>> QueryIs();
+        Expression<Func<IMartenQueryable<TDoc>, TOut>> QueryIs();
     }
 
     // ENDSAMPLE

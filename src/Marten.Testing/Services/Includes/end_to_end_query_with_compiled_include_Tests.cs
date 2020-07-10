@@ -34,7 +34,7 @@ namespace Marten.Testing.Services.Includes
                 var issue2 = query.Query(issueQuery);
 
                 SpecificationExtensions.ShouldNotBeNull(issueQuery.Included);
-                issueQuery.Included.Id.ShouldBe(user.Id);
+                issueQuery.Included.Single().Id.ShouldBe(user.Id);
 
                 SpecificationExtensions.ShouldNotBeNull(issue2);
             }
@@ -43,55 +43,17 @@ namespace Marten.Testing.Services.Includes
         public class IssueByTitleWithAssignee : ICompiledQuery<Issue>
         {
             public string Title { get; set; }
-            public User Included { get; private set; } = new User();
+            public IList<User> Included { get; private set; } = new List<User>();
 
-            public Expression<Func<IQueryable<Issue>, Issue>> QueryIs()
+            public Expression<Func<IMartenQueryable<Issue>, Issue>> QueryIs()
             {
                 return query => query
-                    .Include<Issue, IssueByTitleWithAssignee>(x => x.AssigneeId, x => x.Included)
+                    .Include(x => x.AssigneeId, Included)
                     .Single(x => x.Title == Title);
             }
         }
         // ENDSAMPLE
 
-        [Fact]
-        public void compiled_query_with_multi_includes()
-        {
-            var user = new User();
-            var reporter = new User();
-            var issue = new Issue { AssigneeId = user.Id, ReporterId = reporter.Id, Title = "Garage Door is busted" };
-
-            theSession.Store<object>(user, reporter, issue);
-            theSession.SaveChanges();
-
-            using (var query = theStore.QuerySession())
-            {
-                var issueQuery = new IssueByTitleIncludingUsers {Title = issue.Title};
-                var issue2 = query.Query(issueQuery);
-
-                SpecificationExtensions.ShouldNotBeNull(issueQuery.IncludedAssignee);
-                issueQuery.IncludedAssignee.Id.ShouldBe(user.Id);
-                SpecificationExtensions.ShouldNotBeNull(issueQuery.IncludedReported);
-                issueQuery.IncludedReported.Id.ShouldBe(reporter.Id);
-
-                SpecificationExtensions.ShouldNotBeNull(issue2);
-            }
-        }
-
-public class IssueByTitleIncludingUsers : ICompiledQuery<Issue>
-{
-    public string Title { get; set; }
-    public User IncludedAssignee { get; private set; } = new User();
-    public User IncludedReported { get; private set; } = new User();
-
-    public Expression<Func<IQueryable<Issue>, Issue>> QueryIs()
-    {
-        return query => query
-            .Include<Issue, IssueByTitleIncludingUsers>(x => x.AssigneeId, x => x.IncludedAssignee)
-            .Include<Issue, IssueByTitleIncludingUsers>(x => x.ReporterId, x => x.IncludedReported)
-            .Single(x => x.Title == Title);
-    }
-}
 
         // SAMPLE: compiled_include_list
         public class IssueWithUsers : ICompiledListQuery<Issue>
@@ -100,9 +62,9 @@ public class IssueByTitleIncludingUsers : ICompiledQuery<Issue>
             // Can also work like that:
             //public List<User> Users => new List<User>();
 
-            public Expression<Func<IQueryable<Issue>, IEnumerable<Issue>>> QueryIs()
+            public Expression<Func<IMartenQueryable<Issue>, IEnumerable<Issue>>> QueryIs()
             {
-                return query => query.Include<Issue, IssueWithUsers>(x => x.AssigneeId, x => x.Users);
+                return query => query.Include(x => x.AssigneeId, Users);
             }
         }
 
@@ -142,9 +104,9 @@ public class IssueByTitleIncludingUsers : ICompiledQuery<Issue>
             // Can also work like that:
             //public List<User> Users => new Dictionary<Guid,User>();
 
-            public Expression<Func<IQueryable<Issue>, IEnumerable<Issue>>> QueryIs()
+            public Expression<Func<IMartenQueryable<Issue>, IEnumerable<Issue>>> QueryIs()
             {
-                return query => query.Include<Issue, IssueWithUsersById>(x => x.AssigneeId, x => x.UsersById);
+                return query => query.Include(x => x.AssigneeId, UsersById);
             }
         }
 

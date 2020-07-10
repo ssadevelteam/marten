@@ -1,52 +1,42 @@
 using System;
-using Marten.Linq.Fields;
-using Marten.Linq.QueryHandlers;
-using Marten.Util;
+using System.Collections.Generic;
+using LamarCodeGeneration;
 
 namespace Marten.V4Internals.Linq.Includes
 {
-    public class Include<T> : IInclude
+    public static class Include
     {
-        private readonly IDocumentStorage<T> _storage;
-        private readonly Action<T> _callback;
-
-        public Include(int index, IDocumentStorage<T> storage, IField connectingField, Action<T> callback)
+        public static IIncludeReader ReaderToAction<T>(IMartenSession session, Action<T> action)
         {
-            _storage = storage;
-            _callback = callback;
+            var storage = session.StorageFor<T>();
 
-            IdAlias = "id" + (index + 1);
-
-            TempSelector = $"{connectingField.TypedLocator} as {IdAlias}";
+            var selector = (ISelector<T>) storage.BuildSelector(session);
+            return new IncludeReader<T>(action, selector);
         }
 
-        public string IdAlias { get;}
-        public string TempSelector { get; }
-        public Statement BuildStatement()
+        public static IIncludeReader ReaderToList<T>(IMartenSession session, IList<T> list)
         {
-            return new IncludedDocumentStatement(_storage, this);
+            return ReaderToAction<T>(session, list.Add);
         }
 
-        public IIncludeReader BuildReader(IMartenSession session)
+        public static IIncludeReader ReaderToDictionary<T, TId>(IMartenSession session, IDictionary<TId, T> dictionary)
         {
-            var selector = (ISelector<T>) _storage.BuildSelector(session);
-            return new IncludeReader<T>(_callback, selector);
-        }
-
-        public class IncludedDocumentStatement : Statement
-        {
-            public IncludedDocumentStatement(IDocumentStorage<T> storage, Include<T> include) : base(storage, storage.Fields)
+            var storage = session.StorageFor<T>();
+            if (storage is IDocumentStorage<T, TId> s)
             {
-                Where = new InTempTableWhereFragment(LinqConstants.IdListTableName, include.IdAlias);
+                void Callback(T item)
+                {
+                    var id = s.Identity(item);
+                    dictionary[id] = item;
+                }
+
+                var selector = (ISelector<T>) storage.BuildSelector(session);
+                return new IncludeReader<T>(Callback, selector);
             }
-
-            protected override void configure(CommandBuilder sql)
+            else
             {
-                base.configure(sql);
-                sql.Append(";\n");
+                throw new InvalidOperationException($"Document type {typeof(T).FullNameInCode()} has an id type of {storage.IdType.NameInCode()}, but was used with {typeof(TId).NameInCode()}");
             }
         }
     }
-
-
 }

@@ -1,6 +1,6 @@
 namespace Marten.V4Internals.Linq.Includes
 {
-    public interface IInclude
+    public interface IIncludePlan
     {
         IIncludeReader BuildReader(IMartenSession session);
 

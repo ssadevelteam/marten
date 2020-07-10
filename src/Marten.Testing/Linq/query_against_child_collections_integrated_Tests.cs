@@ -188,7 +188,7 @@ namespace Marten.Testing.Linq
                 this.Value = value;
             }
 
-            public Expression<Func<IQueryable<Outer>, Outer>> QueryIs()
+            public Expression<Func<IMartenQueryable<Outer>, Outer>> QueryIs()
             {
                 return q => q.FirstOrDefault(o => o.Inners.Any(i => i.Type == Type && i.Value == Value));
             }

@@ -136,7 +136,7 @@ public class FindByFirstName : ICompiledQuery<User, User>
 {
     public string FirstName { get; set; }
 
-    public Expression<Func<IQueryable<User>, User>> QueryIs()
+    public Expression<Func<IMartenQueryable<User>, User>> QueryIs()
     {
         return q => q.FirstOrDefault(x => x.FirstName == FirstName);
     }

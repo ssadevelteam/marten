@@ -10,9 +10,9 @@ namespace Marten.V4Internals.Linq.Includes
 {
     public class IncludeIdentitySelectorStatement : Statement, ISelectClause
     {
-        private readonly IList<IInclude> _includes;
+        private readonly IList<IIncludePlan> _includes;
 
-        public IncludeIdentitySelectorStatement(DocumentStatement original, IList<IInclude> includes) : base(null, null)
+        public IncludeIdentitySelectorStatement(DocumentStatement original, IList<IIncludePlan> includes) : base(null, null)
         {
             _includes = includes;
             Inner = original.Clone();
