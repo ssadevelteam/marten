@@ -58,7 +58,7 @@ namespace Marten.Testing.Services.Includes
         // SAMPLE: compiled_include_list
         public class IssueWithUsers : ICompiledListQuery<Issue>
         {
-            public List<User> Users { get; set; }
+            public List<User> Users { get; set; } = new List<User>();
             // Can also work like that:
             //public List<User> Users => new List<User>();
 
@@ -100,7 +100,7 @@ namespace Marten.Testing.Services.Includes
         // SAMPLE: compiled_include_dictionary
         public class IssueWithUsersById : ICompiledListQuery<Issue>
         {
-            public IDictionary<Guid,User> UsersById { get; set; }
+            public IDictionary<Guid,User> UsersById { get; set; } = new Dictionary<Guid, User>();
             // Can also work like that:
             //public List<User> Users => new Dictionary<Guid,User>();
 

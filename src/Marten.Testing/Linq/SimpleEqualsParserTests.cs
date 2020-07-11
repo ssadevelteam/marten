@@ -223,7 +223,7 @@ namespace Marten.Testing.Linq
 			Assert.NotNull(itemFromDb);
 		}
 
-		class CompiledQueryTarget : ICompiledQuery<QueryTarget, QueryTarget>
+		public class CompiledQueryTarget : ICompiledQuery<QueryTarget, QueryTarget>
 		{
 			public Guid IdProp { get; set; }
 			public int IntProp { get; set; }
