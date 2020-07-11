@@ -24,6 +24,8 @@ namespace Marten.V4Internals.Sessions
             ITenant tenant) : base(store, sessionOptions, database, tenant)
         {
             Concurrency = sessionOptions.ConcurrencyChecks;
+
+            Events = new EventStore(this, store, _unitOfWork, tenant);
         }
 
 

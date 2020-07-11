@@ -318,5 +318,10 @@ namespace Marten.V4Internals
         {
             return _operations.Any();
         }
+
+        public bool TryFindStream(string stream, out EventStream streamKey)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

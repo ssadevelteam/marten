@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Baseline;
 using Marten.Linq;
 using Marten.Schema.Identity;
-using Marten.Services;
 using Marten.Storage;
 using Marten.V4Internals;
 using Marten.V4Internals.Sessions;
@@ -16,18 +15,16 @@ namespace Marten.Events
     public class EventStore: IEventStore
     {
         private readonly NewDocumentSession _session;
-        private readonly IManagedConnection _connection;
         private readonly UnitOfWork _unitOfWork;
         private readonly ITenant _tenant;
         private readonly ISelector<IEvent> _selector;
         private readonly DocumentStore _store;
 
-        public EventStore(NewDocumentSession session, DocumentStore store, IManagedConnection connection, UnitOfWork unitOfWork, ITenant tenant)
+        public EventStore(NewDocumentSession session, DocumentStore store, UnitOfWork unitOfWork, ITenant tenant)
         {
             _session = session;
             _store = store;
 
-            _connection = connection;
             _unitOfWork = unitOfWork;
             _tenant = tenant;
 
@@ -94,21 +91,19 @@ namespace Marten.Events
         {
             ensureAsStringStorage();
 
-            EventStream eventStream = null;
+            if (_unitOfWork.TryFindStream(stream, out var eventStream))
+            {
+                eventStream.AddEvents(events.Select(EventStream.ToEvent));
+            }
+            else
+            {
+                eventStream = new EventStream(stream, events.Select(EventStream.ToEvent).ToArray(), false);
 
-            throw new NotImplementedException();
-            // if (_unitOfWork.HasStream(stream))
-            // {
-            //     eventStream = _unitOfWork.StreamFor(stream);
-            //     eventStream.AddEvents(events.Select(EventStream.ToEvent));
-            // }
-            // else
-            // {
-            //     eventStream = new EventStream(stream, events.Select(EventStream.ToEvent).ToArray(), false);
-            //     _unitOfWork.StoreStream(eventStream);
-            // }
-            //
-            // return eventStream;
+                throw new NotImplementedException("This is where we need to build out the new StorageOperation");
+                //_unitOfWork.StoreStream(eventStream);
+            }
+
+            return eventStream;
         }
 
         public EventStream Append(Guid stream, int expectedVersion, IEnumerable<object> events)
@@ -161,7 +156,7 @@ namespace Marten.Events
                 AggregateType = aggregateType
             };
 
-            throw new NotImplementedException();
+            throw new NotImplementedException("Create new StorageOperation here.");
             //_unitOfWork.StoreStream(stream);
 
             return stream;
