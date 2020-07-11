@@ -7,6 +7,11 @@ using Shouldly;
 
 namespace Marten.Testing.V4Internals
 {
+    public class GuidDoc
+    {
+        public Guid Id { get; set; }
+    }
+
     public class VersionTrackerTests
     {
         private StringDoc stringDoc = new StringDoc {Id = "bar"};
