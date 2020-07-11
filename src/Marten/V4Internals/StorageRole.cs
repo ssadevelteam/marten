@@ -7,6 +7,7 @@ namespace Marten.V4Internals
         Update,
         Deletion,
         Patch,
-        Other
+        Other,
+        Events
     }
 }

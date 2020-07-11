@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace Marten.Services
 {
+    [Obsolete("Got absorbed into IStorageOperation in v4")]
     public interface ICallback
     {
         void Postprocess(DbDataReader reader, IList<Exception> exceptions);

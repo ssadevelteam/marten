@@ -7,6 +7,7 @@ using Marten.Services;
 
 namespace Marten.Events
 {
+    [Obsolete("Replaced by AppendEventsOperation in v4")]
     public class EventStreamAppender
     {
         private readonly EventGraph _graph;

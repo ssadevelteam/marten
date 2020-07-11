@@ -319,7 +319,12 @@ namespace Marten.V4Internals
             return _operations.Any();
         }
 
-        public bool TryFindStream(string stream, out EventStream streamKey)
+        public bool TryFindStream(string streamKey, out EventStream stream)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool TryFindStream(Guid streamId, out EventStream stream)
         {
             throw new NotImplementedException();
         }

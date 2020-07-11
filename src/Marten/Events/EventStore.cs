@@ -28,6 +28,7 @@ namespace Marten.Events
             _unitOfWork = unitOfWork;
             _tenant = tenant;
 
+            // TODO -- we can make much more of this lazy
             StreamIdentity = _store.Events.StreamIdentity;
 
             if (StreamIdentity == StreamIdentity.AsGuid)
@@ -63,23 +64,21 @@ namespace Marten.Events
 
         public EventStream Append(Guid stream, params object[] events)
         {
-            throw new NotImplementedException();
-            // ensureAsGuidStorage();
-            //
-            // EventStream eventStream = null;
-            //
-            // if (_unitOfWork.HasStream(stream))
-            // {
-            //     eventStream = _unitOfWork.StreamFor(stream);
-            //     eventStream.AddEvents(events.Select(EventStream.ToEvent));
-            // }
-            // else
-            // {
-            //     eventStream = new EventStream(stream, events.Select(EventStream.ToEvent).ToArray(), false);
-            //     _unitOfWork.StoreStream(eventStream);
-            // }
-            //
-            // return eventStream;
+            ensureAsGuidStorage();
+
+
+            if (_unitOfWork.TryFindStream(stream, out var eventStream))
+            {
+                eventStream.AddEvents(events.Select(EventStream.ToEvent));
+            }
+            else
+            {
+                eventStream = new EventStream(stream, events.Select(EventStream.ToEvent).ToArray(), false);
+                var operation = new AppendEventsOperation(eventStream, _store.Events);
+                _unitOfWork.Add(operation);
+            }
+
+            return eventStream;
         }
 
         public EventStream Append(string stream, IEnumerable<object> events)
@@ -98,9 +97,8 @@ namespace Marten.Events
             else
             {
                 eventStream = new EventStream(stream, events.Select(EventStream.ToEvent).ToArray(), false);
-
-                throw new NotImplementedException("This is where we need to build out the new StorageOperation");
-                //_unitOfWork.StoreStream(eventStream);
+                var operation = new AppendEventsOperation(eventStream, _store.Events);
+                _unitOfWork.Add(operation);
             }
 
             return eventStream;
@@ -156,8 +154,8 @@ namespace Marten.Events
                 AggregateType = aggregateType
             };
 
-            throw new NotImplementedException("Create new StorageOperation here.");
-            //_unitOfWork.StoreStream(stream);
+            var operation = new AppendEventsOperation(stream, _store.Events);
+            _unitOfWork.Add(operation);
 
             return stream;
         }
@@ -186,8 +184,8 @@ namespace Marten.Events
                 AggregateType = aggregateType
             };
 
-            throw new NotImplementedException();
-            //_unitOfWork.StoreStream(stream);
+            var operation = new AppendEventsOperation(stream, _store.Events);
+            _unitOfWork.Add(operation);
 
             return stream;
         }
@@ -203,8 +201,8 @@ namespace Marten.Events
 
             var stream = new EventStream(id, events.Select(EventStream.ToEvent).ToArray(), true);
 
-            throw new NotImplementedException();
-            //_unitOfWork.StoreStream(stream);
+            var operation = new AppendEventsOperation(stream, _store.Events);
+            _unitOfWork.Add(operation);
 
             return stream;
         }
@@ -220,8 +218,8 @@ namespace Marten.Events
 
             var stream = new EventStream(streamKey, events.Select(EventStream.ToEvent).ToArray(), true);
 
-            throw new NotImplementedException();
-            //_unitOfWork.StoreStream(stream);
+            var operation = new AppendEventsOperation(stream, _store.Events);
+            _unitOfWork.Add(operation);
 
             return stream;
         }
