@@ -15,17 +15,15 @@ namespace Marten.Events
     public class EventStore: IEventStore
     {
         private readonly NewDocumentSession _session;
-        private readonly UnitOfWork _unitOfWork;
         private readonly ITenant _tenant;
-        private readonly ISelector<IEvent> _selector;
+        private readonly IEventSelector _selector;
         private readonly DocumentStore _store;
 
-        public EventStore(NewDocumentSession session, DocumentStore store, UnitOfWork unitOfWork, ITenant tenant)
+        public EventStore(NewDocumentSession session, DocumentStore store, ITenant tenant)
         {
             _session = session;
             _store = store;
 
-            _unitOfWork = unitOfWork;
             _tenant = tenant;
 
             // TODO -- we can make much more of this lazy
@@ -67,7 +65,7 @@ namespace Marten.Events
             ensureAsGuidStorage();
 
 
-            if (_unitOfWork.TryFindStream(stream, out var eventStream))
+            if (_session.UnitOfWork.TryFindStream(stream, out var eventStream))
             {
                 eventStream.AddEvents(events.Select(EventStream.ToEvent));
             }
@@ -75,7 +73,7 @@ namespace Marten.Events
             {
                 eventStream = new EventStream(stream, events.Select(EventStream.ToEvent).ToArray(), false);
                 var operation = new AppendEventsOperation(eventStream, _store.Events);
-                _unitOfWork.Add(operation);
+                _session.UnitOfWork.Add(operation);
             }
 
             return eventStream;
@@ -90,7 +88,7 @@ namespace Marten.Events
         {
             ensureAsStringStorage();
 
-            if (_unitOfWork.TryFindStream(stream, out var eventStream))
+            if (_session.UnitOfWork.TryFindStream(stream, out var eventStream))
             {
                 eventStream.AddEvents(events.Select(EventStream.ToEvent));
             }
@@ -98,7 +96,7 @@ namespace Marten.Events
             {
                 eventStream = new EventStream(stream, events.Select(EventStream.ToEvent).ToArray(), false);
                 var operation = new AppendEventsOperation(eventStream, _store.Events);
-                _unitOfWork.Add(operation);
+                _session.UnitOfWork.Add(operation);
             }
 
             return eventStream;
@@ -155,7 +153,7 @@ namespace Marten.Events
             };
 
             var operation = new AppendEventsOperation(stream, _store.Events);
-            _unitOfWork.Add(operation);
+            _session.UnitOfWork.Add(operation);
 
             return stream;
         }
@@ -185,7 +183,7 @@ namespace Marten.Events
             };
 
             var operation = new AppendEventsOperation(stream, _store.Events);
-            _unitOfWork.Add(operation);
+            _session.UnitOfWork.Add(operation);
 
             return stream;
         }
@@ -202,7 +200,7 @@ namespace Marten.Events
             var stream = new EventStream(id, events.Select(EventStream.ToEvent).ToArray(), true);
 
             var operation = new AppendEventsOperation(stream, _store.Events);
-            _unitOfWork.Add(operation);
+            _session.UnitOfWork.Add(operation);
 
             return stream;
         }
@@ -219,7 +217,7 @@ namespace Marten.Events
             var stream = new EventStream(streamKey, events.Select(EventStream.ToEvent).ToArray(), true);
 
             var operation = new AppendEventsOperation(stream, _store.Events);
-            _unitOfWork.Add(operation);
+            _session.UnitOfWork.Add(operation);
 
             return stream;
         }

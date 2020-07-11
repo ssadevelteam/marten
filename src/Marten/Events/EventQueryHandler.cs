@@ -17,14 +17,14 @@ namespace Marten.Events
 
     internal class EventQueryHandler<TIdentity>: IEventQueryHandler
     {
-        private readonly ISelector<IEvent> _selector;
+        private readonly IEventSelector _selector;
         private readonly TIdentity _streamId;
         private readonly DateTime? _timestamp;
         private readonly int _version;
         private readonly TenancyStyle _tenancyStyle;
         private readonly string _tenantId;
 
-        public EventQueryHandler(ISelector<IEvent> selector, TIdentity streamId, int version = 0, DateTime? timestamp = null, TenancyStyle tenancyStyle = TenancyStyle.Single, string tenantId = null)
+        public EventQueryHandler(IEventSelector selector, TIdentity streamId, int version = 0, DateTime? timestamp = null, TenancyStyle tenancyStyle = TenancyStyle.Single, string tenantId = null)
         {
             if (timestamp != null && timestamp.Value.Kind != DateTimeKind.Utc)
             {
@@ -48,8 +48,7 @@ namespace Marten.Events
 
         public void ConfigureCommand(CommandBuilder sql, IMartenSession session)
         {
-            throw new NotImplementedException();
-            //_selector.WriteSelectClause(sql, null);
+            _selector.WriteSelectClause(sql);
 
             var param = sql.AddParameter(_streamId);
             sql.Append(" where stream_id = :");
@@ -81,12 +80,26 @@ namespace Marten.Events
 
         public IReadOnlyList<IEvent> Handle(DbDataReader reader, IMartenSession session)
         {
-            throw new NotImplementedException();
+            var list = new List<IEvent>();
+            while (reader.Read())
+            {
+                var @event = _selector.Resolve(reader);
+                list.Add(@event);
+            }
+
+            return list;
         }
 
-        public Task<IReadOnlyList<IEvent>> HandleAsync(DbDataReader reader, IMartenSession session, CancellationToken token)
+        public async Task<IReadOnlyList<IEvent>> HandleAsync(DbDataReader reader, IMartenSession session, CancellationToken token)
         {
-            throw new NotImplementedException();
+            var list = new List<IEvent>();
+            while (await reader.ReadAsync(token).ConfigureAwait(false))
+            {
+                var @event = await _selector.ResolveAsync(reader, token).ConfigureAwait(false);
+                list.Add(@event);
+            }
+
+            return list;
         }
 
 

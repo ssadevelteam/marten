@@ -106,7 +106,7 @@ namespace Marten.Events
             return new[] { "id", "type", "version", "data", "seq_id", "stream_id", "timestamp", TenantIdColumn.Name, DocumentMapping.DotNetTypeColumn };
         }
 
-        public void WriteSelectClause(CommandBuilder sql, IQueryableDocument mapping)
+        public void WriteSelectClause(CommandBuilder sql)
         {
             sql.Append($"select id, type, version, data, seq_id, stream_id, timestamp, tenant_id, {DocumentMapping.DotNetTypeColumn} from ");
             sql.Append(Events.DatabaseSchemaName);

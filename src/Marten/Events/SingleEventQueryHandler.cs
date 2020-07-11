@@ -22,7 +22,7 @@ namespace Marten.Events
 
         public void ConfigureCommand(CommandBuilder sql, IMartenSession session)
         {
-            _selector.WriteSelectClause(sql, null);
+            _selector.WriteSelectClause(sql);
 
             var param = sql.AddParameter(_id);
             sql.Append(" where id = :");

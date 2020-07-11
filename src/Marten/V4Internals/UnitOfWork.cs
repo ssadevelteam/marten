@@ -172,14 +172,14 @@ namespace Marten.V4Internals
 
         IEnumerable<IEvent> IChangeSet.GetEvents()
         {
-            throw new NotImplementedException();
+            return _operations.OfType<AppendEventsOperation>().SelectMany(x => x.Stream.Events);
         }
 
         IEnumerable<PatchOperation> IChangeSet.Patches => _operations.OfType<PatchOperation>();
 
         IEnumerable<EventStream> IChangeSet.GetStreams()
         {
-            throw new NotImplementedException();
+            return _operations.OfType<AppendEventsOperation>().Select(x => x.Stream);
         }
 
         private IEnumerable<IStorageOperation> operationsFor(Type documentType)
@@ -321,12 +321,18 @@ namespace Marten.V4Internals
 
         public bool TryFindStream(string streamKey, out EventStream stream)
         {
-            throw new NotImplementedException();
+            stream = _operations.OfType<AppendEventsOperation>()
+                .FirstOrDefault(x => x.Stream.Key == streamKey)?.Stream;
+
+            return stream != null;
         }
 
         public bool TryFindStream(Guid streamId, out EventStream stream)
         {
-            throw new NotImplementedException();
+            stream = _operations.OfType<AppendEventsOperation>()
+                .FirstOrDefault(x => x.Stream.Id == streamId)?.Stream;
+
+            return stream != null;
         }
     }
 }

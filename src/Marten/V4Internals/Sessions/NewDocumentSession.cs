@@ -25,9 +25,10 @@ namespace Marten.V4Internals.Sessions
         {
             Concurrency = sessionOptions.ConcurrencyChecks;
 
-            Events = new EventStore(this, store, _unitOfWork, tenant);
+            Events = new EventStore(this, store, tenant);
         }
 
+        internal UnitOfWork UnitOfWork => _unitOfWork;
 
         public void Delete<T>(T entity)
         {
