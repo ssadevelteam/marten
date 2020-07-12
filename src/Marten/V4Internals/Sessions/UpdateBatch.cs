@@ -89,14 +89,19 @@ namespace Marten.V4Internals.Sessions
         private void applyCallbacks(IEnumerable<IStorageOperation> operations, DbDataReader reader)
         {
             var first = operations.First();
-            first.Postprocess(reader, _exceptions);
+
+            if (!(first is NoDataReturnedCall))
+            {
+                first.Postprocess(reader, _exceptions);
+                reader.NextResult();
+            }
 
             foreach (var operation in operations.Skip(1))
             {
                 if (!(operation is NoDataReturnedCall))
                 {
-                    reader.NextResult();
                     operation.Postprocess(reader, _exceptions);
+                    reader.NextResult();
                 }
             }
         }
@@ -104,14 +109,19 @@ namespace Marten.V4Internals.Sessions
         private async Task applyCallbacksAsync(IEnumerable<IStorageOperation> operations, DbDataReader reader, CancellationToken token)
         {
             var first = operations.First();
-            await first.PostprocessAsync(reader, _exceptions, token).ConfigureAwait(false);
+
+            if (!(first is NoDataReturnedCall))
+            {
+                await first.PostprocessAsync(reader, _exceptions, token).ConfigureAwait(false);
+                await reader.NextResultAsync(token).ConfigureAwait(false);
+            }
 
             foreach (var operation in operations.Skip(1))
             {
                 if (!(operation is NoDataReturnedCall))
                 {
-                    await reader.NextResultAsync(token).ConfigureAwait(false);
                     await operation.PostprocessAsync(reader, _exceptions, token).ConfigureAwait(false);
+                    await reader.NextResultAsync(token).ConfigureAwait(false);
                 }
             }
         }

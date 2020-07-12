@@ -46,14 +46,6 @@ namespace Marten.Storage
         /// </summary>
         /// <param name="documentType"></param>
         /// <returns></returns>
-        IDocumentStorage StorageFor(Type documentType);
-
-        /// <summary>
-        /// Retrieves or generates the active IDocumentStorage object
-        /// for the given document type
-        /// </summary>
-        /// <param name="documentType"></param>
-        /// <returns></returns>
         IDocumentStorage<T> StorageFor<T>();
 
         /// <summary>

@@ -18,7 +18,7 @@ namespace Marten.Schema.Testing
                 _.Schema.For<Target>().Duplicate(expression);
             });
 
-            theStore.Tenancy.Default.StorageFor(typeof(Target)).ShouldNotBeNull();
+            theStore.Tenancy.Default.StorageFor<Target>().ShouldNotBeNull();
 
             var existing = theStore.TableSchema(typeof (Target));
 

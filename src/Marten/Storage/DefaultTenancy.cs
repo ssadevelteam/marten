@@ -52,11 +52,6 @@ namespace Marten.Storage
 
         public string TenantId { get; }
 
-        public IDocumentStorage StorageFor(Type documentType)
-        {
-            return _inner.StorageFor(documentType);
-        }
-
         public IDocumentStorage<T> StorageFor<T>()
         {
             return _inner.StorageFor<T>();

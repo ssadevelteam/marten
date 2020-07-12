@@ -26,7 +26,7 @@ namespace Marten.Schema.Testing
         private class ProjectUsingDuplicateField : Project { } //used for duplicatedfield index tests
 
         //used for attributes index tests
-        private class UniqueCodePerTenant
+        public class UniqueCodePerTenant
         {
             public UniqueCodePerTenant()
             {

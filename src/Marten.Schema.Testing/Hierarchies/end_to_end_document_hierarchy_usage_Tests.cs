@@ -10,7 +10,7 @@ namespace Marten.Schema.Testing.Hierarchies
 {
     public class delete_by_where_for_hierarchy_Tests: end_to_end_document_hierarchy_usage_Tests
     {
-        protected delete_by_where_for_hierarchy_Tests()
+        public delete_by_where_for_hierarchy_Tests()
         {
             DocumentTracking = DocumentTracking.None;
         }
@@ -58,7 +58,7 @@ namespace Marten.Schema.Testing.Hierarchies
 
     public class persist_and_load_for_hierarchy_Tests: end_to_end_document_hierarchy_usage_Tests
     {
-        protected persist_and_load_for_hierarchy_Tests()
+        public persist_and_load_for_hierarchy_Tests()
         {
             DocumentTracking = DocumentTracking.IdentityOnly;
         }
@@ -334,7 +334,7 @@ namespace Marten.Schema.Testing.Hierarchies
 
     public class Bug_1247_end_to_end_query_with_include_and_document_hierarchy_Tests: end_to_end_document_hierarchy_usage_Tests
     {
-        protected Bug_1247_end_to_end_query_with_include_and_document_hierarchy_Tests()
+        public Bug_1247_end_to_end_query_with_include_and_document_hierarchy_Tests()
         {
             DocumentTracking = DocumentTracking.IdentityOnly;
         }
@@ -362,9 +362,9 @@ namespace Marten.Schema.Testing.Hierarchies
 
                 list.Count.ShouldBe(3);
 
-                list.Any(x => x.Id == user1.Id);
-                list.Any(x => x.Id == user2.Id);
-                list.Any(x => x == null);
+                list.Any(x => x.Id == user1.Id).ShouldBeTrue();
+                list.Any(x => x.Id == user2.Id).ShouldBeTrue();
+                list.Any(x => x == null).ShouldBeTrue();
 
                 issues.Length.ShouldBe(4);
             }
@@ -405,7 +405,7 @@ namespace Marten.Schema.Testing.Hierarchies
 
     public class Bug_1484_store_overloads_Tests: end_to_end_document_hierarchy_usage_Tests
     {
-        protected Bug_1484_store_overloads_Tests()
+        public Bug_1484_store_overloads_Tests()
         {
             DocumentTracking = DocumentTracking.IdentityOnly;
         }

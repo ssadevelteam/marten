@@ -45,7 +45,7 @@ namespace Marten.Testing.Bugs
                 _.Schema.For<Route>();
             });
 
-            SpecificationExtensions.ShouldNotBeNull(theStore.Tenancy.Default.StorageFor(typeof(Route)));
+            SpecificationExtensions.ShouldNotBeNull(theStore.Tenancy.Default.StorageFor<Route>());
         }
 
         public class RoutesPlannedAfter: ICompiledQuery<Route, IEnumerable<Route>>

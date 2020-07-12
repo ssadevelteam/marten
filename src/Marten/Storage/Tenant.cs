@@ -170,12 +170,6 @@ namespace Marten.Storage
             }
         }
 
-        [Obsolete("Try to eliminate in v4")]
-        public IDocumentStorage StorageFor(Type documentType)
-        {
-            throw new NotImplementedException("Trying to get rid of this in v4");
-        }
-
         public IDocumentStorage<T> StorageFor<T>()
         {
             return Providers.StorageFor<T>().QueryOnly;

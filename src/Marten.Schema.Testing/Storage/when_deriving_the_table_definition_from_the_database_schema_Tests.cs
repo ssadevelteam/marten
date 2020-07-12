@@ -24,7 +24,7 @@ namespace Marten.Schema.Testing.Storage
             theMapping.DuplicateField("UserName");
 
 
-            _storage = theStore.Tenancy.Default.StorageFor(typeof(User));
+            _storage = theStore.Tenancy.Default.StorageFor<User>();
 
             theDerivedTable = new DocumentTable(theMapping);
         }
@@ -38,7 +38,7 @@ namespace Marten.Schema.Testing.Storage
         [Fact]
         public void it_finds_the_primary_key()
         {
-            SpecificationExtensions.ShouldNotBeNull(theDerivedTable.PrimaryKey);
+            theDerivedTable.PrimaryKey.ShouldNotBeNull();
             theDerivedTable.PrimaryKey.Name.ShouldBe("id");
         }
 

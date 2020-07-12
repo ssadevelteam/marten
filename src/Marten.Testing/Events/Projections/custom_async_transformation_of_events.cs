@@ -361,19 +361,19 @@ namespace Marten.Testing.Events.Projections
             var firstBankAccountView = await theSession.LoadAsync<BankAccountView>(firstBankAccountId);
             var secondBankAccountView = await theSession.LoadAsync<BankAccountView>(secondBankAccountId);
 
-            SpecificationExtensions.ShouldNotBeNull(firstBankAccountView);
+            firstBankAccountView.ShouldNotBeNull();
             firstBankAccountView.Id.ShouldBe(firstBankAccountId);
             firstBankAccountView.Number.ShouldBe(firstBankAccountNumber);
 
-            SpecificationExtensions.ShouldNotBeNull(firstBankAccountView.Customer);
+            firstBankAccountView.Customer.ShouldNotBeNull();
             firstBankAccountView.Customer.Id.ShouldBe(customer.Id);
             firstBankAccountView.Customer.FullName.ShouldBe(customer.FullName);
 
-            SpecificationExtensions.ShouldNotBeNull(secondBankAccountView);
+            secondBankAccountView.ShouldNotBeNull();
             secondBankAccountView.Id.ShouldBe(secondBankAccountId);
             secondBankAccountView.Number.ShouldBe(secondBankAccountNumber);
 
-            SpecificationExtensions.ShouldNotBeNull(secondBankAccountView.Customer);
+            secondBankAccountView.Customer.ShouldNotBeNull();
             secondBankAccountView.Customer.Id.ShouldBe(customer.Id);
             secondBankAccountView.Customer.FullName.ShouldBe(customer.FullName);
 
@@ -437,11 +437,11 @@ namespace Marten.Testing.Events.Projections
 
             theSession.Events.StartStream<QuestParty>(streamId, started);
             theSession.SaveChanges();
-            SpecificationExtensions.ShouldNotBeNull(theSession.Load<PersistedView>(streamId));
+            theSession.Load<PersistedView>(streamId).ShouldNotBeNull();
 
             theSession.Events.Append(Guid.NewGuid(), ended);
             theSession.SaveChanges();
-            SpecificationExtensions.ShouldNotBeNull(theSession.Load<PersistedView>(streamId));
+            theSession.Load<PersistedView>(streamId).ShouldNotBeNull();
         }
 
         public project_events_async_from_multiple_streams_into_view(DefaultStoreFixture fixture) : base(fixture)

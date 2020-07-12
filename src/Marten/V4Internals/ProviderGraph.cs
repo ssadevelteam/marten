@@ -31,7 +31,8 @@ namespace Marten.V4Internals
                 {
                     DirtyTracking = storage,
                     Lightweight = storage,
-                    IdentityMap = storage
+                    IdentityMap = storage,
+                    QueryOnly = storage
                 };
 
                 _storage = _storage.AddOrUpdate(typeof(T), slot);
@@ -66,7 +67,7 @@ namespace Marten.V4Internals
             if (mapping is EventMapping em)
             {
                 var storage = (IDocumentStorage<T>) em;
-                var slot = new DocumentProvider<T> {Lightweight = storage, IdentityMap = storage, DirtyTracking = storage};
+                var slot = new DocumentProvider<T> {Lightweight = storage, IdentityMap = storage, DirtyTracking = storage, QueryOnly = storage};
                 _storage = _storage.AddOrUpdate(typeof(T), slot);
 
                 return slot;
