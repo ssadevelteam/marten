@@ -408,19 +408,19 @@ namespace Marten.Testing.Events.Projections
 
             theSession.Events.StartStream<QuestParty>(streamId, started);
             theSession.SaveChanges();
-            SpecificationExtensions.ShouldNotBeNull(theSession.Load<PersistedView>(streamId));
+            theSession.Load<PersistedView>(streamId).ShouldNotBeNull();
 
             theSession.Events.Append(streamId, ended);
             theSession.SaveChanges();
-            SpecificationExtensions.ShouldBeNull(theSession.Load<PersistedView>(streamId));
+            theSession.Load<PersistedView>(streamId).ShouldBeNull();
 
             theSession.Events.Append(streamId, started);
             theSession.SaveChanges();
-            SpecificationExtensions.ShouldNotBeNull(theSession.Load<PersistedView>(streamId));
+            theSession.Load<PersistedView>(streamId).ShouldNotBeNull();
 
             theSession.Events.Append(streamId, ended, started);
             theSession.SaveChanges();
-            SpecificationExtensions.ShouldNotBeNull(theSession.Load<PersistedView>(streamId));
+            theSession.Load<PersistedView>(streamId).ShouldNotBeNull();
         }
 
         [Fact]
