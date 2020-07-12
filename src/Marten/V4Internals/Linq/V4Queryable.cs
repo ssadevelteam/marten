@@ -15,7 +15,6 @@ using Marten.V4Internals.Linq.Includes;
 using Npgsql;
 using Remotion.Linq;
 using Remotion.Linq.Clauses;
-using Remotion.Linq.Clauses.ResultOperators;
 
 namespace Marten.V4Internals.Linq
 {

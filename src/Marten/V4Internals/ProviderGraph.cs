@@ -1,6 +1,7 @@
 using System;
 using Baseline;
 using LamarCodeGeneration;
+using Marten.Events;
 using Marten.Schema;
 using Marten.Util;
 
@@ -23,6 +24,21 @@ namespace Marten.V4Internals
                 return stored.As<DocumentProvider<T>>();
             }
 
+            if (typeof(T) == typeof(IEvent))
+            {
+                var storage = new EventDocumentStorage(_options.Events, new EventQueryMapping(_options), _options.Serializer());
+                var slot = new DocumentProvider<IEvent>
+                {
+                    DirtyTracking = storage,
+                    Lightweight = storage,
+                    IdentityMap = storage
+                };
+
+                _storage = _storage.AddOrUpdate(typeof(T), slot);
+
+                return slot.As<DocumentProvider<T>>();
+            }
+
             var mapping = _options.Storage.FindMapping(typeof(T));
 
             if (mapping is DocumentMapping m)
@@ -42,6 +58,15 @@ namespace Marten.V4Internals
                         mapping.IdType);
 
                 var slot = loader.BuildPersistence(this, s);
+                _storage = _storage.AddOrUpdate(typeof(T), slot);
+
+                return slot;
+            }
+
+            if (mapping is EventMapping em)
+            {
+                var storage = (IDocumentStorage<T>) em;
+                var slot = new DocumentProvider<T> {Lightweight = storage, IdentityMap = storage, DirtyTracking = storage};
                 _storage = _storage.AddOrUpdate(typeof(T), slot);
 
                 return slot;

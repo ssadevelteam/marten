@@ -8,7 +8,7 @@ using Marten.V4Internals;
 
 namespace Marten.Events
 {
-    public class EventQueryMapping: DocumentMapping
+    public class EventQueryMapping : DocumentMapping
     {
         public EventQueryMapping(StoreOptions storeOptions) : base(typeof(IEvent), storeOptions)
         {

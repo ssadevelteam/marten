@@ -141,7 +141,7 @@ namespace Marten.V4Internals
 
         IEnumerable<EventStream> IUnitOfWork.Streams()
         {
-            throw new NotImplementedException();
+            return _operations.OfType<AppendEventsOperation>().Select(x => x.Stream);
         }
 
         IEnumerable<PatchOperation> IUnitOfWork.Patches()

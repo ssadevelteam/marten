@@ -15,6 +15,7 @@ using Marten.Services;
 using Marten.Storage;
 using Marten.Util;
 using Marten.V4Internals;
+using Marten.V4Internals.Linq;
 using Npgsql;
 using NpgsqlTypes;
 using Remotion.Linq;
@@ -23,7 +24,7 @@ namespace Marten.Events
 {
     public abstract class EventMapping: IDocumentMapping, IQueryableDocument
     {
-        private readonly EventGraph _parent;
+        protected readonly EventGraph _parent;
         protected readonly DocumentMapping _inner;
 
         protected EventMapping(EventGraph parent, Type eventType)
@@ -105,14 +106,17 @@ namespace Marten.Events
 
     }
 
-    public class EventMapping<T>: EventMapping where T : class
+    public class EventMapping<T>: EventMapping, IDocumentStorage<T> where T : class
     {
         private readonly string _tableName;
+        private Type _idType;
 
         public EventMapping(EventGraph parent) : base(parent, typeof(T))
         {
             var schemaName = parent.DatabaseSchemaName;
             _tableName = schemaName == StoreOptions.DefaultDatabaseSchemaName ? "mt_events" : $"{schemaName}.mt_events";
+
+            _idType = parent.StreamIdentity == StreamIdentity.AsGuid ? typeof(Guid) : typeof(string);
         }
 
         public Type TopLevelBaseType => DocumentType;
@@ -147,66 +151,119 @@ namespace Marten.Events
             throw new NotSupportedException("You cannot delete events at this time");
         }
 
-        // TODO -- we'll have to put these back some how for Linq queries against the events again.
-        // public T Resolve(int startingIndex, DbDataReader reader, IIdentityMap map)
-        // {
-        //     var id = reader.GetGuid(startingIndex);
-        //     var json = reader.GetTextReader(startingIndex + 1);
-        //
-        //     return map.Get<T>(id, json, null);
-        // }
-        //
-        // public async Task<T> ResolveAsync(int startingIndex, DbDataReader reader, IIdentityMap map, CancellationToken token)
-        // {
-        //     var id = await reader.GetFieldValueAsync<Guid>(startingIndex, token).ConfigureAwait(false);
-        //
-        //     var json = await reader.As<NpgsqlDataReader>().GetTextReaderAsync(startingIndex + 1).ConfigureAwait(false);
-        //
-        //     return map.Get<T>(id, json, null);
-        // }
-        //
-        // public T Resolve(IIdentityMap map, IQuerySession session, object id)
-        // {
-        //     if (map.Has<T>(id))
-        //         return map.Retrieve<T>(id);
-        //
-        //     var cmd = LoaderCommand(id);
-        //     cmd.Connection = session.Connection;
-        //     using (var reader = cmd.ExecuteReader())
-        //     {
-        //         if (!reader.Read())
-        //             return null;
-        //
-        //         var json = reader.GetTextReader(0);
-        //         var doc = session.Serializer.FromJson<T>(json);
-        //         map.Store(id, doc);
-        //
-        //         return doc;
-        //     }
-        // }
-        //
-        // public async Task<T> ResolveAsync(IIdentityMap map, IQuerySession session, CancellationToken token, object id)
-        // {
-        //     if (map.Has<T>(id))
-        //         return map.Retrieve<T>(id);
-        //
-        //     var cmd = LoaderCommand(id);
-        //     cmd.Connection = session.Connection;
-        //
-        //     using (var reader = await cmd.ExecuteReaderAsync(token).ConfigureAwait(false))
-        //     {
-        //         var found = await reader.ReadAsync(token).ConfigureAwait(false);
-        //
-        //         if (!found)
-        //             return null;
-        //
-        //         var json = reader.GetTextReader(0);
-        //         //var json = await reader.GetFieldValueAsync<string>(0, token).ConfigureAwait(false);
-        //         var doc = session.Serializer.FromJson<T>(json);
-        //         map.Store(id, doc);
-        //
-        //         return doc;
-        //     }
-        // }
+        string ISelectClause.FromObject => _tableName;
+
+        Type ISelectClause.SelectedType => typeof(T);
+
+        void ISelectClause.WriteSelectClause(CommandBuilder sql)
+        {
+            sql.Append("select data from ");
+            sql.Append(_tableName);
+            sql.Append(" as d");
+        }
+
+        ISelector ISelectClause.BuildSelector(IMartenSession session)
+        {
+            return new EventSelector<T>(session.Serializer);
+        }
+
+        IQueryHandler<TResult> ISelectClause.BuildHandler<TResult>(IMartenSession session, Statement topStatement, Statement currentStatement)
+        {
+            var selector = new EventSelector<T>(session.Serializer);
+
+            return LinqHandlerBuilder.BuildHandler<T, TResult>(selector, topStatement);
+        }
+
+        internal class EventSelector<TEvent>: ISelector<TEvent>
+        {
+            private readonly ISerializer _serializer;
+
+            public EventSelector(ISerializer serializer)
+            {
+                _serializer = serializer;
+            }
+
+            public TEvent Resolve(DbDataReader reader)
+            {
+                using var json = reader.GetTextReader(0);
+                return _serializer.FromJson<TEvent>(json);
+            }
+
+            public Task<TEvent> ResolveAsync(DbDataReader reader, CancellationToken token)
+            {
+                using var json = reader.GetTextReader(0);
+                var doc = _serializer.FromJson<TEvent>(json);
+
+                return Task.FromResult(doc);
+            }
+        }
+
+        ISelectClause ISelectClause.UseStatistics(QueryStatistics statistics)
+        {
+            throw new NotImplementedException();
+        }
+
+        Type IDocumentStorage.SourceType => typeof(IEvent);
+
+        IFieldMapping IDocumentStorage.Fields => this;
+
+        IQueryableDocument IDocumentStorage.QueryableDocument => this;
+
+        object IDocumentStorage<T>.IdentityFor(T document)
+        {
+            throw new NotImplementedException();
+        }
+
+        Type IDocumentStorage<T>.IdType => _idType;
+
+        Guid? IDocumentStorage<T>.VersionFor(T document, IMartenSession session)
+        {
+            throw new NotImplementedException();
+        }
+
+        void IDocumentStorage<T>.Store(IMartenSession session, T document)
+        {
+            throw new NotImplementedException();
+        }
+
+        void IDocumentStorage<T>.Store(IMartenSession session, T document, Guid? version)
+        {
+            throw new NotImplementedException();
+        }
+
+        void IDocumentStorage<T>.Eject(IMartenSession session, T document)
+        {
+            throw new NotImplementedException();
+        }
+
+        IStorageOperation IDocumentStorage<T>.Update(T document, IMartenSession session, ITenant tenant)
+        {
+            throw new NotImplementedException();
+        }
+
+        IStorageOperation IDocumentStorage<T>.Insert(T document, IMartenSession session, ITenant tenant)
+        {
+            throw new NotImplementedException();
+        }
+
+        IStorageOperation IDocumentStorage<T>.Upsert(T document, IMartenSession session, ITenant tenant)
+        {
+            throw new NotImplementedException();
+        }
+
+        IStorageOperation IDocumentStorage<T>.Overwrite(T document, IMartenSession session, ITenant tenant)
+        {
+            throw new NotImplementedException();
+        }
+
+        IStorageOperation IDocumentStorage<T>.DeleteForDocument(T document)
+        {
+            throw new NotImplementedException();
+        }
+
+        IStorageOperation IDocumentStorage<T>.DeleteForWhere(IWhereFragment @where)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

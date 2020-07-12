@@ -66,7 +66,7 @@ namespace Marten.Events
             parameters[5].Value = dotnetTypes;
             parameters[5].NpgsqlDbType = NpgsqlDbType.Array | NpgsqlDbType.Varchar;
 
-            parameters[6].Value = events.Select(x => session.Serializer.ToJson(x)).ToArray();
+            parameters[6].Value = events.Select(x => session.Serializer.ToJson(x.Data)).ToArray();
             parameters[6].NpgsqlDbType = NpgsqlDbType.Array | NpgsqlDbType.Jsonb;
         }
 

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Baseline;
 using LamarCodeGeneration;
 using Marten.Events;
+using Marten.Events.Projections.Async;
 using Marten.Linq;
 using Marten.Patching;
 using Marten.Services;
@@ -119,7 +120,7 @@ namespace Marten.V4Internals.Sessions
 
             Database.BeginTransaction();
 
-            // TODO -- apply inline projections
+            applyProjections();
 
             _unitOfWork.Sort(Options);
 
@@ -174,7 +175,7 @@ namespace Marten.V4Internals.Sessions
 
             await Database.BeginTransactionAsync(token).ConfigureAwait(false);
 
-            // TODO -- apply inline projections
+            await applyProjectionsAsync(token).ConfigureAwait(false);
 
             _unitOfWork.Sort(Options);
 
@@ -492,6 +493,32 @@ namespace Marten.V4Internals.Sessions
             }
         }
 
+        private void applyProjections()
+        {
+            var streams = PendingChanges.Streams().ToArray();
 
+            if (streams.Length > 0)
+            {
+                var eventPage = new EventPage(streams);
+                foreach (var projection in DocumentStore.Events.InlineProjections)
+                {
+                    projection.Apply(this, eventPage);
+                }
+            }
+        }
+
+        private async Task applyProjectionsAsync(CancellationToken token)
+        {
+            var streams = PendingChanges.Streams().ToArray();
+
+            if (streams.Length > 0)
+            {
+                var eventPage = new EventPage(streams);
+                foreach (var projection in DocumentStore.Events.InlineProjections)
+                {
+                    await projection.ApplyAsync(this, eventPage, token).ConfigureAwait(false);
+                }
+            }
+        }
     }
 }
