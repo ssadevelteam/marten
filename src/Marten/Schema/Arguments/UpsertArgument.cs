@@ -85,7 +85,14 @@ namespace Marten.Schema.Arguments
             else
             {
                 method.Frames.Code($"{parameters.Usage}[{i}].{nameof(NpgsqlParameter.NpgsqlDbType)} = {{0}};", DbType);
-                method.Frames.Code($"{parameters.Usage}[{i}].{nameof(NpgsqlParameter.Value)} = document.{memberPath};");
+                if (_members.Last().GetMemberType().IsClass)
+                {
+                    method.Frames.Code($"{parameters.Usage}[{i}].{nameof(NpgsqlParameter.Value)} = document.{memberPath} ?? (object){typeof(DBNull).FullNameInCode()}.{nameof(DBNull.Value)};");
+                }
+                else
+                {
+                    method.Frames.Code($"{parameters.Usage}[{i}].{nameof(NpgsqlParameter.Value)} = document.{memberPath};");
+                }
             }
         }
 

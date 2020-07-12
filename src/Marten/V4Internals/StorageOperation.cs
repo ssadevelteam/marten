@@ -42,9 +42,6 @@ namespace Marten.V4Internals
         public void ConfigureCommand(CommandBuilder builder, IMartenSession session)
         {
             var parameters = builder.AppendWithParameters(CommandText());
-            parameters[0].NpgsqlDbType = DbType();
-            parameters[0].Value = _id;
-
             ConfigureParameters(parameters, _document, session);
         }
 

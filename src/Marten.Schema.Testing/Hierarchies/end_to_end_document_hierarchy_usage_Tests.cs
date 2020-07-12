@@ -5,6 +5,7 @@ using Marten.Schema.Testing.Documents;
 using Marten.Services;
 using Shouldly;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Marten.Schema.Testing.Hierarchies
 {
@@ -300,8 +301,11 @@ namespace Marten.Schema.Testing.Hierarchies
 
     public class query_through_mixed_population_Tests_tenanted: IntegrationContext
     {
-        public query_through_mixed_population_Tests_tenanted()
+
+        public query_through_mixed_population_Tests_tenanted(ITestOutputHelper output) : base(output)
         {
+            EnableCommandLogging = true;
+
             StoreOptions(
                 _ =>
                 {
@@ -327,7 +331,7 @@ namespace Marten.Schema.Testing.Hierarchies
             using (var session = theStore.OpenSession())
             {
                 var users = session.Query<AdminUser>().Where(u => u.AnyTenant()).ToArray();
-                SpecificationExtensions.ShouldBeGreaterThan(users.Length, 0);
+                users.Length.ShouldBeGreaterThan(0);
             }
         }
     }
