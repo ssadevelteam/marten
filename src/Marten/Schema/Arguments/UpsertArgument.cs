@@ -62,28 +62,30 @@ namespace Marten.Schema.Arguments
         public virtual void GenerateCode(GeneratedMethod method, GeneratedType type, int i, Argument parameters,
             DocumentMapping mapping)
         {
+            var memberPath = _members.Select(x => x.Name).Join("?.");
+
             if (DotNetType.IsEnum)
             {
                 if (mapping.EnumStorage == EnumStorage.AsInteger)
                 {
                     method.Frames.Code($"{parameters.Usage}[{i}].{nameof(NpgsqlParameter.NpgsqlDbType)} = {{0}};", NpgsqlDbType.Integer);
-                    method.Frames.Code($"{parameters.Usage}[{i}].{nameof(NpgsqlParameter.Value)} = (int)document.{_members.Last().Name};");
+                    method.Frames.Code($"{parameters.Usage}[{i}].{nameof(NpgsqlParameter.Value)} = (int)document.{memberPath};");
                 }
                 else if (DotNetType.IsNullable())
                 {
                     method.Frames.Code($"{parameters.Usage}[{i}].{nameof(NpgsqlParameter.NpgsqlDbType)} = {{0}};", NpgsqlDbType.Varchar);
-                    method.Frames.Code($"{parameters.Usage}[{i}].{nameof(NpgsqlParameter.Value)} = document.{_members.Last().Name}?.ToString();");
+                    method.Frames.Code($"{parameters.Usage}[{i}].{nameof(NpgsqlParameter.Value)} = document.{memberPath}?.ToString();");
                 }
                 else
                 {
                     method.Frames.Code($"{parameters.Usage}[{i}].{nameof(NpgsqlParameter.NpgsqlDbType)} = {{0}};", NpgsqlDbType.Varchar);
-                    method.Frames.Code($"{parameters.Usage}[{i}].{nameof(NpgsqlParameter.Value)} = document.{_members.Last().Name}.ToString();");
+                    method.Frames.Code($"{parameters.Usage}[{i}].{nameof(NpgsqlParameter.Value)} = document.{memberPath}.ToString();");
                 }
             }
             else
             {
                 method.Frames.Code($"{parameters.Usage}[{i}].{nameof(NpgsqlParameter.NpgsqlDbType)} = {{0}};", DbType);
-                method.Frames.Code($"{parameters.Usage}[{i}].{nameof(NpgsqlParameter.Value)} = document.{_members.Last().Name};");
+                method.Frames.Code($"{parameters.Usage}[{i}].{nameof(NpgsqlParameter.Value)} = document.{memberPath};");
             }
         }
 

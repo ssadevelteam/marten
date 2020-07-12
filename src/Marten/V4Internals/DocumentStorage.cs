@@ -13,6 +13,7 @@ using Marten.Util;
 using Marten.V4Internals.Linq;
 using Npgsql;
 using Remotion.Linq;
+using LambdaBuilder = Baseline.Expressions.LambdaBuilder;
 
 namespace Marten.V4Internals
 {
@@ -24,6 +25,7 @@ namespace Marten.V4Internals
 
         protected readonly string _loadArraySql;
         protected readonly string _loaderSql;
+        protected Action<T, TId> _setter;
 
         public DocumentStorage(DocumentMapping document)
         {
@@ -48,7 +50,11 @@ namespace Marten.V4Internals
             }
 
             QueryableDocument = document;
+
+            _setter = LambdaBuilder.Setter<T, TId>(document.IdMember);
         }
+
+
 
         object IDocumentStorage<T>.IdentityFor(T document)
         {

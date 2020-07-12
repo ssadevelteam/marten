@@ -547,6 +547,8 @@ namespace Marten.Schema
             return false;
         }
 
+
+
         private HiloSettings _hiloSettings;
         private MemberInfo _versionMember;
 

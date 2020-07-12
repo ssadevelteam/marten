@@ -25,7 +25,7 @@ namespace Marten.Schema.Testing.Identity.Sequences
         public void GenerateCode(GeneratedMethod assign, DocumentMapping mapping)
         {
             var document = new Use(mapping.DocumentType);
-            assign.Frames.Code($"{{0}}.{mapping.IdMember.Name} = \"newId\";", document);
+            assign.Frames.Code($"_setter({{0}}, \"newId\");", document);
             assign.Frames.Code($"return {{0}}.{mapping.IdMember.Name};", document);
         }
 

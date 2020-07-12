@@ -1,6 +1,9 @@
 using System;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using Baseline;
+using Baseline.Expressions;
 using LamarCodeGeneration;
 using LamarCodeGeneration.Frames;
 using Marten.Linq;
@@ -8,6 +11,8 @@ using Marten.Schema;
 using Marten.Services;
 using Marten.Storage;
 using Marten.V4Internals.Linq;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using ReflectionExtensions = Marten.Util.ReflectionExtensions;
 
 namespace Marten.V4Internals
 {
@@ -80,8 +85,11 @@ namespace Marten.V4Internals
             identity.Frames.Code($"return {{0}}.{_mapping.IdMember.Name};", identity.Arguments[0]);
 
             var assign = type.MethodFor("AssignIdentity");
+
             _mapping.IdStrategy.GenerateCode(assign, _mapping);
         }
+
+
 
         private static void writeNotImplementedStubs(GeneratedType type)
         {
