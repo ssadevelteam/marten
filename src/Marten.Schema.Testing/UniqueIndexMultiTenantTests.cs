@@ -11,7 +11,7 @@ namespace Marten.Schema.Testing
     {
         public const string UniqueSqlState = "23505";
 
-        private class Project
+        public class Project
         {
             public Project()
             {
