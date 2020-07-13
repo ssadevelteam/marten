@@ -85,5 +85,10 @@ namespace Marten.V4Internals.Linq
         {
             _locator = $"{op}({_locator})";
         }
+
+        public ISelectClause CloneToDouble()
+        {
+            throw new NotSupportedException();
+        }
     }
 }

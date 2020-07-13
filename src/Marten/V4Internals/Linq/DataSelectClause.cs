@@ -62,5 +62,10 @@ namespace Marten.V4Internals.Linq
         {
             FieldName = $"{op}({FieldName})";
         }
+
+        public ISelectClause CloneToDouble()
+        {
+            return new DataSelectClause<double>(FromObject, FieldName);
+        }
     }
 }

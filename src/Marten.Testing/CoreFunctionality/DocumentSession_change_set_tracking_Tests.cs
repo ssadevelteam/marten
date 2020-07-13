@@ -23,7 +23,8 @@ namespace Marten.Testing.CoreFunctionality
             var newDoc1 = new Target {Id = Guid.Empty};
             var newDoc2 = new Target {Id = Guid.Empty};
 
-            theSession.Store(target1, target2, target3, newDoc1, newDoc2);
+            theSession.Store(target1, target2, target3);
+            theSession.Insert(newDoc1, newDoc2);
 
             var id1 = Guid.NewGuid();
             var id2 = Guid.NewGuid();

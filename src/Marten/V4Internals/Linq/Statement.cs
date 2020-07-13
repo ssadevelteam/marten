@@ -235,6 +235,12 @@ namespace Marten.V4Internals.Linq
             if (SelectClause is IScalarSelectClause c)
             {
                 c.ApplyOperator(databaseOperator);
+
+                // Hack, but let it go
+                if (databaseOperator == "AVG")
+                {
+                    SelectClause = c.CloneToDouble();
+                }
             }
             else
             {

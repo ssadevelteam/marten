@@ -6,6 +6,7 @@ using LamarCodeGeneration;
 using Marten.Linq;
 using Marten.Linq.Fields;
 using Marten.Util;
+using Field = Marten.Schema.Field;
 
 namespace Marten.V4Internals.Linq
 {
@@ -14,10 +15,10 @@ namespace Marten.V4Internals.Linq
         private static readonly string NullResultMessage = $"The cast to value type '{typeof(T).FullNameInCode()}' failed because the materialized value is null. Either the result type's generic parameter or the query must use a nullable type.";
         private string _locator;
 
-        public ScalarSelectClause(string field, string from)
+        public ScalarSelectClause(string locator, string from)
         {
             FromObject = from;
-            _locator = field;
+            _locator = locator;
         }
 
         public ScalarSelectClause(IField field, string from)
@@ -119,6 +120,11 @@ namespace Marten.V4Internals.Linq
         public void ApplyOperator(string op)
         {
             _locator = $"{op}({_locator})";
+        }
+
+        public ISelectClause CloneToDouble()
+        {
+            return new ScalarSelectClause<double>(_locator,FromObject);
         }
     }
 }

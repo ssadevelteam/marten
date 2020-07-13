@@ -164,7 +164,7 @@ namespace Marten.V4Internals
             return _operations.Where(x => x.DocumentType.CanBeCastTo(documentType));
         }
 
-        IEnumerable<object> IChangeSet.Updated => _operations.OfType<IDocumentStorageOperation>().Where(x => x.Role() == StorageRole.Update).Select(x => x.Document);
+        IEnumerable<object> IChangeSet.Updated => _operations.OfType<IDocumentStorageOperation>().Where(x => x.Role() == StorageRole.Update || x.Role() == StorageRole.Upsert).Select(x => x.Document);
 
         IEnumerable<object> IChangeSet.Inserted => _operations.OfType<IDocumentStorageOperation>().Where(x => x.Role() == StorageRole.Insert).Select(x => x.Document);
 
