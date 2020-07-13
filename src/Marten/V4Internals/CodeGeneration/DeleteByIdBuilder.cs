@@ -21,7 +21,7 @@ namespace Marten.V4Internals
         public GeneratedType Build(GeneratedAssembly assembly)
         {
             var baseType = typeof(DeleteOne<,>).MakeGenericType(_mapping.DocumentType, _mapping.IdType);
-            var type = assembly.AddType($"Delete{_mapping.DocumentType.Name}ById", baseType);
+            var type = assembly.AddType($"Delete{_mapping.DocumentType.Name.Sanitize()}ById", baseType);
 
             var sql = $"delete from {_mapping.Table.QualifiedName} as d where id = ?";
             if (_mapping.DeleteStyle == DeleteStyle.SoftDelete)

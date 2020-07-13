@@ -38,7 +38,7 @@ namespace Marten.V4Internals
             CommandText = $"select {_function.Identifier}({_function.OrderedArguments().Select(x => "?").Join(", ")})";
 
             ClassName =
-                $"{function.GetType().Name.Replace("Function", "")}{mapping.DocumentType.NameInCode().Sanitize()}Operation";
+                $"{function.GetType().Name.Replace("Function", "")}{mapping.DocumentType.Name.Sanitize()}Operation";
 
             _mapping = mapping;
         }

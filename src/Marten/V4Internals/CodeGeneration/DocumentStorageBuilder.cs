@@ -27,7 +27,7 @@ namespace Marten.V4Internals
         {
             _mapping = mapping;
             _selectorTypeSource = selectorTypeSource;
-            _typeName = $"{style}{mapping.DocumentType.NameInCode().Sanitize()}DocumentStorage";
+            _typeName = $"{style}{mapping.DocumentType.Name.Sanitize()}DocumentStorage";
 
             _baseType =
                 determineOpenDocumentStorageType(style).MakeGenericType(mapping.DocumentType, mapping.IdType);
