@@ -85,7 +85,8 @@ namespace Marten.Schema.Arguments
             else
             {
                 method.Frames.Code($"{parameters.Usage}[{i}].{nameof(NpgsqlParameter.NpgsqlDbType)} = {{0}};", DbType);
-                if (_members.Last().GetMemberType().IsClass)
+                var rawMemberType = _members.Last().GetRawMemberType();
+                if (rawMemberType.IsClass || rawMemberType.IsNullable())
                 {
                     method.Frames.Code($"{parameters.Usage}[{i}].{nameof(NpgsqlParameter.Value)} = document.{memberPath} ?? (object){typeof(DBNull).FullNameInCode()}.{nameof(DBNull.Value)};");
                 }
