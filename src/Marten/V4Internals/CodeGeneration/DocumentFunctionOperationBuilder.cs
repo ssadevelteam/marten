@@ -29,11 +29,14 @@ namespace Marten.V4Internals
         private readonly UpsertFunction _function;
         private readonly DocumentMapping _mapping;
         private readonly StorageRole _role;
+        private readonly StoreOptions _options;
 
-        public DocumentFunctionOperationBuilder(DocumentMapping mapping, UpsertFunction function, StorageRole role)
+        public DocumentFunctionOperationBuilder(DocumentMapping mapping, UpsertFunction function, StorageRole role,
+            StoreOptions options)
         {
             _function = function;
             _role = role;
+            _options = options;
 
             CommandText = $"select {_function.Identifier}({_function.OrderedArguments().Select(x => "?").Join(", ")})";
 
@@ -123,7 +126,7 @@ namespace Marten.V4Internals
             for (var i = 0; i < arguments.Length; i++)
             {
                 var argument = arguments[i];
-                argument.GenerateCode(method, type, i, parameters, _mapping);
+                argument.GenerateCode(method, type, i, parameters, _mapping, _options);
             }
         }
     }

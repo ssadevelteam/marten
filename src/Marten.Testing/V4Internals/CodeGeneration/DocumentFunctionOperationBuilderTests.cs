@@ -45,7 +45,7 @@ namespace Marten.Testing.V4Internals.CodeGeneration
             {
                 if (_builder == null)
                     _builder = new DocumentFunctionOperationBuilder(theMapping, new UpsertFunction(theMapping),
-                        StorageRole.Upsert);
+                        StorageRole.Upsert, new StoreOptions());
 
                 return _builder;
             }

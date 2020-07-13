@@ -46,11 +46,31 @@ namespace Marten.Schema.Arguments
                 if (value != null)
                 {
                     DbType = TypeMappings.ToDbType(value.Last().GetMemberType());
+
+
+                    if (_members.Length == 1)
+                    {
+                        DotNetType = _members.Last().GetRawMemberType();
+                    }
+                    else
+                    {
+                        var rawType = _members.LastOrDefault().GetRawMemberType();
+                        if (!rawType.IsClass && !rawType.IsNullable())
+                        {
+                            DotNetType = typeof(Nullable<>).MakeGenericType(rawType);
+                        }
+                        else
+                        {
+                            DotNetType = rawType;
+                        }
+                    }
                 }
+
+
             }
         }
 
-        public Type DotNetType => _members?.LastOrDefault()?.GetMemberType();
+        public Type DotNetType { get; private set; }
 
         public NpgsqlDbType DbType { get; set; }
 
@@ -60,16 +80,24 @@ namespace Marten.Schema.Arguments
         }
 
         public virtual void GenerateCode(GeneratedMethod method, GeneratedType type, int i, Argument parameters,
-            DocumentMapping mapping)
+            DocumentMapping mapping, StoreOptions options)
         {
             var memberPath = _members.Select(x => x.Name).Join("?.");
 
-            if (DotNetType.IsEnum)
+            if (DotNetType.IsEnum || (DotNetType.IsNullable() && DotNetType.GetGenericArguments()[0].IsEnum))
             {
-                if (mapping.EnumStorage == EnumStorage.AsInteger)
+                if (options.DuplicatedFieldEnumStorage == EnumStorage.AsInteger)
                 {
-                    method.Frames.Code($"{parameters.Usage}[{i}].{nameof(NpgsqlParameter.NpgsqlDbType)} = {{0}};", NpgsqlDbType.Integer);
-                    method.Frames.Code($"{parameters.Usage}[{i}].{nameof(NpgsqlParameter.Value)} = (int)document.{memberPath};");
+                    if (DotNetType.IsNullable())
+                    {
+                        method.Frames.Code($"{parameters.Usage}[{i}].{nameof(NpgsqlParameter.NpgsqlDbType)} = {{0}};", NpgsqlDbType.Integer);
+                        method.Frames.Code($"{parameters.Usage}[{i}].{nameof(NpgsqlParameter.Value)} = document.{memberPath} == null ? (object){typeof(DBNull).FullNameInCode()}.Value : (object)((int)document.{memberPath});");
+                    }
+                    else
+                    {
+                        method.Frames.Code($"{parameters.Usage}[{i}].{nameof(NpgsqlParameter.NpgsqlDbType)} = {{0}};", NpgsqlDbType.Integer);
+                        method.Frames.Code($"{parameters.Usage}[{i}].{nameof(NpgsqlParameter.Value)} = (int)document.{memberPath};");
+                    }
                 }
                 else if (DotNetType.IsNullable())
                 {

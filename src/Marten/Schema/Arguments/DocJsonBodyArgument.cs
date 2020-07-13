@@ -31,7 +31,7 @@ namespace Marten.Schema.Arguments
         }
 
         public override void GenerateCode(GeneratedMethod method, GeneratedType type, int i, Argument parameters,
-            DocumentMapping mapping)
+            DocumentMapping mapping, StoreOptions options)
         {
             method.Frames.Code($"{parameters.Usage}[{i}].NpgsqlDbType = {{0}};", NpgsqlDbType.Jsonb);
             method.Frames.Code($"{parameters.Usage}[{i}].Value = {{0}}.Serializer.ToJson(_document);", Use.Type<IMartenSession>());

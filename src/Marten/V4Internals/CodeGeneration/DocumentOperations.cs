@@ -6,15 +6,15 @@ namespace Marten.V4Internals
 {
     internal class DocumentOperations
     {
-        public DocumentOperations(GeneratedAssembly assembly, DocumentMapping mapping)
+        public DocumentOperations(GeneratedAssembly assembly, DocumentMapping mapping, StoreOptions options)
         {
             DeleteById = new DeleteByIdBuilder(mapping).Build(assembly);
             DeleteByWhere = new DeleteWhereBuilder(mapping).Build(assembly);
-            Upsert = new DocumentFunctionOperationBuilder(mapping, new UpsertFunction(mapping), StorageRole.Upsert)
+            Upsert = new DocumentFunctionOperationBuilder(mapping, new UpsertFunction(mapping), StorageRole.Upsert, options)
                     .BuildType(assembly);
-            Insert = new DocumentFunctionOperationBuilder(mapping, new InsertFunction(mapping), StorageRole.Insert)
+            Insert = new DocumentFunctionOperationBuilder(mapping, new InsertFunction(mapping), StorageRole.Insert, options)
                     .BuildType(assembly);
-            Update = new DocumentFunctionOperationBuilder(mapping, new UpdateFunction(mapping), StorageRole.Update)
+            Update = new DocumentFunctionOperationBuilder(mapping, new UpdateFunction(mapping), StorageRole.Update, options)
                     .BuildType(assembly);
 
 
@@ -28,7 +28,7 @@ namespace Marten.V4Internals
 
             if (mapping.UseOptimisticConcurrency)
             {
-                Overwrite = new DocumentFunctionOperationBuilder(mapping, new OverwriteFunction(mapping), StorageRole.Update)
+                Overwrite = new DocumentFunctionOperationBuilder(mapping, new OverwriteFunction(mapping), StorageRole.Update, options)
                         .BuildType(assembly);
             }
         }

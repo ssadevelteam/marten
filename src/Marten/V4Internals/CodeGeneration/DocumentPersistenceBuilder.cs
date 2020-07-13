@@ -24,7 +24,7 @@ namespace Marten.V4Internals
         {
             var assembly = new GeneratedAssembly(new GenerationRules("Marten.Generated"));
 
-            var operations = new DocumentOperations(assembly, _mapping);
+            var operations = new DocumentOperations(assembly, _mapping, _options);
 
             assembly.Namespaces.Add(typeof(CommandExtensions).Namespace);
             assembly.Namespaces.Add(typeof(TenantIdArgument).Namespace);

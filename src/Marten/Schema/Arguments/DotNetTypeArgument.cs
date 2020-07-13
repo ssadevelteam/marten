@@ -25,7 +25,7 @@ namespace Marten.Schema.Arguments
 
 
         public override void GenerateCode(GeneratedMethod method, GeneratedType type, int i, Argument parameters,
-            DocumentMapping mapping)
+            DocumentMapping mapping, StoreOptions options)
         {
             var version = type.AllInjectedFields[0];
 
