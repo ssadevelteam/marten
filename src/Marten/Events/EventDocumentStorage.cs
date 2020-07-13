@@ -77,6 +77,8 @@ namespace Marten.Events
         }
 
         public IQueryableDocument QueryableDocument => _mapping;
+        public bool UseOptimisticConcurrency { get; } = false;
+
         public object IdentityFor(IEvent document)
         {
             return _graph.StreamIdentity == StreamIdentity.AsGuid ? (object) document.Id : document.StreamKey;

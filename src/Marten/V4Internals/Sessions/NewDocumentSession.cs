@@ -239,15 +239,32 @@ namespace Marten.V4Internals.Sessions
             {
                 var storage = StorageFor<T>();
 
-                foreach (var entity in entities)
+                if (Concurrency == ConcurrencyChecks.Disabled && storage.UseOptimisticConcurrency)
                 {
-                    // Put it in the identity map -- if necessary
-                    storage.Store(this, entity);
+                    foreach (var entity in entities)
+                    {
+                        // Put it in the identity map -- if necessary
+                        storage.Store(this, entity);
 
-                    var upsert = storage.Upsert(entity, this, Tenant);
+                        var overwrite = storage.Overwrite(entity, this, Tenant);
 
-                    _unitOfWork.Add(upsert);
+                        _unitOfWork.Add(overwrite);
+                    }
                 }
+                else
+                {
+                    foreach (var entity in entities)
+                    {
+                        // Put it in the identity map -- if necessary
+                        storage.Store(this, entity);
+
+                        var upsert = storage.Upsert(entity, this, Tenant);
+
+                        _unitOfWork.Add(upsert);
+                    }
+                }
+
+
             }
         }
 

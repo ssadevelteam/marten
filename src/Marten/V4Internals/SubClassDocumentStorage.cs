@@ -81,6 +81,7 @@ namespace Marten.V4Internals
         }
 
         public IQueryableDocument QueryableDocument => _mapping;
+        public bool UseOptimisticConcurrency => _parent.UseOptimisticConcurrency;
 
         public Type IdType => typeof(TId);
         public Guid? VersionFor(T document, IMartenSession session)

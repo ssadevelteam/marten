@@ -51,10 +51,13 @@ namespace Marten.V4Internals
 
             QueryableDocument = document;
 
+            UseOptimisticConcurrency = document.UseOptimisticConcurrency;
+
+
             _setter = LambdaBuilder.Setter<T, TId>(document.IdMember);
         }
 
-
+        public bool UseOptimisticConcurrency { get; }
 
         object IDocumentStorage<T>.IdentityFor(T document)
         {

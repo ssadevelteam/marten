@@ -22,6 +22,7 @@ namespace Marten.V4Internals
         IWhereFragment DefaultWhereFragment();
 
         IQueryableDocument QueryableDocument { get; }
+        bool UseOptimisticConcurrency { get; }
     }
 
     public interface IDocumentStorage<T> : IDocumentStorage

@@ -119,6 +119,7 @@ namespace Marten.Events
             _idType = parent.StreamIdentity == StreamIdentity.AsGuid ? typeof(Guid) : typeof(string);
         }
 
+        [Obsolete("Lot of methods removed in v4 we can remove")]
         public Type TopLevelBaseType => DocumentType;
 
         public NpgsqlCommand LoaderCommand(object id)
@@ -150,6 +151,8 @@ namespace Marten.Events
         {
             throw new NotSupportedException("You cannot delete events at this time");
         }
+
+        public bool UseOptimisticConcurrency { get; } = false;
 
         string ISelectClause.FromObject => _tableName;
 
