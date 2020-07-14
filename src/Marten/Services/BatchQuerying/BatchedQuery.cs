@@ -79,14 +79,16 @@ namespace Marten.Services.BatchQuerying
                 builder.Append(";");
             }
 
+            // TODO --- duplication
+            command.CommandText = builder.ToString();
+
             // TODO -- this needs to be temporary
             if (command.CommandText.Contains(TenantIdArgument.ArgName))
             {
                 command.AddNamedParameter(TenantIdArgument.ArgName, _parent.Tenant.TenantId);
             }
 
-            // TODO --- duplication
-            command.CommandText = builder.ToString();
+
 
             return command;
         }
