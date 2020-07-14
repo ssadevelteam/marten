@@ -97,25 +97,6 @@ namespace Marten.Testing.Linq
             maxNumber.ShouldBe(10);
         }
 
-        [Fact]
-        public void min_on_empty_table_should_throw()
-        {
-            Exception<InvalidOperationException>.ShouldBeThrownBy(()=> theSession.Query<Target>().Min(t => t.Number));
-        }
-
-        [Fact]
-        public void max_on_empty_table_should_throw()
-        {
-            Exception<InvalidOperationException>.ShouldBeThrownBy(() => theSession.Query<Target>().Max(t => t.Number));
-        }
-
-        [Fact]
-        public void average_on_empty_table_should_throw()
-        {
-            var e = Exception<InvalidOperationException>.ShouldBeThrownBy(() => theSession.Query<Target>().Average(t => t.Number));
-            e.Message.ShouldBe("The cast to value type 'System.Double' failed because the materialized value is null. Either the result type's generic parameter or the query must use a nullable type.");
-        }
-
         public query_with_aggregate_functions(DefaultStoreFixture fixture) : base(fixture)
         {
         }
