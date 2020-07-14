@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Baseline;
 using Marten.Linq;
+using Marten.Linq.QueryHandlers;
 using Marten.Schema;
 using Marten.Services;
 using Marten.Storage;
@@ -101,6 +102,12 @@ namespace Marten.Testing.V4Internals
         }
 
         public ConcurrencyChecks Concurrency { get; } = ConcurrencyChecks.Enabled;
+
+        private int _tableNumber;
+        public string NextTempTableName()
+        {
+            return LinqConstants.IdListTableName + ++_tableNumber;
+        }
 
         public Task<T> ExecuteQuery<T>(IQueryHandler<T> handler, CancellationToken token)
         {

@@ -9,6 +9,7 @@ namespace Marten.V4Internals.Linq.Includes
     {
         private readonly IDocumentStorage<T> _storage;
         private readonly Action<T> _callback;
+        private readonly string _tempTableName;
 
         public IncludePlan(int index, IDocumentStorage<T> storage, IField connectingField, Action<T> callback)
         {
@@ -22,9 +23,9 @@ namespace Marten.V4Internals.Linq.Includes
 
         public string IdAlias { get;}
         public string TempSelector { get; }
-        public Statement BuildStatement()
+        public Statement BuildStatement(string tempTableName)
         {
-            return new IncludedDocumentStatement(_storage, this);
+            return new IncludedDocumentStatement(_storage, this, tempTableName);
         }
 
         public IIncludeReader BuildReader(IMartenSession session)
@@ -35,9 +36,10 @@ namespace Marten.V4Internals.Linq.Includes
 
         public class IncludedDocumentStatement : Statement
         {
-            public IncludedDocumentStatement(IDocumentStorage<T> storage, IncludePlan<T> includePlan) : base(storage, storage.Fields)
+            public IncludedDocumentStatement(IDocumentStorage<T> storage, IncludePlan<T> includePlan,
+                string tempTableName) : base(storage, storage.Fields)
             {
-                Where = new InTempTableWhereFragment(LinqConstants.IdListTableName, includePlan.IdAlias);
+                Where = new InTempTableWhereFragment(tempTableName, includePlan.IdAlias);
             }
 
             protected override void configure(CommandBuilder sql)

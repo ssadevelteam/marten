@@ -31,5 +31,7 @@ namespace Marten.V4Internals
         /// Override whether or not this session honors optimistic concurrency checks
         /// </summary>
         ConcurrencyChecks Concurrency { get; }
+
+        string NextTempTableName();
     }
 }

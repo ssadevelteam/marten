@@ -11,9 +11,13 @@ namespace Marten.V4Internals.Linq.Includes
     public class IncludeIdentitySelectorStatement : Statement, ISelectClause
     {
         private readonly IList<IIncludePlan> _includes;
+        private string _tableName;
 
-        public IncludeIdentitySelectorStatement(DocumentStatement original, IList<IIncludePlan> includes) : base(null, null)
+        public IncludeIdentitySelectorStatement(DocumentStatement original, IList<IIncludePlan> includes,
+            IMartenSession session) : base(null, null)
         {
+            _tableName = session.NextTempTableName();
+
             _includes = includes;
             Inner = original.Clone();
             Inner.SelectClause = this;
@@ -24,14 +28,14 @@ namespace Marten.V4Internals.Linq.Includes
             Statement current = this;
             foreach (var include in includes)
             {
-                var includeStatement = include.BuildStatement();
+                var includeStatement = include.BuildStatement(_tableName);
                 current.Next = includeStatement;
                 current = includeStatement;
             }
 
             current.Next = original;
 
-            original.Where = new InTempTableWhereFragment(LinqConstants.IdListTableName, "id");
+            original.Where = new InTempTableWhereFragment(_tableName, "id");
             original.Limit = 0;
             original.Offset = 0;
         }
@@ -43,7 +47,7 @@ namespace Marten.V4Internals.Linq.Includes
         protected override void configure(CommandBuilder sql)
         {
             sql.Append("create temp table ");
-            sql.Append(LinqConstants.IdListTableName);
+            sql.Append(_tableName);
             sql.Append(" as (\n");
             Inner.Configure(sql);
             sql.Append("\n);");

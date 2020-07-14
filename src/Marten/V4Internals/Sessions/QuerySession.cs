@@ -104,6 +104,11 @@ namespace Marten.V4Internals.Sessions
         }
 
         public ConcurrencyChecks Concurrency { get; protected set; } = ConcurrencyChecks.Enabled;
+        private int _tableNumber;
+        public string NextTempTableName()
+        {
+            return LinqConstants.IdListTableName + ++_tableNumber;
+        }
 
 
         public void Dispose()

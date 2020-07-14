@@ -182,7 +182,7 @@ namespace Marten.V4Internals.Linq
 
         public IQueryHandler<TResult> BuildHandler<TResult>(QueryStatistics statistics, IList<IIncludePlan> includes)
         {
-            BuildDatabaseCommand<TResult>(statistics, includes);
+            BuildDatabaseCommand(statistics, includes);
 
             var handler = buildHandlerForCurrentStatement<TResult>();
 
@@ -191,7 +191,7 @@ namespace Marten.V4Internals.Linq
                 : handler;
         }
 
-        public void BuildDatabaseCommand<TResult>(QueryStatistics statistics, IList<IIncludePlan> includes)
+        public void BuildDatabaseCommand(QueryStatistics statistics, IList<IIncludePlan> includes)
         {
             if (statistics != null)
             {
@@ -204,7 +204,7 @@ namespace Marten.V4Internals.Linq
 
             if (includes.Any())
             {
-                TopStatement = new IncludeIdentitySelectorStatement((DocumentStatement) TopStatement, includes);
+                TopStatement = new IncludeIdentitySelectorStatement((DocumentStatement) TopStatement, includes, _session);
             }
         }
 

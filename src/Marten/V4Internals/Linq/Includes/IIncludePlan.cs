@@ -7,6 +7,6 @@ namespace Marten.V4Internals.Linq.Includes
         // TODO -- something to break up the Statements
         string IdAlias { get; }
         string TempSelector { get; }
-        Statement BuildStatement();
+        Statement BuildStatement(string tempTableName);
     }
 }
