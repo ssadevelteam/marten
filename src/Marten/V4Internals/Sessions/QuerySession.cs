@@ -40,6 +40,8 @@ namespace Marten.V4Internals.Sessions
 
         public void MarkAsDocumentLoaded(object id, object document)
         {
+            if (document == null) return;
+
             foreach (var listener in Listeners)
             {
                 listener.DocumentLoaded(id, document);
@@ -131,10 +133,7 @@ namespace Marten.V4Internals.Sessions
         {
             assertNotDisposed();
             var document = storageFor<T, string>().Load(id, this);
-            foreach (var listener in Listeners)
-            {
-                listener.DocumentLoaded(id, document);
-            }
+            MarkAsDocumentLoaded(id, document);
 
             return document;
         }
@@ -168,10 +167,7 @@ namespace Marten.V4Internals.Sessions
                 throw new InvalidOperationException($"The identity type for document type {typeof(T).FullNameInCode()} is not numeric");
             }
 
-            if (document != null)
-            {
-                MarkAsDocumentLoaded(id, document);
-            }
+            MarkAsDocumentLoaded(id, document);
 
             return document;
         }
@@ -196,10 +192,7 @@ namespace Marten.V4Internals.Sessions
                 throw new InvalidOperationException($"The identity type for document type {typeof(T).FullNameInCode()} is not numeric");
             }
 
-            if (document != null)
-            {
-                MarkAsDocumentLoaded(id, document);
-            }
+            MarkAsDocumentLoaded(id, document);
 
             return document;
         }
@@ -208,10 +201,7 @@ namespace Marten.V4Internals.Sessions
         {
             assertNotDisposed();
             var document = storageFor<T, long>().Load(id, this);
-            foreach (var listener in Listeners)
-            {
-                listener.DocumentLoaded(id, document);
-            }
+            MarkAsDocumentLoaded(id, document);
 
             return document;
         }
@@ -220,10 +210,7 @@ namespace Marten.V4Internals.Sessions
         {
             assertNotDisposed();
             var document = await storageFor<T, long>().LoadAsync(id, this, token).ConfigureAwait(false);
-            foreach (var listener in Listeners)
-            {
-                listener.DocumentLoaded(id, document);
-            }
+            MarkAsDocumentLoaded(id, document);
 
             return document;
         }
@@ -232,6 +219,7 @@ namespace Marten.V4Internals.Sessions
         {
             assertNotDisposed();
             var document = storageFor<T, Guid>().Load(id, this);
+            MarkAsDocumentLoaded(id, document);
 
             return document;
         }
@@ -240,10 +228,7 @@ namespace Marten.V4Internals.Sessions
         {
             assertNotDisposed();
             var document = await storageFor<T, Guid>().LoadAsync(id, this, token).ConfigureAwait(false);
-            foreach (var listener in Listeners)
-            {
-                listener.DocumentLoaded(id, document);
-            }
+            MarkAsDocumentLoaded(id, document);
 
             return document;
         }
