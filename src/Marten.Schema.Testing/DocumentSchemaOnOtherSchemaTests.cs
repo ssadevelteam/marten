@@ -113,13 +113,12 @@ namespace Marten.Schema.Testing
             using (var store = DocumentStore.For(ConnectionSource.ConnectionString))
             {
 
-                var storage = store.Storage;
+                store.Options.Providers.StorageFor<User>().ShouldNotBeNull();
 
-                storage.MappingFor(typeof(User)).ShouldNotBeNull();
 
                 Exception<AmbiguousDocumentTypeAliasesException>.ShouldBeThrownBy(() =>
                 {
-                    storage.MappingFor(typeof(User2));
+                    store.Options.Providers.StorageFor<User2>().ShouldNotBeNull();
                 });
             }
         }

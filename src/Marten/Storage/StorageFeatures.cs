@@ -94,6 +94,8 @@ namespace Marten.Storage
 
                 value = subclass ?? MappingFor(documentType);
                 _mappings.Swap(d => d.AddOrUpdate(documentType, value));
+
+                assertNoDuplicateDocumentAliases();
             }
 
             return value;
