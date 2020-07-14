@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
@@ -84,7 +83,7 @@ namespace Marten.V4Internals.Linq
                 }
             }
 
-            if (considerSelectors && Model.SelectClause.Selector.CanReduce)
+            if (considerSelectors && !(Model.SelectClause.Selector is QuerySourceReferenceExpression))
             {
                 var visitor = new SelectorVisitor(this);
                 visitor.Visit(Model.SelectClause.Selector);

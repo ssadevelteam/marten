@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Data.Common;
 using System.IO;
 using System.Threading;
@@ -7,6 +8,8 @@ using LamarCodeGeneration.Util;
 using Marten.Linq;
 using Marten.Linq.QueryHandlers;
 using Marten.Util;
+using Marten.V4Internals.Linq.QueryHandlers;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Marten.V4Internals.Linq
 {
@@ -66,7 +69,7 @@ namespace Marten.V4Internals.Linq
         }
     }
 
-    public class JsonArrayHandler: IQueryHandler<string>
+    public class JsonArrayHandler: IQueryHandler<string>, IQueryHandler<IReadOnlyList<string>>, IQueryHandler<IEnumerable<string>>, ISelector<string>
     {
         private readonly Statement _statement;
         private string _arrayPrefix;
@@ -117,29 +120,63 @@ namespace Marten.V4Internals.Linq
             return builder.ToString();
         }
 
+        Task<IEnumerable<string>> IQueryHandler<IEnumerable<string>>.HandleAsync(DbDataReader reader, IMartenSession session, CancellationToken token)
+        {
+            IQueryHandler<IEnumerable<string>> inner = new ListQueryHandler<string>(null, this);
+            return inner.HandleAsync(reader, session, token);
+        }
+
+        IEnumerable<string> IQueryHandler<IEnumerable<string>>.Handle(DbDataReader reader, IMartenSession session)
+        {
+            IQueryHandler<IEnumerable<string>> inner = new ListQueryHandler<string>(null, this);
+            return inner.Handle(reader, session);
+        }
+
+        Task<IReadOnlyList<string>> IQueryHandler<IReadOnlyList<string>>.HandleAsync(DbDataReader reader, IMartenSession session, CancellationToken token)
+        {
+            var inner = new ListQueryHandler<string>(null, this);
+            return inner.HandleAsync(reader, session, token);
+        }
+
+        IReadOnlyList<string> IQueryHandler<IReadOnlyList<string>>.Handle(DbDataReader reader, IMartenSession session)
+        {
+            var inner = new ListQueryHandler<string>(null, this);
+            return inner.Handle(reader, session);
+        }
+
         public async Task<string> HandleAsync(DbDataReader reader, IMartenSession session, CancellationToken token)
         {
             // TODO -- figure out better, more efficient ways to do this
             var builder = new StringWriter();
 
-            builder.Write(_arrayPrefix);
+            await builder.WriteAsync(_arrayPrefix);
 
             if (await reader.ReadAsync(token).ConfigureAwait(false))
             {
                 using var text = reader.GetTextReader(0);
-                builder.Write(await text.ReadToEndAsync().ConfigureAwait(false));
+                await builder.WriteAsync(await text.ReadToEndAsync().ConfigureAwait(false));
             }
 
             while (await reader.ReadAsync(token))
             {
                 using var text = reader.GetTextReader(0);
-                builder.Write(',');
-                builder.Write(await text.ReadToEndAsync().ConfigureAwait(false));
+                await builder.WriteAsync(',');
+                await builder.WriteAsync(await text.ReadToEndAsync().ConfigureAwait(false));
             }
 
-            builder.Write(_arraySuffix);
+            await builder.WriteAsync(_arraySuffix);
 
             return builder.ToString();
+        }
+
+        string ISelector<string>.Resolve(DbDataReader reader)
+        {
+            return reader.GetFieldValue<string>(0);
+        }
+
+        Task<string> ISelector<string>.ResolveAsync(DbDataReader reader, CancellationToken token)
+        {
+            return reader.GetFieldValueAsync<string>(0, token);
         }
     }
 }
