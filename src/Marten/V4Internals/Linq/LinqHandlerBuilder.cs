@@ -18,7 +18,7 @@ using Remotion.Linq.Clauses.ResultOperators;
 
 namespace Marten.V4Internals.Linq
 {
-    public class LinqHandlerBuilder
+    public partial class LinqHandlerBuilder
     {
         private readonly IMartenSession _session;
 
@@ -56,44 +56,6 @@ namespace Marten.V4Internals.Linq
 
         }
 
-        private void handleSelector()
-        {
-            // Important to deal with the selector first before you go into
-            // the result operators
-            switch (Model.SelectClause.Selector.NodeType)
-            {
-                case ExpressionType.MemberAccess:
-                    CurrentStatement.ToScalar(Model.SelectClause.Selector);
-                    break;
-
-                case ExpressionType.Call:
-                    var method = (MethodCallExpression)Model.SelectClause.Selector;
-
-                    bool matched = false;
-                    foreach (var matcher in _methodMatchers)
-                    {
-                        if (matcher.TryMatch(method, out var op))
-                        {
-                            AddResultOperator(op);
-                            matched = true;
-                            break;
-                        }
-                    }
-
-                    if (!matched)
-                    {
-                        throw new NotImplementedException($"Marten does not (yet) support the {method.Method.DeclaringType.FullNameInCode()}.{method.Method.Name}() method as a Linq selector");
-                    }
-
-                    break;
-
-                case ExpressionType.MemberInit:
-                case ExpressionType.New:
-                    CurrentStatement.ToSelectTransform(Model.SelectClause);
-                    break;
-            }
-        }
-
         private void processQueryModel(QueryModel queryModel, IDocumentStorage storage, bool considerSelectors)
         {
             for (var i = 0; i < queryModel.BodyClauses.Count; i++)
@@ -122,9 +84,10 @@ namespace Marten.V4Internals.Linq
                 }
             }
 
-            if (considerSelectors)
+            if (considerSelectors && Model.SelectClause.Selector.CanReduce)
             {
-                handleSelector();
+                var visitor = new SelectorVisitor(this);
+                visitor.Visit(Model.SelectClause.Selector);
             }
 
             foreach (var resultOperator in queryModel.ResultOperators)

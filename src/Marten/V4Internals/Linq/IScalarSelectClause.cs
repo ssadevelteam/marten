@@ -4,5 +4,6 @@ namespace Marten.V4Internals.Linq
     {
         void ApplyOperator(string op);
         ISelectClause CloneToDouble();
+        string FieldName { get; }
     }
 }

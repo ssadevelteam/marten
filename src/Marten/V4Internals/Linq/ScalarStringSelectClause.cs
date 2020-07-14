@@ -25,6 +25,8 @@ namespace Marten.V4Internals.Linq
             _locator = field.TypedLocator;
         }
 
+        public string FieldName => _locator;
+
         public Type SelectedType => typeof(string);
 
         public string FromObject { get; }

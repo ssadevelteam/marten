@@ -4,6 +4,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Baseline;
 using Marten.Linq;
+using Marten.V4Internals.Linq;
 using Remotion.Linq.Clauses;
 using Remotion.Linq.Parsing.Structure.IntermediateModel;
 
@@ -11,7 +12,8 @@ namespace Marten.Transforms
 {
     public class TransformToOtherMatcher: IMethodCallMatcher
     {
-        public bool TryMatch(MethodCallExpression expression, out ResultOperatorBase op)
+        public bool TryMatch(MethodCallExpression expression, ExpressionVisitor selectorVisitor,
+            out ResultOperatorBase op)
         {
             if (expression.Method.Name == nameof(TransformExtensions.TransformTo))
             {

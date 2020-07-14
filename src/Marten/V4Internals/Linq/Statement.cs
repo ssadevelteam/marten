@@ -255,12 +255,12 @@ namespace Marten.V4Internals.Linq
             ReturnDefaultWhenEmpty = true;
         }
 
-        public void ToSelectTransform(SelectClause select)
+        public void ToSelectTransform(Expression selectExpression)
         {
-            var builder = new SelectTransformBuilder(select, Fields);
+            var builder = new SelectTransformBuilder(selectExpression, Fields);
             var transformField = builder.SelectedFieldExpression;
 
-            SelectClause = typeof(DataSelectClause<>).CloseAndBuildAs<ISelectClause>(SelectClause.FromObject, transformField, select.Selector.Type);
+            SelectClause = typeof(DataSelectClause<>).CloseAndBuildAs<ISelectClause>(SelectClause.FromObject, transformField, selectExpression.Type);
         }
 
 

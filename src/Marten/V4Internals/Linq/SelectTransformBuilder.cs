@@ -16,9 +16,10 @@ namespace Marten.V4Internals.Linq
         private TargetObject _target;
         private SelectedField _currentField;
 
-        public SelectTransformBuilder(SelectClause @clause, IFieldMapping fields)
+        public SelectTransformBuilder(Expression @clause, IFieldMapping fields)
         {
-            Visit(@clause.Selector);
+            // ReSharper disable once VirtualMemberCallInConstructor
+            Visit(@clause);
             SelectedFieldExpression = _target.ToSelectField(fields);
         }
 

@@ -18,6 +18,11 @@ namespace Marten.V4Internals.Linq
         {
             _sourceType = parent.SelectedType;
             FromObject = parent.FromObject;
+
+            if (parent is IScalarSelectClause c)
+            {
+                SelectionText = $"select {c.FieldName} from ";
+            }
         }
 
         public Type SelectedType => typeof(string);
