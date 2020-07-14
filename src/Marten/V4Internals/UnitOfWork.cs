@@ -16,6 +16,12 @@ namespace Marten.V4Internals
 
         public void Add(IStorageOperation operation)
         {
+            if (operation is IDocumentStorageOperation o)
+            {
+                _operations.RemoveAll(x =>
+                    x is IDocumentStorageOperation && x.As<IDocumentStorageOperation>().Document == o.Document);
+            }
+
             _operations.Add(operation);
         }
 

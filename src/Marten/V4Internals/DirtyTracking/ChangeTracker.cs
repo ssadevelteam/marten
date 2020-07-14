@@ -28,7 +28,7 @@ namespace Marten.V4Internals.DirtyTracking
                 .Tenant
                 .Providers.StorageFor<T>()
                 .DirtyTracking
-                .Update(_document, session, session.Tenant);
+                .Upsert(_document, session, session.Tenant);
 
             return true;
         }

@@ -429,7 +429,6 @@ namespace Marten.V4Internals.Sessions
         }
 
         public IEventStore Events { get; }
-        public ConcurrencyChecks Concurrency { get; set; } = ConcurrencyChecks.Enabled;
 
         public IPatchExpression<T> Patch<T>(int id)
         {
