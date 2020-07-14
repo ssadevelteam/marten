@@ -209,8 +209,7 @@ return new Marten.Generated.{operations.DeleteByWhere.TypeName}({{0}});
 return new Marten.Generated.{operationType.TypeName}
 (
     {{0}}, Identity({{0}}),
-    {{1}}.Versions.ForType<{_mapping.DocumentType.FullNameInCode()},
-    {_mapping.IdType.FullNameInCode()}>(),
+    {{1}}.Versions.ForType<{_mapping.DocumentType.FullNameInCode()}, {_mapping.IdType.FullNameInCode()}>(),
     {{2}}
     {tenantDeclaration}
 );"
@@ -223,11 +222,11 @@ return new Marten.Generated.{operationType.TypeName}
 return new Marten.Generated.{operationType.TypeName}
 (
     {{0}}, Identity({{0}}),
-    {{1}}.Versions.ForType<{_mapping.DocumentType.FullNameInCode()},
-    {_mapping.IdType.FullNameInCode()}>()
+    {{1}}.Versions.ForType<{_mapping.DocumentType.FullNameInCode()}, {_mapping.IdType.FullNameInCode()}>(),
+    {{2}}
     {tenantDeclaration}
 );"
-                        , new Use(_mapping.DocumentType), Use.Type<IMartenSession>());
+                        , new Use(_mapping.DocumentType), Use.Type<IMartenSession>(), Use.Type<DocumentMapping>());
             }
         }
     }

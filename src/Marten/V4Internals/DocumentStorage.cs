@@ -26,9 +26,12 @@ namespace Marten.V4Internals
         protected readonly string _loadArraySql;
         protected readonly string _loaderSql;
         protected Action<T, TId> _setter;
+        protected readonly DocumentMapping _mapping;
 
         public DocumentStorage(DocumentMapping document)
         {
+            _mapping = document;
+
             _document = document;
             Fields = document;
             TableName = document.Table;

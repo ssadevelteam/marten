@@ -54,13 +54,6 @@ namespace Marten.V4Internals
             var baseType = typeof(StorageOperation<,>).MakeGenericType(_mapping.DocumentType, _mapping.IdType);
             var type = assembly.AddType(ClassName, baseType);
 
-
-
-            if (_mapping.IsHierarchy())
-            {
-                type.AllInjectedFields.Add(new InjectedField(typeof(DocumentMapping), "mapping"));
-            }
-
             if (_mapping.TenancyStyle == TenancyStyle.Conjoined)
             {
                 type.AllInjectedFields.Add(new InjectedField(typeof(ITenant)));
@@ -95,8 +88,10 @@ namespace Marten.V4Internals
             if (_mapping.UseOptimisticConcurrency)
             {
                 @async.AsyncMode = AsyncMode.AsyncTask;
-                @async.Frames.CodeAsync("BLOCK:if (await postprocessConcurrencyAsync({0}, {1}, {2}))", Use.Type<DbDataReader>(), Use.Type<IList<Exception>>(), Use.Type<CancellationToken>());
-                @sync.Frames.Code("BLOCK:if (postprocessConcurrency({0}, {1}))", Use.Type<DbDataReader>(), Use.Type<IList<Exception>>());
+                @async.Frames.CodeAsync("BLOCK:if (await postprocessConcurrencyAsync({0}, {1}, {2}))",
+                    Use.Type<DbDataReader>(), Use.Type<IList<Exception>>(), Use.Type<CancellationToken>());
+                @sync.Frames.Code("BLOCK:if (postprocessConcurrency({0}, {1}))", Use.Type<DbDataReader>(),
+                    Use.Type<IList<Exception>>());
 
 
                 applyVersionToDocument();
@@ -104,17 +99,29 @@ namespace Marten.V4Internals
                 @async.Frames.Code("END");
                 @sync.Frames.Code("END");
 
+                return;
             }
             else
             {
                 sync.Frames.Code("storeVersion();");
                 async.Frames.Code("storeVersion();");
                 applyVersionToDocument();
+
+                if (_role == StorageRole.Update)
+                {
+                    @async.AsyncMode = AsyncMode.AsyncTask;
+
+                    sync.Frames.Code("postprocessUpdate({0}, {1});", Use.Type<DbDataReader>(),
+                        Use.Type<IList<Exception>>());
+                    async.Frames.CodeAsync("await postprocessUpdateAsync({0}, {1}, {2});", Use.Type<DbDataReader>(),
+                        Use.Type<IList<Exception>>(), Use.Type<CancellationToken>());
+                }
+                else
+                {
+                    @async.AsyncMode = AsyncMode.ReturnCompletedTask;
+                    @async.Frames.Add(new CommentFrame("Nothing"));
+                }
             }
-
-
-            @async.AsyncMode = AsyncMode.ReturnCompletedTask;
-            @async.Frames.Add(new CommentFrame("Nothing"));
         }
 
         private void buildConfigureMethod(GeneratedType type)

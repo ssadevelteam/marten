@@ -35,7 +35,7 @@ namespace Marten.Testing.V4Internals.CodeGeneration
                 var realType = theGeneratedType.CompiledType;
 
                 var user = new User();
-                return (IStorageOperation)Activator.CreateInstance(realType, user, Guid.NewGuid(), new Dictionary<Guid, Guid>());
+                return (IStorageOperation)Activator.CreateInstance(realType, user, Guid.NewGuid(), new Dictionary<Guid, Guid>(), theMapping);
             }
         }
 

@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using Baseline;
 using Marten.Events;
+using Marten.Exceptions;
 using Marten.Schema.Testing.Documents;
 using Marten.Testing.Harness;
 using Shouldly;
@@ -113,13 +114,13 @@ namespace Marten.Schema.Testing
             {
 
                 var storage = store.Storage;
-throw new NotImplementedException();
-                // storage.StorageFor<User>().ShouldNotBeNull();
-                //
-                // Exception<AmbiguousDocumentTypeAliasesException>.ShouldBeThrownBy(() =>
-                // {
-                //     storage.StorageFor(typeof(User2));
-                // });
+
+                storage.MappingFor(typeof(User)).ShouldNotBeNull();
+
+                Exception<AmbiguousDocumentTypeAliasesException>.ShouldBeThrownBy(() =>
+                {
+                    storage.MappingFor(typeof(User2));
+                });
             }
         }
 
