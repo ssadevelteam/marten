@@ -12,6 +12,8 @@ using Marten.Linq;
 using Marten.Patching;
 using Marten.Services;
 using Marten.Storage;
+using Marten.V4Internals.Linq;
+using Remotion.Linq.Clauses;
 
 namespace Marten.V4Internals.Sessions
 {
@@ -104,10 +106,35 @@ namespace Marten.V4Internals.Sessions
             // TODO -- memoize the parser
             var parser = new MartenExpressionParser(Options.Serializer(), Options);
 
-            // TODO -- this could be cleaner maybe?
-            var documentStorage = StorageFor<T>();
-            var @where = parser.ParseWhereFragment(documentStorage.Fields, expression);
-            var deletion = documentStorage.DeleteForWhere(@where);
+            var model = MartenQueryParser.Flyweight.GetParsedQuery(Query<T>().Where(expression).As<V4Queryable<T>>().Expression);
+
+            var storage = StorageFor<T>();
+
+            var whereClauses = model.BodyClauses.OfType<WhereClause>().ToArray();
+
+            // This is duplicated logic
+            IWhereFragment where = null;
+
+            switch (whereClauses.Length)
+            {
+                case 0:
+                    where = storage.DefaultWhereFragment();
+                    break;
+
+                case 1:
+                    where = parser.ParseWhereFragment(storage.Fields, whereClauses.Single().Predicate);
+                    break;
+
+                default:
+                    where = new CompoundWhereFragment(parser, storage.Fields, "and", whereClauses);
+                    break;
+
+
+            }
+
+            where = storage.FilterDocuments(null, where);
+
+            var deletion = storage.DeleteForWhere(@where);
             _unitOfWork.Add(deletion);
         }
 
