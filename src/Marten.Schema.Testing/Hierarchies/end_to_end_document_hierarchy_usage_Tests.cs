@@ -338,8 +338,11 @@ namespace Marten.Schema.Testing.Hierarchies
 
     public class Bug_1247_end_to_end_query_with_include_and_document_hierarchy_Tests: end_to_end_document_hierarchy_usage_Tests
     {
-        public Bug_1247_end_to_end_query_with_include_and_document_hierarchy_Tests()
+        private readonly ITestOutputHelper _output;
+
+        public Bug_1247_end_to_end_query_with_include_and_document_hierarchy_Tests(ITestOutputHelper output)
         {
+            _output = output;
             DocumentTracking = DocumentTracking.IdentityOnly;
         }
 
@@ -360,15 +363,16 @@ namespace Marten.Schema.Testing.Hierarchies
 
             using (var query = theStore.QuerySession())
             {
+                query.Logger = new TestOutputMartenLogger(_output);
+
                 var list = new List<User>();
 
                 var issues = query.Query<Issue>().Include<User>(x => x.AssigneeId, list).ToArray();
 
-                list.Count.ShouldBe(3);
+                list.Count.ShouldBe(2);
 
                 list.Any(x => x.Id == user1.Id).ShouldBeTrue();
                 list.Any(x => x.Id == user2.Id).ShouldBeTrue();
-                list.Any(x => x == null).ShouldBeTrue();
 
                 issues.Length.ShouldBe(4);
             }
@@ -395,11 +399,10 @@ namespace Marten.Schema.Testing.Hierarchies
 
                 var issues = await query.Query<Issue>().Include<User>(x => x.AssigneeId, list).ToListAsync();
 
-                list.Count.ShouldBe(3);
+                list.Count.ShouldBe(2);
 
                 list.Any(x => x.Id == user1.Id).ShouldBeTrue();
                 list.Any(x => x.Id == user2.Id).ShouldBeTrue();
-                list.Any(x => x == null);
 
                 issues.Count.ShouldBe(4);
             }

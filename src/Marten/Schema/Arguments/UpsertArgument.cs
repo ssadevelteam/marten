@@ -95,7 +95,7 @@ namespace Marten.Schema.Arguments
                 if (rawMemberType.IsClass || rawMemberType.IsNullable() || _members.Length > 1)
                 {
                     method.Frames.Code($@"
-BLOCK:if (document.{memberPath} == null)
+BLOCK:if (document.{memberPath} != null)
 {parameters.Usage}[{i}].{nameof(NpgsqlParameter.Value)} = document.{memberPath};
 END
 BLOCK:else
