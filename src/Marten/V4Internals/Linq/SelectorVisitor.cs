@@ -16,6 +16,12 @@ namespace Marten.V4Internals.Linq
                 _parent = parent;
             }
 
+            protected override Expression VisitUnary(UnaryExpression node)
+            {
+                _parent.CurrentStatement.ToScalar(node);
+                return null;
+            }
+
             protected override Expression VisitMember(MemberExpression node)
             {
                 _parent.CurrentStatement.ToScalar(node);
