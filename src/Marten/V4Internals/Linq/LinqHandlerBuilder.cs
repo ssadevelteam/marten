@@ -6,10 +6,12 @@ using System.Runtime.CompilerServices;
 using Baseline;
 using LamarCodeGeneration;
 using Marten.Linq;
+using Marten.Schema.Arguments;
 using Marten.Transforms;
 using Marten.Util;
 using Marten.V4Internals.Linq.Includes;
 using Marten.V4Internals.Linq.QueryHandlers;
+using Npgsql;
 using Remotion.Linq;
 using Remotion.Linq.Clauses;
 using Remotion.Linq.Clauses.Expressions;
@@ -182,7 +184,7 @@ namespace Marten.V4Internals.Linq
 
         public IQueryHandler<TResult> BuildHandler<TResult>(QueryStatistics statistics, IList<IIncludePlan> includes)
         {
-            BuildDatabaseCommand(statistics, includes);
+            BuildDatabaseStatement(statistics, includes);
 
             var handler = buildHandlerForCurrentStatement<TResult>();
 
@@ -191,7 +193,7 @@ namespace Marten.V4Internals.Linq
                 : handler;
         }
 
-        public void BuildDatabaseCommand(QueryStatistics statistics, IList<IIncludePlan> includes)
+        public void BuildDatabaseStatement(QueryStatistics statistics, IList<IIncludePlan> includes)
         {
             if (statistics != null)
             {
@@ -251,6 +253,25 @@ namespace Marten.V4Internals.Linq
             TopStatement.CompileStructure(new MartenExpressionParser(_session.Serializer, _session.Options));
 
             TopStatement.Configure(sql);
+        }
+
+        public NpgsqlCommand BuildDatabaseCommand(QueryStatistics statistics, IList<IIncludePlan> plans)
+        {
+            BuildDatabaseStatement(statistics, plans);
+
+            var command = new NpgsqlCommand();
+            var sql = new CommandBuilder(command);
+
+            TopStatement.Configure(sql);
+            command.CommandText = sql.ToString();
+
+            // TODO -- Like this to be temporary
+            if (command.CommandText.Contains(CommandBuilder.TenantIdArg))
+            {
+                command.AddNamedParameter(TenantIdArgument.ArgName, _session.Tenant.TenantId);
+            }
+
+            return command;
         }
     }
 }

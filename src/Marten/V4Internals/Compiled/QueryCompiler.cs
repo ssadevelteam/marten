@@ -7,6 +7,7 @@ using Baseline;
 using Baseline.Dates;
 using LamarCodeGeneration;
 using Marten.Linq;
+using Marten.Schema.Arguments;
 using Marten.Util;
 using Marten.V4Internals.Linq;
 using Marten.V4Internals.Linq.Includes;
@@ -136,9 +137,10 @@ namespace Marten.V4Internals.Compiled
             // This *could* throw
             var queryTemplate = plan.CreateQueryTemplate(query);
 
-            var builder = BuildDatabaseCommand(session, queryTemplate, out var command);
-
             var statistics = plan.GetStatisticsIfAny(query);
+            var builder = BuildDatabaseCommand(session, queryTemplate, statistics, plan, out var command);
+
+
 
             plan.HandlerPrototype = builder.BuildHandler<TOut>(statistics, new List<IIncludePlan>());
 
@@ -147,7 +149,10 @@ namespace Marten.V4Internals.Compiled
             return plan;
         }
 
-        public static LinqHandlerBuilder BuildDatabaseCommand<TDoc, TOut>(IMartenSession session, ICompiledQuery<TDoc, TOut> queryTemplate,
+        public static LinqHandlerBuilder BuildDatabaseCommand<TDoc, TOut>(IMartenSession session,
+            ICompiledQuery<TDoc, TOut> queryTemplate,
+            QueryStatistics statistics,
+            CompiledQueryPlan plan,
             out NpgsqlCommand command)
         {
             Expression expression = queryTemplate.QueryIs();
@@ -155,13 +160,8 @@ namespace Marten.V4Internals.Compiled
 
             var builder = new LinqHandlerBuilder(session, invocation, forCompiled: true);
 
-            command = new NpgsqlCommand();
-            var sql = new CommandBuilder(command);
+            command = builder.BuildDatabaseCommand(statistics, plan.IncludePlans);
 
-            // TODO -- Watch for multi-tenancy here!!!!
-
-            builder.BuildDiagnosticCommand(FetchType.FetchMany, sql);
-            command.CommandText = sql.ToString();
             return builder;
         }
 

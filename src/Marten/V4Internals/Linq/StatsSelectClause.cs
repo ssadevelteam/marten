@@ -10,7 +10,7 @@ namespace Marten.V4Internals.Linq
 {
     public class StatsSelectClause<T> : ISelectClause
     {
-        private readonly QueryStatistics _statistics;
+        private QueryStatistics _statistics;
 
         public StatsSelectClause(ISelectClause inner, QueryStatistics statistics)
         {
@@ -59,7 +59,8 @@ namespace Marten.V4Internals.Linq
 
         public ISelectClause UseStatistics(QueryStatistics statistics)
         {
-            throw new InvalidOperationException("Double usage of QueryStatistics");
+            _statistics = statistics;
+            return this;
         }
     }
 }

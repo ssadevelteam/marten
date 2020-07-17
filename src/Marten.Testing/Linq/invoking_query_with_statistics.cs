@@ -28,11 +28,10 @@ namespace Marten.Testing.Linq
                 PageSize = pageSize;
             }
 
-            public QueryStatistics Stats { get; set; }
             public int PageNumber { get; set; }
             public int PageSize { get; set; }
 
-            public QueryStatistics Statistics { get; } = new QueryStatistics();
+            public QueryStatistics Stats { get; } = new QueryStatistics();
 
             public Expression<Func<IMartenQueryable<Target>, IEnumerable<Target>>> QueryIs()
             {
@@ -49,7 +48,7 @@ namespace Marten.Testing.Linq
         public void can_get_the_total_from_a_compiled_query()
         {
             var count = theSession.Query<Target>().Count(x => x.Number > 10);
-            SpecificationExtensions.ShouldBeGreaterThan(count, 0);
+            count.ShouldBeGreaterThan(0);
 
             var query = new TargetPaginationQuery(2, 5);
             var list = theSession
