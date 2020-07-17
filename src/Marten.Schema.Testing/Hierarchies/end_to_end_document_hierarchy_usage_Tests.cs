@@ -89,8 +89,8 @@ namespace Marten.Schema.Testing.Hierarchies
 
             theSession.SaveChanges();
 
-            SpecificationExtensions.ShouldBeNull(theSession.Load<User>(admin1.Id));
-            SpecificationExtensions.ShouldBeNull(theSession.Load<AdminUser>(admin1.Id));
+            theSession.Load<User>(admin1.Id).ShouldBeNull();
+            theSession.Load<AdminUser>(admin1.Id).ShouldBeNull();
         }
 
         [Fact]
@@ -102,7 +102,7 @@ namespace Marten.Schema.Testing.Hierarchies
             theSession.Delete<User>(user1.Id);
             theSession.SaveChanges();
 
-            SpecificationExtensions.ShouldBeNull(theSession.Load<User>(user1.Id));
+            theSession.Load<User>(user1.Id).ShouldBeNull();
         }
 
         [Fact]
@@ -114,7 +114,7 @@ namespace Marten.Schema.Testing.Hierarchies
             theSession.Delete(user1);
             theSession.SaveChanges();
 
-            SpecificationExtensions.ShouldBeNull(theSession.Load<User>(user1.Id));
+            theSession.Load<User>(user1.Id).ShouldBeNull();
         }
 
 

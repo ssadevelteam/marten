@@ -74,7 +74,7 @@ namespace Marten.Testing.Events.Projections
 
             var persisted = new QuestParty { Id = id };
             theSession.Store(persisted);
-            theSession.SaveChanges();
+            await theSession.SaveChangesAsync();
 
             var finder = new AggregateFinder<QuestParty>();
 
