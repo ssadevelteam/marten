@@ -34,5 +34,20 @@ namespace Marten.V4Internals.Compiled
             var inner = (IQueryHandler<TOut>)_inner.CloneForSession(session, _statistics);
             return inner.HandleAsync(reader, session, token);
         }
+
+        protected string StartsWith(string value)
+        {
+            return $"%{value}";
+        }
+
+        protected string ContainsString(string value)
+        {
+            return $"%{value}%";
+        }
+
+        protected string EndsWith(string value)
+        {
+            return $"{value}%";
+        }
     }
 }

@@ -174,6 +174,11 @@ namespace Marten.V4Internals.Compiled
             {
                 parameter.TryMatch(command);
             }
+
+            if (Parameters.Any(x => x.ParameterIndex < 0))
+            {
+                throw new InvalidOperationException("Unable to match compiled query members with a command parameter");
+            }
         }
     }
 }
