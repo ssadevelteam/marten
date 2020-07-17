@@ -20,7 +20,7 @@ namespace Marten.Transforms
                 var transformName = (string)expression.Arguments.Last().As<ConstantExpression>().Value;
 
                 op = typeof(TransformToOtherTypeOperator<>).CloseAndBuildAs<ResultOperatorBase>(transformName,
-                    expression.Type);
+                    expression.Type.GetGenericArguments()[0]);
 
                 return true;
             }
@@ -42,7 +42,7 @@ namespace Marten.Transforms
             var transformName = transform.As<ConstantExpression>().Value.As<string>();
 
             _operator = typeof(TransformToOtherTypeOperator<>).CloseAndBuildAs<ResultOperatorBase>(transformName,
-                parseInfo.ParsedExpression.Type);
+                parseInfo.ParsedExpression.Type.GetGenericArguments()[0]);
         }
 
         protected override ResultOperatorBase CreateResultOperator(ClauseGenerationContext clauseGenerationContext)
