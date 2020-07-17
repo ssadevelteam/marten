@@ -13,9 +13,9 @@ namespace Marten.V4Internals.Linq.Includes
     {
         private readonly IDocumentStorage<TSource> _source;
         private readonly IMartenSession _session;
-        private readonly ICompiledQueryPlan _plan;
+        private readonly CompiledQueryPlan _plan;
 
-        public CompiledQueryExpressionVisitor(IMartenSession session, ICompiledQueryPlan plan)
+        public CompiledQueryExpressionVisitor(IMartenSession session, CompiledQueryPlan plan)
         {
             _source = session.StorageFor<TSource>();
             _session = session;

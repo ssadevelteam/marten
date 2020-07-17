@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 using Baseline;
 using Baseline.Dates;
 using LamarCodeGeneration;
@@ -14,18 +14,14 @@ using Npgsql;
 
 namespace Marten.V4Internals.Compiled
 {
-
-
-
-
     public class QueryCompiler
     {
-        private static readonly IList<IParameterFinder> _finders = new List<IParameterFinder>();
+        internal static readonly IList<IParameterFinder> Finders = new List<IParameterFinder>();
 
         private static void forType<T>(Func<int, T[]> uniqueValues)
         {
             var finder = new SimpleParameterFinder<T>(uniqueValues);
-            _finders.Add(finder);
+            Finders.Add(finder);
         }
 
         static QueryCompiler()
@@ -125,75 +121,48 @@ namespace Marten.V4Internals.Compiled
             });
         }
 
+
+
         public static CompiledQueryPlan BuildPlan<TDoc, TOut>(IMartenSession session, ICompiledQuery<TDoc, TOut> query)
         {
             eliminateStringNulls(query);
 
             var plan = new CompiledQueryPlan(query.GetType(), typeof(TOut));
             findIncludes(session, query, plan);
-
-            findQueryStatisticsMember(query, plan);
-
+            plan.FindMembers();
 
             assertValidityOfQueryType(plan, query.GetType());
 
-            NpgsqlCommand commandSource(ICompiledQuery<TDoc, TOut> query1)
-            {
-                Expression expression = query1.QueryIs();
-                var invocation = Expression.Invoke(expression, Expression.Parameter(typeof(IMartenQueryable<TDoc>)));
+            // This *could* throw
+            var queryTemplate = plan.CreateQueryTemplate(query);
 
-                var builder = new LinqHandlerBuilder(session, invocation, forCompiled:true);
+            var builder = BuildDatabaseCommand(session, queryTemplate, out var command);
 
-                var command = new NpgsqlCommand();
-                var sql = new CommandBuilder(command);
-                builder.BuildDiagnosticCommand(FetchType.FetchMany, sql);
-                command.CommandText = sql.ToString();
-
-                return command;
-            }
-
-            var q = (ICompiledQuery<TDoc, TOut>)Activator.CreateInstance(query.GetType());;
-            var singles = new List<IParameterFinder>();
-            var multiples = new List<IParameterFinder>();
-            foreach (var finder in _finders)
-            {
-                var match = finder.TryMatch(q);
-                switch (match)
-                {
-                    case SearchMatch.SinglePass:
-                        singles.Add(finder);
-                        break;
-
-                    case SearchMatch.MultiplePass:
-                        multiples.Add(finder);
-                        break;
-                }
-            }
-
-
-            // Building the inner handler
-            Expression expression = query.QueryIs();
-            var invocation = Expression.Invoke(expression, Expression.Parameter(typeof(IMartenQueryable<TDoc>)));
-
-            var builder = new LinqHandlerBuilder(session, invocation, forCompiled:true);
-            // Use empty include plans because you mostly care about the inner most handler anyway
             var statistics = plan.GetStatisticsIfAny(query);
 
             plan.HandlerPrototype = builder.BuildHandler<TOut>(statistics, new List<IIncludePlan>());
 
-
-            if (singles.Any())
-            {
-                var cmd = commandSource(q);
-                plan.Parameters.AddRange(singles.SelectMany(x => x.SinglePassMatch(q, cmd)));
-            }
-
-            plan.Parameters.AddRange(multiples.SelectMany(x => x.MultiplePassMatch<TDoc, TOut>(commandSource, query.GetType())));
-
-            // This HAS to be the original query
-            plan.Command = commandSource(query);
+            plan.ReadCommand(command);
 
             return plan;
+        }
+
+        public static LinqHandlerBuilder BuildDatabaseCommand<TDoc, TOut>(IMartenSession session, ICompiledQuery<TDoc, TOut> queryTemplate,
+            out NpgsqlCommand command)
+        {
+            Expression expression = queryTemplate.QueryIs();
+            var invocation = Expression.Invoke(expression, Expression.Parameter(typeof(IMartenQueryable<TDoc>)));
+
+            var builder = new LinqHandlerBuilder(session, invocation, forCompiled: true);
+
+            command = new NpgsqlCommand();
+            var sql = new CommandBuilder(command);
+
+            // TODO -- Watch for multi-tenancy here!!!!
+
+            builder.BuildDiagnosticCommand(FetchType.FetchMany, sql);
+            command.CommandText = sql.ToString();
+            return builder;
         }
 
         private static void eliminateStringNulls(object query)
@@ -219,11 +188,6 @@ namespace Marten.V4Internals.Compiled
             }
         }
 
-        private static void findQueryStatisticsMember<TDoc, TOut>(ICompiledQuery<TDoc, TOut> query, CompiledQueryPlan plan)
-        {
-            plan.StatisticsMember = query.GetType().GetProperties()
-                .FirstOrDefault(x => x.PropertyType == typeof(QueryStatistics));
-        }
 
         private static void findIncludes<TDoc, TOut>(IMartenSession session, ICompiledQuery<TDoc, TOut> query, CompiledQueryPlan plan)
         {
@@ -234,39 +198,18 @@ namespace Marten.V4Internals.Compiled
             includeVisitor.Visit(invocation.Expression);
         }
 
-        private static void assertValidityOfQueryType(ICompiledQueryPlan plan, Type type)
+        private static void assertValidityOfQueryType(CompiledQueryPlan plan, Type type)
         {
-            try
+            if (plan.InvalidMembers.Any())
             {
-                Activator.CreateInstance(type);
-            }
-            catch (Exception e)
-            {
-                throw new InvalidOperationException("Marten requires a no-argument constructor for compiled query types. This constructor does not have to be public");
-            }
+                var members = plan.InvalidMembers.Select(x => $"{x.GetRawMemberType().NameInCode()} {x.Name}")
+                    .Join(", ");
+                var message = $"Members {members} cannot be used as parameters to a compiled query";
 
-            var specialMembers = plan.SpecialMembers();
-
-            foreach (var field in type.GetFields(BindingFlags.Instance).Where(x => !specialMembers.Contains(x)))
-            {
-                if (_finders.All(x => x.DotNetType != field.FieldType))
-                {
-                    throw new InvalidOperationException($"Marten does not (yet) support fields of type {field.FieldType.FullNameInCode()} as arguments to compiled queries");
-                }
-            }
-
-            foreach (var property in type.GetProperties(BindingFlags.Instance).Where(x => !specialMembers.Contains(x)))
-            {
-                if (_finders.All(x => x.DotNetType != property.PropertyType))
-                {
-                    throw new InvalidOperationException($"Marten does not (yet) support properties of type {property.PropertyType.FullNameInCode()} as arguments to compiled queries");
-                }
-
-                if (!property.CanWrite)
-                {
-                    throw new InvalidOperationException($"Property {property.Name} must have a setter for compiled query planning");
-                }
+                // TODO -- use a specific Marten exception here
+                throw new InvalidOperationException(message);
             }
         }
+
     }
 }

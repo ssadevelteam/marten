@@ -18,72 +18,25 @@ namespace Marten.V4Internals.Compiled
 
         public Type DotNetType => typeof(T);
 
-
-        public SearchMatch TryMatch(object query)
+        public Queue<object> UniqueValueQueue()
         {
-            var members = findMembers(query.GetType()).ToArray();
-            if (!members.Any())
-            {
-                return SearchMatch.None;
-            }
-
-            var values = _uniqueValues(members.Length);
-            for (var i = 0; i < values.Length; i++)
-            {
-                if (members[i] is PropertyInfo p) p.SetValue(query, values[i]);
-
-                if (members[i] is FieldInfo f) f.SetValue(query, values[i]);
-            }
-
-            return SearchMatch.SinglePass;
+            return new Queue<object>(_uniqueValues(100).OfType<object>());
         }
 
-        private IEnumerable<MemberInfo> findMembers(Type type)
+        public bool AreValuesUnique(object query, CompiledQueryPlan plan)
         {
-            foreach (var prop in type.GetProperties(BindingFlags.Instance | BindingFlags.Public).Where(x => x.CanRead && x.PropertyType == typeof(T)))
-            {
-                yield return prop;
-            }
+            var members = findMembers(plan);
 
-            foreach (var field in type.GetFields(BindingFlags.Instance | BindingFlags.Public).Where(x => x.FieldType == typeof(T)))
-            {
-                yield return field;
-            }
+            if (!members.Any()) return true;
+
+            return members.Select(x => x.GetValue(query))
+                .Distinct().Count() == members.Length;
         }
 
-        private IEnumerable<(MemberInfo member, object value)> findMemberValues(object query)
+        private static IQueryMember<T>[] findMembers(CompiledQueryPlan plan)
         {
-            foreach (var prop in query.GetType().GetProperties().Where(x => x.CanRead && x.PropertyType == typeof(T)))
-            {
-                yield return (prop, prop.GetValue(query));
-            }
-
-            foreach (var field in query.GetType().GetFields().Where(x => x.FieldType == typeof(T)))
-            {
-                yield return (field, field.GetValue(query));
-            }
+            return plan.Parameters.OfType<IQueryMember<T>>().ToArray();
         }
 
-        public IEnumerable<ParameterMap> SinglePassMatch(object query, NpgsqlCommand command)
-        {
-            var members = findMemberValues(query).ToArray();
-
-            for (int i = 0; i < command.Parameters.Count; i++)
-            {
-                var parameter = command.Parameters[i];
-                var match = members.SingleOrDefault(x => x.value.Equals(parameter.Value));
-
-                if (match != default)
-                {
-                    yield return new ParameterMap(i, match.member);
-                }
-
-            }
-        }
-
-        public IEnumerable<ParameterMap> MultiplePassMatch<TDoc, TOut>(Func<ICompiledQuery<TDoc, TOut>, NpgsqlCommand> source, Type queryType)
-        {
-            throw new NotSupportedException();
-        }
     }
 }
