@@ -133,7 +133,6 @@ namespace Marten.V4Internals.Sessions
         {
             assertNotDisposed();
             var document = storageFor<T, string>().Load(id, this);
-            MarkAsDocumentLoaded(id, document);
 
             return document;
         }
@@ -142,7 +141,6 @@ namespace Marten.V4Internals.Sessions
         {
             assertNotDisposed();
             var document = await storageFor<T, string>().LoadAsync(id, this, token).ConfigureAwait(false);
-            MarkAsDocumentLoaded(id, document);
 
             return document;
         }
@@ -167,8 +165,6 @@ namespace Marten.V4Internals.Sessions
                 throw new InvalidOperationException($"The identity type for document type {typeof(T).FullNameInCode()} is not numeric");
             }
 
-            MarkAsDocumentLoaded(id, document);
-
             return document;
         }
 
@@ -192,7 +188,6 @@ namespace Marten.V4Internals.Sessions
                 throw new InvalidOperationException($"The identity type for document type {typeof(T).FullNameInCode()} is not numeric");
             }
 
-            MarkAsDocumentLoaded(id, document);
 
             return document;
         }
@@ -201,7 +196,6 @@ namespace Marten.V4Internals.Sessions
         {
             assertNotDisposed();
             var document = storageFor<T, long>().Load(id, this);
-            MarkAsDocumentLoaded(id, document);
 
             return document;
         }
@@ -210,7 +204,6 @@ namespace Marten.V4Internals.Sessions
         {
             assertNotDisposed();
             var document = await storageFor<T, long>().LoadAsync(id, this, token).ConfigureAwait(false);
-            MarkAsDocumentLoaded(id, document);
 
             return document;
         }
@@ -219,7 +212,6 @@ namespace Marten.V4Internals.Sessions
         {
             assertNotDisposed();
             var document = storageFor<T, Guid>().Load(id, this);
-            MarkAsDocumentLoaded(id, document);
 
             return document;
         }
@@ -228,7 +220,6 @@ namespace Marten.V4Internals.Sessions
         {
             assertNotDisposed();
             var document = await storageFor<T, Guid>().LoadAsync(id, this, token).ConfigureAwait(false);
-            MarkAsDocumentLoaded(id, document);
 
             return document;
         }
