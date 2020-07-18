@@ -5,6 +5,7 @@ using Baseline;
 using LamarCodeGeneration;
 using Marten.Util;
 using Npgsql;
+using NpgsqlTypes;
 
 namespace Marten.V4Internals.Compiled
 {
@@ -24,6 +25,11 @@ namespace Marten.V4Internals.Compiled
 
         public Type Type => typeof(T);
 
+        public object GetValueAsObject(object query)
+        {
+            return GetValue(query);
+        }
+
         public abstract T GetValue(object query);
         public abstract void SetValue(object query, T value);
 
@@ -32,21 +38,30 @@ namespace Marten.V4Internals.Compiled
             Value = GetValue(query);
         }
 
-        public void TryMatch(NpgsqlCommand command)
+        public void TryMatch(NpgsqlCommand command, StoreOptions storeOptions)
         {
             ParameterIndex = -1;
 
-            if (!isFound(command, Value) && Type == typeof(string))
+            if (Type.IsEnum)
             {
-                if (isFound(command, $"%{Value}"))
+                var parameterValue = storeOptions.Serializer().EnumStorage == EnumStorage.AsInteger
+                    ? Value.As<int>()
+                    : (object)Value.ToString();
+
+                tryToFind(command, parameterValue);
+            }
+
+            if (!tryToFind(command, Value) && Type == typeof(string))
+            {
+                if (tryToFind(command, $"%{Value}"))
                 {
                     Mask = "StartsWith({0})";
                 }
-                else if (isFound(command, $"%{Value}%"))
+                else if (tryToFind(command, $"%{Value}%"))
                 {
                     Mask = "ContainsString({0})";
                 }
-                else if (isFound(command, $"{Value}%"))
+                else if (tryToFind(command, $"{Value}%"))
                 {
                     Mask = "EndsWith({0})";
                 }
@@ -55,7 +70,7 @@ namespace Marten.V4Internals.Compiled
 
         }
 
-        private bool isFound(NpgsqlCommand command, object value)
+        private bool tryToFind(NpgsqlCommand command, object value)
         {
             var parameter = command.Parameters.FirstOrDefault(x => value.Equals(x.Value));
             if (parameter != null)
@@ -85,26 +100,53 @@ namespace Marten.V4Internals.Compiled
 
         public int ParameterIndex { get; set; }
 
-        public void GenerateCode(GeneratedMethod method)
+        public void GenerateCode(GeneratedMethod method, StoreOptions storeOptions)
         {
-            if (Mask == null)
+            if (Type.IsEnum)
             {
-                method.Frames.Code($@"
+                if (storeOptions.Serializer().EnumStorage == EnumStorage.AsInteger)
+                {
+                    method.Frames.Code($@"
 parameters[{ParameterIndex}].NpgsqlDbType = {{0}};
-parameters[{ParameterIndex}].Value = _query.{Member.Name};
-", TypeMappings.ToDbType(Member.GetMemberType()));
+parameters[{ParameterIndex}].Value = (int)_query.{Member.Name};
+", NpgsqlDbType.Integer);
+                }
+                else
+                {
+                    method.Frames.Code($@"
+parameters[{ParameterIndex}].NpgsqlDbType = {{0}};
+parameters[{ParameterIndex}].Value = _query.{Member.Name}.ToString();
+", NpgsqlDbType.Varchar);
+                }
+            }
+            else if (Mask == null)
+            {
+                generateBasicSetter(method);
             }
             else
             {
-                var maskedValue = Mask.ToFormat($"_query.{Member.Name}");
-
-                method.Frames.Code($@"
-parameters[{ParameterIndex}].NpgsqlDbType = {{0}};
-parameters[{ParameterIndex}].Value = {maskedValue};
-", TypeMappings.ToDbType(Member.GetMemberType()));
+                generateMaskedStringCode(method);
             }
 
 
+        }
+
+        private void generateMaskedStringCode(GeneratedMethod method)
+        {
+            var maskedValue = Mask.ToFormat($"_query.{Member.Name}");
+
+            method.Frames.Code($@"
+parameters[{ParameterIndex}].NpgsqlDbType = {{0}};
+parameters[{ParameterIndex}].Value = {maskedValue};
+", TypeMappings.ToDbType(Member.GetMemberType()));
+        }
+
+        private void generateBasicSetter(GeneratedMethod method)
+        {
+            method.Frames.Code($@"
+parameters[{ParameterIndex}].NpgsqlDbType = {{0}};
+parameters[{ParameterIndex}].Value = _query.{Member.Name};
+", TypeMappings.ToDbType(Member.GetMemberType()));
         }
     }
 }

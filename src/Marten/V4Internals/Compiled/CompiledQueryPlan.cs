@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using LamarCodeGeneration;
-using LamarCodeGeneration.Util;
 using Marten.Linq;
 using Marten.Util;
 using Marten.V4Internals.Linq.Includes;
 using Npgsql;
+using Baseline;
 
 namespace Marten.V4Internals.Compiled
 {
@@ -37,7 +37,7 @@ namespace Marten.V4Internals.Compiled
                 {
                     InvalidMembers.Add(member);
                 }
-                else if (QueryCompiler.Finders.All(x => x.DotNetType != memberType))
+                else if (QueryCompiler.Finders.All(x => x.Matches(memberType)))
                 {
                     InvalidMembers.Add(member);
                 }
@@ -166,18 +166,20 @@ namespace Marten.V4Internals.Compiled
             throw new InvalidOperationException("Marten is unable to create a compiled query plan for type " + type.FullNameInCode());
         }
 
-        public void ReadCommand(NpgsqlCommand command)
+        public void ReadCommand(NpgsqlCommand command, StoreOptions storeOptions)
         {
             Command = command;
 
             foreach (var parameter in Parameters)
             {
-                parameter.TryMatch(command);
+                parameter.TryMatch(command, storeOptions);
             }
 
-            if (Parameters.Any(x => x.ParameterIndex < 0))
+            var missing = Parameters.Where(x => x.ParameterIndex < 0);
+            if (missing.Any())
             {
-                throw new InvalidOperationException("Unable to match compiled query members with a command parameter");
+                // TODO -- use a specific exception type
+                throw new InvalidOperationException($"Unable to match compiled query member(s) {missing.Select(x => x.Member.Name).Join(", ")} with a command parameter");
             }
         }
     }

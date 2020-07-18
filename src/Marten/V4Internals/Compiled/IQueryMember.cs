@@ -12,9 +12,10 @@ namespace Marten.V4Internals.Compiled
 
         MemberInfo Member { get; }
         int ParameterIndex { get; set; }
-        void GenerateCode(GeneratedMethod method);
+        void GenerateCode(GeneratedMethod method, StoreOptions storeOptions);
         void StoreValue(object query);
-        void TryMatch(NpgsqlCommand command);
+        void TryMatch(NpgsqlCommand command, StoreOptions storeOptions);
         void TryWriteValue(UniqueValueSource valueSource, object query);
+        object GetValueAsObject(object query);
     }
 }

@@ -20,7 +20,7 @@ namespace Marten.Testing.V4Internals.Compiled
             using var store = DocumentStore.For(ConnectionSource.ConnectionString);
             using var session = store.QuerySession();
 
-            return QueryCompiler.BuildPlan((IMartenSession) session, query);
+            return QueryCompiler.BuildPlan((IMartenSession) session, query, new StoreOptions());
         }
 
         protected ICompiledQuerySource buildQuerySourceFor<TDoc, TOut>(ICompiledQuery<TDoc, TOut> query)
@@ -30,9 +30,9 @@ namespace Marten.Testing.V4Internals.Compiled
 
             using var session = store.QuerySession();
 
-            var plan = QueryCompiler.BuildPlan((IMartenSession) session, query);
+            var plan = QueryCompiler.BuildPlan((IMartenSession) session, query, new StoreOptions());
 
-            return new CompiledQuerySourceBuilder(plan).Build();
+            return new CompiledQuerySourceBuilder(plan, new StoreOptions()).Build();
         }
 
         //[Fact]

@@ -17,7 +17,7 @@ namespace Marten.V4Internals.Compiled
 {
     public class QueryCompiler
     {
-        internal static readonly IList<IParameterFinder> Finders = new List<IParameterFinder>();
+        internal static readonly IList<IParameterFinder> Finders = new List<IParameterFinder>{new EnumParameterFinder()};
 
         private static void forType<T>(Func<int, T[]> uniqueValues)
         {
@@ -124,7 +124,8 @@ namespace Marten.V4Internals.Compiled
 
 
 
-        public static CompiledQueryPlan BuildPlan<TDoc, TOut>(IMartenSession session, ICompiledQuery<TDoc, TOut> query)
+        public static CompiledQueryPlan BuildPlan<TDoc, TOut>(IMartenSession session, ICompiledQuery<TDoc, TOut> query,
+            StoreOptions storeOptions)
         {
             eliminateStringNulls(query);
 
@@ -144,7 +145,7 @@ namespace Marten.V4Internals.Compiled
 
             plan.HandlerPrototype = builder.BuildHandler<TOut>(statistics, new List<IIncludePlan>());
 
-            plan.ReadCommand(command);
+            plan.ReadCommand(command, storeOptions);
 
             return plan;
         }

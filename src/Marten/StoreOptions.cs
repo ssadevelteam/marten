@@ -432,8 +432,8 @@ namespace Marten
                 return source;
             }
 
-            var plan = QueryCompiler.BuildPlan(session, query);
-            source = new CompiledQuerySourceBuilder(plan).Build();
+            var plan = QueryCompiler.BuildPlan(session, query, this);
+            source = new CompiledQuerySourceBuilder(plan, this).Build();
             _querySources = _querySources.AddOrUpdate(query.GetType(), source);
 
             return source;

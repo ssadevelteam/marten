@@ -17,8 +17,8 @@ namespace Marten.V4Internals.Compiled
             }
             else
             {
-                queue = QueryCompiler.Finders.Single(x => x.DotNetType == type)
-                    .UniqueValueQueue();
+                queue = QueryCompiler.Finders.Single(x => x.Matches(type))
+                    .UniqueValueQueue(type);
 
                 _values.Add(type, queue);
 

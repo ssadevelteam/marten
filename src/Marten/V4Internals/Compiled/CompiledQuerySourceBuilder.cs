@@ -15,10 +15,12 @@ namespace Marten.V4Internals.Compiled
     public class CompiledQuerySourceBuilder
     {
         private readonly CompiledQueryPlan _plan;
+        private readonly StoreOptions _storeOptions;
 
-        public CompiledQuerySourceBuilder(CompiledQueryPlan plan)
+        public CompiledQuerySourceBuilder(CompiledQueryPlan plan, StoreOptions storeOptions)
         {
             _plan = plan;
+            _storeOptions = storeOptions;
         }
 
         public ICompiledQuerySource Build()
@@ -178,7 +180,7 @@ namespace Marten.V4Internals.Compiled
 
             foreach (var parameter in _plan.Parameters)
             {
-                parameter.GenerateCode(method);
+                parameter.GenerateCode(method, _storeOptions);
             }
 
             if (hardcoded.HasAny())
