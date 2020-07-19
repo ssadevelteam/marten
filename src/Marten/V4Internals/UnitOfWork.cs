@@ -46,6 +46,7 @@ namespace Marten.V4Internals
 
             var types = _operations
                 .Select(x => x.DocumentType)
+                .Where(x => x != null)
                 .Distinct()
                 .TopologicalSort(type => GetTypeDependencies(options, type)).ToArray();
 
@@ -61,6 +62,7 @@ namespace Marten.V4Internals
             return true;
         }
 
+        // TODO -- this needs to be memoized like nobody's business
         private IEnumerable<Type> GetTypeDependencies(StoreOptions options, Type type)
         {
             var mapping = options.Storage.FindMapping(type);

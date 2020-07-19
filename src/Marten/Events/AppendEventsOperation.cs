@@ -24,7 +24,7 @@ namespace Marten.Events
 
         public void ConfigureCommand(CommandBuilder builder, IMartenSession session)
         {
-            var parameters = builder.AppendWithParameters($"select {_eventGraph.DatabaseSchemaName}.mt_append_event(?, ?, ?, ?, ?, ?, ?);");
+            var parameters = builder.AppendWithParameters($"select {_eventGraph.DatabaseSchemaName}.mt_append_event(?, ?, ?, ?, ?, ?, ?)");
             if (_eventGraph.StreamIdentity == StreamIdentity.AsGuid)
             {
                 parameters[0].Value = Stream.Id;

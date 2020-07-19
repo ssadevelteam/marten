@@ -87,6 +87,8 @@ namespace Marten.Storage
 
         internal IDocumentMapping FindMapping(Type documentType)
         {
+            if (documentType == null) throw new ArgumentNullException(nameof(documentType));
+
             if (!_mappings.Value.TryFind(documentType, out var value))
             {
                 var subclass = AllDocumentMappings.SelectMany(x => x.SubClasses)
