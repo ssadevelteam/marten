@@ -39,7 +39,8 @@ namespace Marten.V4Internals.Linq.Includes
             public IncludedDocumentStatement(IDocumentStorage<T> storage, IncludePlan<T> includePlan,
                 string tempTableName) : base(storage, storage.Fields)
             {
-                Where = new InTempTableWhereFragment(tempTableName, includePlan.IdAlias);
+                var initial = new InTempTableWhereFragment(tempTableName, includePlan.IdAlias);
+                Where = storage.FilterDocuments(null, initial);
             }
 
             protected override void configure(CommandBuilder sql)

@@ -55,15 +55,18 @@ namespace Marten.V4Internals.Sessions
         public QuerySession(DocumentStore store, SessionOptions sessionOptions, IManagedConnection database,
             ITenant tenant)
         {
-            if (sessionOptions.Timeout.HasValue && sessionOptions.Timeout.Value < 0)
-            {
-                throw new ArgumentOutOfRangeException("CommandTimeout can't be less than zero");
-            }
-
             DocumentStore = store;
 
             Listeners.AddRange(store.Options.Listeners);
-            if (sessionOptions != null) Listeners.AddRange(sessionOptions.Listeners);
+            if (sessionOptions != null)
+            {
+                if (sessionOptions.Timeout.HasValue && sessionOptions.Timeout.Value < 0)
+                {
+                    throw new ArgumentOutOfRangeException("CommandTimeout can't be less than zero");
+                }
+
+                Listeners.AddRange(sessionOptions.Listeners);
+            }
 
             _providers = tenant.Providers ?? throw new ArgumentNullException(nameof(ITenant.Providers));
 
