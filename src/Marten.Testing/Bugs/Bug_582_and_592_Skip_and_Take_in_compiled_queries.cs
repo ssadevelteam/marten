@@ -61,18 +61,6 @@ namespace Marten.Testing.Bugs
             }
         }
 
-        [Fact]
-        public void warn_if_skip_and_take_are_ordered_wrong()
-        {
-            using (var query = theStore.QuerySession())
-            {
-                Exception<InvalidCompiledQueryException>.ShouldBeThrownBy(() =>
-                {
-                    query.Query(new WrongOrderedPageOfTargets());
-                });
-            }
-        }
-
     }
 
     public class PageOfTargets: ICompiledListQuery<Target>
