@@ -321,7 +321,9 @@ namespace Marten.Testing.Acceptance
 
                 // Inserting the same original string should throw
                 session.Store(item2);
-                SpecificationExtensions.ShouldContain(Assert.Throws<DocumentAlreadyExistsException>(() => session.SaveChanges()).Message, "duplicate");
+
+                Exception<DocumentAlreadyExistsException>.ShouldBeThrownBy(() => session.SaveChanges());
+
             }
         }
 
@@ -401,7 +403,7 @@ namespace Marten.Testing.Acceptance
                 // Inserting the same string but all uppercase should throw because
                 // the index is stored with lowcased value
                 session.Store(item);
-                SpecificationExtensions.ShouldContain(Assert.Throws<DocumentAlreadyExistsException>(() => session.SaveChanges()).Message, "duplicate");
+                Exception<DocumentAlreadyExistsException>.ShouldBeThrownBy(() => session.SaveChanges());
             }
         }
 
