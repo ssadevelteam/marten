@@ -101,8 +101,6 @@ namespace Marten.Services
             await buildConnectionAsync(token).ConfigureAwait(false);
             await _retryPolicy.ExecuteAsync(async () => await _connection.CommitAsync(token).ConfigureAwait(false), token);
 
-            await _connection.CommitAsync(token).ConfigureAwait(false);
-
             _connection.Dispose();
             _connection = null;
         }

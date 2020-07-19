@@ -55,77 +55,34 @@ namespace Marten.V4Internals.Sessions
             ChangeTrackers.RemoveAll(x => ReferenceEquals(x.Document, document));
         }
 
+        // NEED TO REMOVE TRACKER TOO!
+
         protected override void ejectById<T>(long id)
         {
-            if (ItemMap.TryGetValue(typeof(T), out var dict))
-            {
-                if (dict is Dictionary<long, T> d)
-                {
-                    if (d.ContainsKey(id))
-                    {
-                        removeTrackerFor(d[id]);
-                        d.Remove(id);
-                    }
-
-                }
-            }
+            var documentStorage = StorageFor<T>();
+            documentStorage.EjectById(this, id);
+            documentStorage.RemoveDirtyTracker(this, id);
         }
 
         protected override void ejectById<T>(int id)
         {
-            if (ItemMap.TryGetValue(typeof(T), out var dict))
-            {
-                if (dict is Dictionary<int, T> intd)
-                {
-                    if (intd.ContainsKey(id))
-                    {
-                        removeTrackerFor(intd[id]);
-                        intd.Remove(id);
-                    }
-
-                }
-                else if (dict is Dictionary<long, T> longd)
-                {
-                    var lid = (long)id;
-                    if (longd.ContainsKey(lid))
-                    {
-                        removeTrackerFor(longd[lid]);
-                        longd.Remove(lid);
-                    }
-                }
-            }
-
-
+            var documentStorage = StorageFor<T>();
+            documentStorage.EjectById(this, id);
+            documentStorage.RemoveDirtyTracker(this, id);
         }
 
         protected override void ejectById<T>(Guid id)
         {
-            if (ItemMap.TryGetValue(typeof(T), out var dict))
-            {
-                if (dict is Dictionary<Guid, T> d)
-                {
-                    if (d.ContainsKey(id))
-                    {
-                        removeTrackerFor(d[id]);
-                        d.Remove(id);
-                    }
-                }
-            }
+            var documentStorage = StorageFor<T>();
+            documentStorage.EjectById(this, id);
+            documentStorage.RemoveDirtyTracker(this, id);
         }
 
         protected override void ejectById<T>(string id)
         {
-            if (ItemMap.TryGetValue(typeof(T), out var dict))
-            {
-                if (dict is Dictionary<string, T> d)
-                {
-                    if (d.ContainsKey(id))
-                    {
-                        removeTrackerFor(d[id]);
-                        d.Remove(id);
-                    }
-                }
-            }
+            var documentStorage = StorageFor<T>();
+            documentStorage.EjectById(this, id);
+            documentStorage.RemoveDirtyTracker(this, id);
         }
     }
 }

@@ -7,6 +7,7 @@ using Marten.Linq.Fields;
 using Marten.Schema;
 using Marten.Storage;
 using Marten.V4Internals.Linq;
+using Marten.V4Internals.Sessions;
 using Remotion.Linq;
 
 namespace Marten.V4Internals
@@ -48,6 +49,8 @@ namespace Marten.V4Internals
 
 
         IStorageOperation DeleteForWhere(IWhereFragment where);
+        void EjectById(IMartenSession session, object id);
+        void RemoveDirtyTracker(IMartenSession session, object id);
     }
 
     public interface IDocumentStorage<T, TId> : IDocumentStorage<T>

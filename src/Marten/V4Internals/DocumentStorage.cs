@@ -60,6 +60,29 @@ namespace Marten.V4Internals
             _setter = LambdaBuilder.Setter<T, TId>(document.IdMember);
         }
 
+        public void EjectById(IMartenSession session, object id)
+        {
+            var typedId = (TId)id;
+
+            if (session.ItemMap.TryGetValue(typeof(T), out var dict))
+            {
+                if (dict is Dictionary<TId, T> d) d.Remove(typedId);
+            }
+        }
+
+        public void RemoveDirtyTracker(IMartenSession session, object id)
+        {
+            session.ChangeTrackers.RemoveAll(x =>
+            {
+                if (x is T doc)
+                {
+                    return Identity(doc).Equals(id);
+                }
+
+                return false;
+            });
+        }
+
         public bool UseOptimisticConcurrency { get; }
 
         object IDocumentStorage<T>.IdentityFor(T document)

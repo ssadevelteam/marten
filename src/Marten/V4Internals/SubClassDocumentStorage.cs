@@ -168,5 +168,15 @@ namespace Marten.V4Internals
         {
             return _parent.Identity(document);
         }
+
+        public void EjectById(IMartenSession session, object id)
+        {
+            _parent.EjectById(session, id);
+        }
+
+        public void RemoveDirtyTracker(IMartenSession session, object id)
+        {
+            _parent.RemoveDirtyTracker(session, id);
+        }
     }
 }

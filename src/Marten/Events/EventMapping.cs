@@ -268,5 +268,15 @@ namespace Marten.Events
         {
             throw new NotImplementedException();
         }
+
+        void IDocumentStorage<T>.EjectById(IMartenSession session, object id)
+        {
+            // Nothing
+        }
+
+        void IDocumentStorage<T>.RemoveDirtyTracker(IMartenSession session, object id)
+        {
+            // Nothing
+        }
     }
 }

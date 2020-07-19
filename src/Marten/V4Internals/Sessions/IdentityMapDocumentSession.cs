@@ -18,43 +18,22 @@ namespace Marten.V4Internals.Sessions
 
         protected override void ejectById<T>(long id)
         {
-            if (ItemMap.TryGetValue(typeof(T), out var dict))
-            {
-                if (dict is Dictionary<long, T> d) d.Remove(id);
-            }
+            StorageFor<T>().EjectById(this, id);
         }
 
         protected override void ejectById<T>(int id)
         {
-            if (ItemMap.TryGetValue(typeof(T), out var dict))
-            {
-                if (dict is Dictionary<int, T> intd)
-                {
-                    intd.Remove((int) id);
-                }
-                else if (dict is Dictionary<long, T> longd)
-                {
-                    longd.Remove(id);
-                }
-            }
-
-
+            StorageFor<T>().EjectById(this, id);
         }
 
         protected override void ejectById<T>(Guid id)
         {
-            if (ItemMap.TryGetValue(typeof(T), out var dict))
-            {
-                if (dict is Dictionary<Guid, T> d) d.Remove(id);
-            }
+            StorageFor<T>().EjectById(this, id);
         }
 
         protected override void ejectById<T>(string id)
         {
-            if (ItemMap.TryGetValue(typeof(T), out var dict))
-            {
-                if (dict is Dictionary<string, T> d) d.Remove(id);
-            }
+            StorageFor<T>().EjectById(this, id);
         }
     }
 }

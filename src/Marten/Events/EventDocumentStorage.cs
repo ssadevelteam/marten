@@ -37,6 +37,16 @@ namespace Marten.Events
             }
         }
 
+        public void EjectById(IMartenSession session, object id)
+        {
+            // Nothing
+        }
+
+        public void RemoveDirtyTracker(IMartenSession session, object id)
+        {
+            // Nothing
+        }
+
         public string FromObject { get; }
         public Type SelectedType => typeof(IEvent);
         public void WriteSelectClause(CommandBuilder sql)

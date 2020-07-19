@@ -11,8 +11,11 @@ namespace Marten.Schema.Testing.Hierarchies
 {
     public class delete_by_where_for_hierarchy_Tests: end_to_end_document_hierarchy_usage_Tests
     {
-        public delete_by_where_for_hierarchy_Tests()
+        private readonly ITestOutputHelper _output;
+
+        public delete_by_where_for_hierarchy_Tests(ITestOutputHelper output)
         {
+            _output = output;
             DocumentTracking = DocumentTracking.None;
         }
 
@@ -74,14 +77,16 @@ namespace Marten.Schema.Testing.Hierarchies
 
             theSession.SaveChanges();
 
-            SpecificationExtensions.ShouldBeNull(theSession.Load<User>(admin1.Id));
-            SpecificationExtensions.ShouldBeNull(theSession.Load<AdminUser>(admin1.Id));
+            theSession.Load<User>(admin1.Id).ShouldBeNull();
+            theSession.Load<AdminUser>(admin1.Id).ShouldBeNull();
         }
 
 
         [Fact]
         public void persist_and_delete_subclass_2()
         {
+            theSession.Logger = new TestOutputMartenLogger(_output);
+
             theSession.Store(admin1);
             theSession.SaveChanges();
 
