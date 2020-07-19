@@ -90,8 +90,15 @@ namespace Marten.Schema.Arguments
             }
             else
             {
-                method.Frames.Code($"{parameters.Usage}[{i}].{nameof(NpgsqlParameter.NpgsqlDbType)} = {{0}};", DbType);
                 var rawMemberType = _members.Last().GetRawMemberType();
+
+
+                var dbTypeString = rawMemberType.IsArray
+                    ? $"{Constant.ForEnum(NpgsqlDbType.Array).Usage} | {Constant.ForEnum(TypeMappings.ToDbType(rawMemberType.GetElementType())).Usage}"
+                    : Constant.ForEnum(DbType).Usage;
+
+                method.Frames.Code($"{parameters.Usage}[{i}].{nameof(NpgsqlParameter.NpgsqlDbType)} = {dbTypeString};");
+
                 if (rawMemberType.IsClass || rawMemberType.IsNullable() || _members.Length > 1)
                 {
                     method.Frames.Code($@"
@@ -149,6 +156,15 @@ END
 
         public virtual void GenerateBulkWriterCode(GeneratedType type, GeneratedMethod load, DocumentMapping mapping)
         {
+            var rawMemberType = _members.Last().GetRawMemberType();
+
+
+            var dbTypeString = rawMemberType.IsArray
+                ? $"{Constant.ForEnum(NpgsqlDbType.Array).Usage} | {Constant.ForEnum(TypeMappings.ToDbType(rawMemberType.GetElementType())).Usage}"
+                : Constant.ForEnum(DbType).Usage;
+
+
+
             if (DotNetType.IsEnum)
             {
                 if (mapping.EnumStorage == EnumStorage.AsInteger)
@@ -167,7 +183,7 @@ END
             }
             else
             {
-                load.Frames.Code($"writer.Write(document.{_members.Last().Name}, {{0}});", DbType);
+                load.Frames.Code($"writer.Write(document.{_members.Last().Name}, {dbTypeString});");
             }
 
         }
