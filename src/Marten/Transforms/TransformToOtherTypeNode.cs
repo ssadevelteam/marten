@@ -19,8 +19,14 @@ namespace Marten.Transforms
             {
                 var transformName = (string)expression.Arguments.Last().As<ConstantExpression>().Value;
 
+                var selectedType = expression.Type;
+                if (selectedType.Closes(typeof(IQueryable<>)))
+                {
+                    selectedType = selectedType.GetGenericArguments()[0];
+                }
+
                 op = typeof(TransformToOtherTypeOperator<>).CloseAndBuildAs<ResultOperatorBase>(transformName,
-                    expression.Type.GetGenericArguments()[0]);
+                    selectedType);
 
                 return true;
             }
