@@ -37,7 +37,7 @@ namespace Marten.V4Internals.Compiled
                 {
                     InvalidMembers.Add(member);
                 }
-                else if (QueryCompiler.Finders.All(x => x.Matches(memberType)))
+                else if (QueryCompiler.Finders.All(x => !x.Matches(memberType)))
                 {
                     InvalidMembers.Add(member);
                 }
