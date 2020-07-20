@@ -14,11 +14,10 @@ namespace Marten.Linq
         {
             if (expression.Method.Name == nameof(CompiledQueryExtensions.AsJson))
             {
-                var argument = expression.Arguments.First();
-                if (argument.CanReduce)
-                {
-                    selectorVisitor.Visit(argument);
-                }
+                var argument = expression.Arguments.FirstOrDefault();
+
+                // TODO -- some other logic necessary to decide whether or not to proceed or not
+                if (argument != null) selectorVisitor.Visit(argument);
 
                 op = AsJsonResultOperator.Flyweight;
                 return true;
