@@ -264,7 +264,7 @@ namespace Marten.Testing.Linq
         [Fact]
         public async Task select_many_with_any_async()
         {
-            theStore.Advanced.Clean.CompletelyRemove(typeof(Target));
+            theStore.Advanced.Clean.DeleteDocumentsFor(typeof(Target));
 
             var product1 = new Product {Tags = new[] {"a", "b", "c"}};
             var product2 = new Product {Tags = new[] {"b", "c", "d"}};

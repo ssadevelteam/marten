@@ -446,6 +446,7 @@ namespace Marten.Testing.Events.Projections
 
         public project_events_async_from_multiple_streams_into_view(DefaultStoreFixture fixture) : base(fixture)
         {
+            DocumentTracking = DocumentTracking.IdentityOnly;
         }
     }
 

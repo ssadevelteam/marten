@@ -95,6 +95,7 @@ namespace Marten.Testing.Events.Projections
 
         public AggregateFinder_Async(DefaultStoreFixture fixture) : base(fixture)
         {
+            DocumentTracking = DocumentTracking.IdentityOnly;
         }
     }
 }

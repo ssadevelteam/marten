@@ -107,8 +107,15 @@ namespace Marten.V4Internals
             }
             else
             {
-                dict = new Dictionary<TId, T>();
-                session.ItemMap.Add(typeof(TId), dict);
+                if (session.ItemMap.TryGetValue(typeof(T), out var d2))
+                {
+                    dict = (Dictionary<TId, T>) d2;
+                }
+                else
+                {
+                    dict = new Dictionary<TId, T>();
+                    session.ItemMap.Add(typeof(T), dict);
+                }
             }
 
             var idList = new List<TId>();
