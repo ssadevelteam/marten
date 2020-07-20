@@ -96,8 +96,6 @@ namespace Marten.Testing.CoreFunctionality
         [Fact]
         public void can_delete_by_query_multiple()
         {
-            theSession.Logger = new TestOutputMartenLogger(_output);
-
             var targets = new[] { new FailureInLife { Id = 1, What = 2 } };
 
             theStore.BulkInsert(targets);

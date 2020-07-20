@@ -193,9 +193,6 @@ namespace Marten.Testing.Linq
 
             using (var query = theStore.QuerySession())
             {
-                var logger = new TestOutputMartenLogger(_output);
-                query.Logger = logger;
-
                 var distinct = query.Query<ProductWithNumbers>().SelectMany(x => x.Tags).Distinct().ToList();
 
                 distinct.OrderBy(x => x).ShouldHaveTheSameElementsAs(1, 2, 3, 4, 5);
@@ -251,8 +248,6 @@ namespace Marten.Testing.Linq
 
             using (var query = theStore.QuerySession())
             {
-                query.Logger = new TestOutputMartenLogger(_output);
-
                 query.Query<Product>().SelectMany(x => x.Tags)
                     .Any().ShouldBeTrue();
 
@@ -282,8 +277,6 @@ namespace Marten.Testing.Linq
 
             using (var query = theStore.QuerySession())
             {
-                query.Logger = new TestOutputMartenLogger(_output);
-
                 (await query.Query<Product>().SelectMany(x => x.Tags)
                     .AnyAsync()).ShouldBeTrue();
 
@@ -335,8 +328,6 @@ namespace Marten.Testing.Linq
 
             using (var query = theStore.QuerySession())
             {
-                query.Logger = new TestOutputMartenLogger(_output);
-
                 var expected = targets
                     .SelectMany(x => x.Children)
                     .Where(x => x.Flag)
@@ -421,8 +412,6 @@ namespace Marten.Testing.Linq
 
             using (var query = theStore.QuerySession())
             {
-                query.Logger = new TestOutputMartenLogger(_output);
-
                 var dict = new Dictionary<Guid, User>();
 
                 var results = query.Query<Target>()

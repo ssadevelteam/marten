@@ -92,8 +92,6 @@ namespace Marten.Testing.Services.Includes
 
             using (var query = theStore.QuerySession())
             {
-                query.Logger = new TestOutputMartenLogger(_output);
-
                 User included = null;
                 var issue2 = query
                     .Query<Issue>()
