@@ -42,7 +42,7 @@ namespace Marten.V4Internals.Linq
 
         public ISelector BuildSelector(IMartenSession session)
         {
-            throw new System.NotSupportedException();
+            return Inner.BuildSelector(session);
         }
 
         public IQueryHandler<TResult> BuildHandler<TResult>(IMartenSession session, Statement topStatement,
