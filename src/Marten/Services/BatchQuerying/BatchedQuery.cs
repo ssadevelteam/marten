@@ -88,8 +88,6 @@ namespace Marten.Services.BatchQuerying
                 command.AddNamedParameter(TenantIdArgument.ArgName, _parent.Tenant.TenantId);
             }
 
-
-
             return command;
         }
 
@@ -158,13 +156,13 @@ namespace Marten.Services.BatchQuerying
         public Task<T> AggregateStream<T>(Guid streamId, int version = 0, DateTime? timestamp = null)
             where T : class
         {
-            throw new NotImplementedException();
-            // var inner = new EventQueryHandler<Guid>(new EventSelector(_store.Events, _store.Serializer), streamId, version,
-            //     timestamp, _store.Events.TenancyStyle, _parent.Tenant.TenantId);
-            // var aggregator = _store.Events.AggregateFor<T>();
-            // var handler = new AggregationQueryHandler<T>(aggregator, inner);
-            //
-            // return AddItem(handler);
+            var events = _parent.DocumentStore.Events;
+            var inner = new EventQueryHandler<Guid>(new EventSelector(events, _parent.Serializer), streamId, version,
+                timestamp, events.TenancyStyle, _parent.Tenant.TenantId);
+            var aggregator = events.AggregateFor<T>();
+            var handler = new AggregationQueryHandler<T>(aggregator, inner);
+
+            return AddItem(handler);
         }
 
         public Task<IEvent> Load(Guid id)
