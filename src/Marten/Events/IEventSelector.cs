@@ -1,5 +1,5 @@
+using Marten.Internal.Linq;
 using Marten.Util;
-using Marten.V4Internals;
 
 namespace Marten.Events
 {

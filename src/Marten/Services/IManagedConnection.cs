@@ -2,7 +2,6 @@ using System;
 using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
-using Marten.V4Internals;
 using Npgsql;
 
 namespace Marten.Services

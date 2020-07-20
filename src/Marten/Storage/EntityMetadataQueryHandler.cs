@@ -4,9 +4,10 @@ using System.Data.Common;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Marten.Internal;
+using Marten.Internal.Linq;
 using Marten.Schema;
 using Marten.Util;
-using Marten.V4Internals;
 
 namespace Marten.Storage
 {

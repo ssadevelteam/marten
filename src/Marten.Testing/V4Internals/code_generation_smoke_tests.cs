@@ -6,6 +6,11 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Baseline;
+using Marten.Internal;
+using Marten.Internal.CodeGeneration;
+using Marten.Internal.DirtyTracking;
+using Marten.Internal.Linq;
+using Marten.Internal.Storage;
 using Marten.Linq;
 using Marten.Linq.QueryHandlers;
 using Marten.Schema;
@@ -15,14 +20,12 @@ using Marten.Testing.CoreFunctionality;
 using Marten.Testing.Documents;
 using Marten.Testing.Harness;
 using Marten.Util;
-using Marten.V4Internals;
-using Marten.V4Internals.DirtyTracking;
 using Npgsql;
 using NSubstitute;
 using Remotion.Linq.Clauses;
 using Xunit;
-using IDocumentStorage = Marten.V4Internals.IDocumentStorage;
-using VersionTracker = Marten.V4Internals.VersionTracker;
+using IDocumentStorage = Marten.Internal.Storage.IDocumentStorage;
+using VersionTracker = Marten.Internal.VersionTracker;
 
 namespace Marten.Testing.V4Internals
 {

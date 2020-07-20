@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using Marten.Internal.CompiledQueries;
 using Marten.Linq;
 using Marten.Testing.Documents;
 using Marten.Testing.Harness;
-using Marten.V4Internals.Compiled;
 using Shouldly;
 using Xunit;
 

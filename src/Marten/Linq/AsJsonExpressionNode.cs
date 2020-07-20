@@ -1,7 +1,6 @@
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using Marten.V4Internals.Linq;
 using Remotion.Linq.Clauses;
 using Remotion.Linq.Clauses.Expressions;
 using Remotion.Linq.Parsing.Structure.IntermediateModel;

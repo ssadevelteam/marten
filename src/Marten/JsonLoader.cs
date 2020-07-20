@@ -1,7 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Marten.V4Internals.Sessions;
+using Marten.Internal.Sessions;
 
 namespace Marten
 {

@@ -8,7 +8,6 @@ using Marten.Schema;
 using Marten.Schema.Identity;
 using Marten.Storage;
 using Marten.Util;
-using Marten.V4Internals.Linq;
 using Remotion.Linq;
 using Remotion.Linq.Clauses;
 

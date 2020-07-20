@@ -6,13 +6,13 @@ using Baseline;
 using Marten.Events;
 using Marten.Events.Projections;
 using Marten.Events.Projections.Async;
+using Marten.Internal.Sessions;
 using Marten.Linq;
 using Marten.Linq.QueryHandlers;
 using Marten.Schema;
 using Marten.Services;
 using Marten.Storage;
 using Marten.Transforms;
-using Marten.V4Internals.Sessions;
 using Remotion.Linq.Parsing.Structure;
 using IsolationLevel = System.Data.IsolationLevel;
 

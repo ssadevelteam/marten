@@ -3,12 +3,13 @@ using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
 using Baseline;
+using Marten.Internal;
+using Marten.Internal.Linq;
 using Marten.Linq;
 using Marten.Schema;
 using Marten.Services;
 using Marten.Storage;
 using Marten.Util;
-using Marten.V4Internals;
 
 namespace Marten.Events
 {

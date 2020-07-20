@@ -5,8 +5,8 @@ using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Baseline;
+using Marten.Internal.Linq;
 using Marten.Linq;
-using Marten.V4Internals.Linq;
 using Npgsql;
 
 namespace Marten
@@ -266,7 +266,7 @@ namespace Marten
 
         public static NpgsqlCommand ToCommand<T>(this IQueryable<T> queryable, FetchType fetchType = FetchType.FetchMany)
         {
-            if (queryable is V4Queryable<T> q1)
+            if (queryable is MartenLinqQueryable<T> q1)
             {
                 return q1.ToPreviewCommand(fetchType);
             }

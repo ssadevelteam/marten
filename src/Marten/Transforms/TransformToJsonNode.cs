@@ -4,7 +4,6 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Baseline;
 using Marten.Linq;
-using Marten.V4Internals.Linq;
 using Remotion.Linq.Clauses;
 using Remotion.Linq.Parsing.Structure.IntermediateModel;
 

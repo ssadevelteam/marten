@@ -3,22 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Baseline;
+using Marten.Internal.Sessions;
 using Marten.Linq;
 using Marten.Services;
 using Marten.Storage;
 using Marten.Util;
-using Marten.V4Internals;
-using Marten.V4Internals.Sessions;
 
 namespace Marten.Patching
 {
     public class PatchExpression<T>: IPatchExpression<T>
     {
         private readonly IWhereFragment _fragment;
-        private readonly NewDocumentSession _session;
+        private readonly DocumentSessionBase _session;
         public readonly IDictionary<string, object> Patch = new Dictionary<string, object>();
 
-        public PatchExpression(IWhereFragment fragment, NewDocumentSession session)
+        public PatchExpression(IWhereFragment fragment, DocumentSessionBase session)
         {
             _fragment = fragment;
             _session = session;

@@ -8,8 +8,6 @@ using Marten.Schema;
 using Marten.Services;
 using Marten.Storage;
 using Marten.Util;
-using Marten.V4Internals;
-using Marten.V4Internals.Linq;
 using Npgsql;
 
 namespace Marten.Events

@@ -5,8 +5,8 @@ using Baseline.Reflection;
 using LamarCodeGeneration;
 using LamarCodeGeneration.Frames;
 using LamarCodeGeneration.Model;
+using Marten.Internal;
 using Marten.Services;
-using Marten.V4Internals;
 using NpgsqlTypes;
 
 namespace Marten.Schema.Arguments

@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using Marten.Internal.Linq;
 using Marten.Linq.QueryHandlers;
 using Marten.Schema.Arguments;
 using Marten.Storage;
-using Marten.V4Internals;
 using Npgsql;
 using NpgsqlTypes;
 

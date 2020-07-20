@@ -1,11 +1,13 @@
 using System;
+using Marten.Internal;
+using Marten.Internal.Linq;
+using Marten.Internal.Operations;
+using Marten.Internal.Storage;
 using Marten.Linq;
 using Marten.Linq.Fields;
 using Marten.Schema;
 using Marten.Storage;
 using Marten.Util;
-using Marten.V4Internals;
-using Marten.V4Internals.Linq;
 using Remotion.Linq;
 
 namespace Marten.Events

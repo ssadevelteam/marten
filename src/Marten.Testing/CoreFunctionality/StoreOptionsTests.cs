@@ -7,7 +7,6 @@ using Marten.Services;
 using Marten.Storage;
 using Marten.Testing.Documents;
 using Marten.Testing.Harness;
-using Marten.V4Internals;
 using Npgsql;
 using NpgsqlTypes;
 using Shouldly;

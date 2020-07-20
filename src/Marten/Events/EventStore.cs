@@ -4,22 +4,21 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Baseline;
+using Marten.Internal.Sessions;
 using Marten.Linq;
 using Marten.Schema.Identity;
 using Marten.Storage;
-using Marten.V4Internals;
-using Marten.V4Internals.Sessions;
 
 namespace Marten.Events
 {
     public class EventStore: IEventStore
     {
-        private readonly NewDocumentSession _session;
+        private readonly DocumentSessionBase _session;
         private readonly ITenant _tenant;
         private readonly IEventSelector _selector;
         private readonly DocumentStore _store;
 
-        public EventStore(NewDocumentSession session, DocumentStore store, ITenant tenant)
+        public EventStore(DocumentSessionBase session, DocumentStore store, ITenant tenant)
         {
             _session = session;
             _store = store;

@@ -1,6 +1,6 @@
+using Marten.Internal;
 using Marten.Storage;
 using Marten.Testing.Documents;
-using Marten.V4Internals;
 using NSubstitute;
 using Shouldly;
 using Xunit;

@@ -1,8 +1,8 @@
 using System;
 using System.Linq;
+using Marten.Internal.Operations;
 using Marten.Services;
 using Marten.Testing.Documents;
-using Marten.V4Internals;
 using Shouldly;
 
 namespace Marten.Testing.CoreFunctionality
@@ -14,7 +14,7 @@ namespace Marten.Testing.CoreFunctionality
             session.PendingChanges.Operations()
                 .OfType<IDocumentStorageOperation>()
 
-                .ShouldContain(x => x.Role() == StorageRole.Upsert && document.Equals(x.Document));
+                .ShouldContain(x => x.Role() == OperationRole.Upsert && document.Equals(x.Document));
         }
 
         public static void ShouldHaveInsertFor<T>(this IDocumentSession session, T document)
@@ -22,7 +22,7 @@ namespace Marten.Testing.CoreFunctionality
             session.PendingChanges.Operations()
                 .OfType<IDocumentStorageOperation>()
 
-                .ShouldContain(x => x.Role() == StorageRole.Insert && document.Equals(x.Document));
+                .ShouldContain(x => x.Role() == OperationRole.Insert && document.Equals(x.Document));
         }
 
         public static void ShouldHaveUpdateFor<T>(this IDocumentSession session, T document)
@@ -30,7 +30,7 @@ namespace Marten.Testing.CoreFunctionality
             session.PendingChanges.Operations()
                 .OfType<IDocumentStorageOperation>()
 
-                .ShouldContain(x => x.Role() == StorageRole.Update && document.Equals(x.Document));
+                .ShouldContain(x => x.Role() == OperationRole.Update && document.Equals(x.Document));
         }
 
         public static void ShouldHaveDeleteFor(this IDocumentSession session, User user)

@@ -1,6 +1,6 @@
+using Marten.Internal;
 using Marten.Storage;
 using Marten.Testing.Harness;
-using Marten.V4Internals;
 using Shouldly;
 using Xunit;
 

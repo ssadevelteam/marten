@@ -1,11 +1,10 @@
 using System.Linq;
 using System.Threading.Tasks;
+using Marten.Internal.Sessions;
 using Marten.Services;
 using Marten.Storage;
 using Marten.Testing.Documents;
 using Marten.Testing.Harness;
-using Marten.V4Internals;
-using Marten.V4Internals.Sessions;
 using Npgsql;
 using NSubstitute;
 using Xunit;
@@ -38,14 +37,14 @@ namespace Marten.Testing.V4Internals
 
         }
 
-        private Marten.V4Internals.Sessions.QuerySession BuildQuerySession()
+        private QuerySession BuildQuerySession()
         {
             using var database =
                 new ManagedConnection(new ConnectionFactory(ConnectionSource.ConnectionString), new NulloRetryPolicy());
 
 
 
-            var newSession = new Marten.V4Internals.Sessions.QuerySession(theStore, null, database,
+            var newSession = new QuerySession(theStore, null, database,
                 theStore.Tenancy.Default);
             return newSession;
         }

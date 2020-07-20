@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Linq;
 using Baseline;
+using Marten.Internal.Operations;
 using Marten.Services;
 using Marten.Testing.Documents;
 using Marten.Testing.Harness;
-using Marten.V4Internals;
 using Shouldly;
 using Xunit;
 

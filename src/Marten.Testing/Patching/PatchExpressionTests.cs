@@ -1,11 +1,11 @@
 using System;
+using Marten.Internal.Sessions;
 using Marten.Patching;
 using Marten.Schema;
 using Marten.Services;
 using Marten.Storage;
 using Marten.Testing.Documents;
 using Marten.Testing.Harness;
-using Marten.V4Internals.Sessions;
 using NSubstitute;
 using Shouldly;
 using Xunit;
@@ -32,7 +32,7 @@ namespace Marten.Testing.Patching
 
             Disposables.Add(session);
 
-            _expression = new PatchExpression<Target>(null, (NewDocumentSession) session);
+            _expression = new PatchExpression<Target>(null, (DocumentSessionBase) session);
         }
 
         [Fact]
@@ -417,11 +417,11 @@ namespace Marten.Testing.Patching
 
             using var session = theStore.LightweightSession();
 
-            var expressionWithSimpleProperty = new PatchExpression<Target>(null, (NewDocumentSession) session);
+            var expressionWithSimpleProperty = new PatchExpression<Target>(null, (DocumentSessionBase) session);
             expressionWithSimpleProperty.Set(x => x.Color, Colors.Blue);
             expressionWithSimpleProperty.Patch["path"].ShouldBe("color");
 
-            var expressionWithNestedProperty = new PatchExpression<Target>(null, (NewDocumentSession) session);
+            var expressionWithNestedProperty = new PatchExpression<Target>(null, (DocumentSessionBase) session);
             expressionWithNestedProperty.Delete(x => x.Inner.AnotherString);
             expressionWithNestedProperty.Patch["path"].ShouldBe("inner.anotherString");
         }

@@ -7,7 +7,6 @@ using Marten.Linq;
 using Marten.Linq.QueryHandlers;
 using Marten.Storage;
 using Marten.Util;
-using Marten.V4Internals;
 using Npgsql;
 
 namespace Marten.Services

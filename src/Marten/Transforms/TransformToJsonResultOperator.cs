@@ -1,11 +1,11 @@
 using System;
 using System.Linq.Expressions;
 using Baseline;
+using Marten.Internal;
+using Marten.Internal.Linq;
 using Marten.Linq;
 using Marten.Schema;
 using Marten.Storage;
-using Marten.V4Internals;
-using Marten.V4Internals.Linq;
 using Remotion.Linq.Clauses;
 using Remotion.Linq.Clauses.ResultOperators;
 using Remotion.Linq.Clauses.StreamedData;

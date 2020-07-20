@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using Marten.Events;
+using Marten.Internal.Operations;
 using Marten.Patching;
-using Marten.V4Internals;
 
 namespace Marten.Services
 {

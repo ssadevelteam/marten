@@ -4,6 +4,8 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Baseline;
 using Marten.Events;
+using Marten.Internal;
+using Marten.Internal.CompiledQueries;
 using Marten.Linq;
 using Marten.Linq.Fields;
 using Marten.Schema;
@@ -13,9 +15,6 @@ using Marten.Services;
 using Marten.Storage;
 using Marten.Transforms;
 using Marten.Util;
-using Marten.V4Internals;
-using Marten.V4Internals.Compiled;
-using Marten.V4Internals.Sessions;
 using Npgsql;
 
 namespace Marten

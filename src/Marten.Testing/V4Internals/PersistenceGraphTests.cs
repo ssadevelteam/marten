@@ -1,6 +1,8 @@
 using System;
+using Marten.Internal;
+using Marten.Internal.CodeGeneration;
+using Marten.Internal.Storage;
 using Marten.Testing.Documents;
-using Marten.V4Internals;
 using Shouldly;
 using Xunit;
 

@@ -4,8 +4,9 @@ using System.Data.Common;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Marten.Internal;
+using Marten.Internal.Operations;
 using Marten.Util;
-using Marten.V4Internals;
 using NpgsqlTypes;
 
 namespace Marten.Events
@@ -99,9 +100,9 @@ namespace Marten.Events
             applyDataFromSproc(values);
         }
 
-        public StorageRole Role()
+        public OperationRole Role()
         {
-            return StorageRole.Events;
+            return OperationRole.Events;
         }
 
 

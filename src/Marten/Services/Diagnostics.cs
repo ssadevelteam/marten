@@ -1,8 +1,8 @@
 using System;
 using System.Net;
+using Marten.Internal;
 using Marten.Linq;
 using Marten.Util;
-using Marten.V4Internals;
 using Npgsql;
 
 namespace Marten.Services

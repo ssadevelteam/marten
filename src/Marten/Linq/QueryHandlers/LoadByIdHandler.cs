@@ -1,10 +1,11 @@
 using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
+using Marten.Internal;
+using Marten.Internal.Linq;
+using Marten.Internal.Storage;
 using Marten.Storage;
 using Marten.Util;
-using Marten.V4Internals;
-using Marten.V4Internals.Linq.QueryHandlers;
 
 namespace Marten.Linq.QueryHandlers
 {

@@ -3,11 +3,12 @@ using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
 using Marten.Events.Projections;
+using Marten.Internal;
+using Marten.Internal.Linq;
+using Marten.Internal.Sessions;
 using Marten.Linq;
 using Marten.Services;
 using Marten.Util;
-using Marten.V4Internals;
-using Marten.V4Internals.Sessions;
 
 namespace Marten.Events
 {

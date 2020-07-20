@@ -4,18 +4,19 @@ using System.Data.Common;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Marten.Internal;
+using Marten.Internal.Operations;
 using Marten.Linq;
 using Marten.Schema;
 using Marten.Schema.Identity;
 using Marten.Services;
 using Marten.Transforms;
 using Marten.Util;
-using Marten.V4Internals;
 using NpgsqlTypes;
 
 namespace Marten.Patching
 {
-    public class PatchOperation: Marten.V4Internals.IStorageOperation, NoDataReturnedCall
+    public class PatchOperation: IStorageOperation, NoDataReturnedCall
     {
         private readonly IQueryableDocument _document;
         private readonly IWhereFragment _fragment;
@@ -46,9 +47,9 @@ namespace Marten.Patching
             return Task.CompletedTask;
         }
 
-        public StorageRole Role()
+        public OperationRole Role()
         {
-            return StorageRole.Patch;
+            return OperationRole.Patch;
         }
 
         public void ConfigureCommand(CommandBuilder builder, IMartenSession session)

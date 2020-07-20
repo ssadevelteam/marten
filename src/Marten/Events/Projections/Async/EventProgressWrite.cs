@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
+using Marten.Internal;
+using Marten.Internal.Operations;
 using Marten.Schema;
 using Marten.Util;
-using Marten.V4Internals;
 using NpgsqlTypes;
 
 namespace Marten.Events.Projections.Async
@@ -42,9 +43,9 @@ namespace Marten.Events.Projections.Async
             return Task.CompletedTask;
         }
 
-        public StorageRole Role()
+        public OperationRole Role()
         {
-            return StorageRole.Other;
+            return OperationRole.Other;
         }
     }
 }

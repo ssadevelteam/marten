@@ -2,9 +2,11 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
+using Marten.Internal;
+using Marten.Internal.Linq;
+using Marten.Internal.Storage;
 using Marten.Storage;
 using Marten.Util;
-using Marten.V4Internals;
 
 namespace Marten.Linq.QueryHandlers
 {
@@ -63,7 +65,7 @@ namespace Marten.Linq.QueryHandlers
         public async Task<IReadOnlyList<T>> HandleAsync(DbDataReader reader, IMartenSession session, CancellationToken token)
         {
             var list = new List<T>();
-            
+
             var selector = (ISelector<T>)storage.BuildSelector(session);
 
             while (await reader.ReadAsync(token).ConfigureAwait(false))

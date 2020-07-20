@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 using Baseline;
 using LamarCodeGeneration;
 using Marten.Events;
+using Marten.Internal.Linq;
+using Marten.Internal.Sessions;
+using Marten.Internal.Storage;
 using Marten.Linq;
 using Marten.Linq.QueryHandlers;
 using Marten.Schema.Arguments;
 using Marten.Util;
-using Marten.V4Internals;
-using Marten.V4Internals.Linq;
-using Marten.V4Internals.Sessions;
 using Npgsql;
 using Remotion.Linq.Clauses;
 
@@ -209,7 +209,7 @@ namespace Marten.Services.BatchQuerying
 
         private Task<TResult> addItem<TDoc, TResult>(IQueryable<TDoc> queryable, ResultOperatorBase op)
         {
-            var handler = queryable.As<V4Queryable<TDoc>>().BuildHandler<TResult>(op);
+            var handler = queryable.As<MartenLinqQueryable<TDoc>>().BuildHandler<TResult>(op);
             return AddItem(handler);
         }
 
@@ -225,7 +225,7 @@ namespace Marten.Services.BatchQuerying
 
         internal Task<IReadOnlyList<T>> Query<T>(IMartenQueryable<T> queryable)
         {
-            var handler = queryable.As<V4Queryable<T>>().BuildHandler<IReadOnlyList<T>>();
+            var handler = queryable.As<MartenLinqQueryable<T>>().BuildHandler<IReadOnlyList<T>>();
             return AddItem(handler);
         }
 

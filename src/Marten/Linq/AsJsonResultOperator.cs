@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Linq.Expressions;
+using Marten.Internal;
+using Marten.Internal.Linq;
 using Marten.Transforms;
-using Marten.V4Internals;
-using Marten.V4Internals.Linq;
 using Remotion.Linq.Clauses;
 using Remotion.Linq.Clauses.ResultOperators;
 using Remotion.Linq.Clauses.StreamedData;

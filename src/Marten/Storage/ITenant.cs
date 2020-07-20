@@ -2,12 +2,13 @@ using System;
 using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
+using Marten.Internal;
+using Marten.Internal.Storage;
 using Marten.Schema;
 using Marten.Schema.Identity;
 using Marten.Schema.Identity.Sequences;
 using Marten.Services;
 using Marten.Transforms;
-using Marten.V4Internals;
 using Npgsql;
 
 namespace Marten.Storage

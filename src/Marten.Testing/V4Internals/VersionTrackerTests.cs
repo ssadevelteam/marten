@@ -1,7 +1,7 @@
 using System;
+using Marten.Internal;
 using Marten.Testing.CoreFunctionality;
 using Marten.Testing.Documents;
-using Marten.V4Internals;
 using Xunit;
 using Shouldly;
 

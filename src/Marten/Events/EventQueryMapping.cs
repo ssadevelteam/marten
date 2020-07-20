@@ -4,7 +4,6 @@ using System.Linq.Expressions;
 using Marten.Linq;
 using Marten.Linq.Fields;
 using Marten.Schema;
-using Marten.V4Internals;
 
 namespace Marten.Events
 {

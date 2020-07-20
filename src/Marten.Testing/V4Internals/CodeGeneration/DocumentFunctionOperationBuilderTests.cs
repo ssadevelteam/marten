@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using Baseline;
 using LamarCodeGeneration;
 using LamarCompiler;
+using Marten.Internal.CodeGeneration;
+using Marten.Internal.Operations;
 using Marten.Schema;
 using Marten.Storage;
 using Marten.Testing.Documents;
-using Marten.V4Internals;
 using Shouldly;
 using Xunit;
 
@@ -45,7 +46,7 @@ namespace Marten.Testing.V4Internals.CodeGeneration
             {
                 if (_builder == null)
                     _builder = new DocumentFunctionOperationBuilder(theMapping, new UpsertFunction(theMapping),
-                        StorageRole.Upsert, new StoreOptions());
+                        OperationRole.Upsert, new StoreOptions());
 
                 return _builder;
             }
@@ -89,7 +90,7 @@ namespace Marten.Testing.V4Internals.CodeGeneration
         [Fact]
         public void role_should_be_upsert()
         {
-            theOperation.Role().ShouldBe(StorageRole.Upsert);
+            theOperation.Role().ShouldBe(OperationRole.Upsert);
         }
 
         [Fact]
