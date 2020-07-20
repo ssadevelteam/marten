@@ -70,37 +70,6 @@ namespace Marten.Util
             }
         }
 
-        [Obsolete("Think this goes away in v4")]
-        public static NpgsqlCommand ToBatchCommand(ITenant tenant, IEnumerable<IQueryHandler> handlers)
-        {
-            if (handlers.Count() == 1)
-                return ToCommand(tenant, handlers.Single());
-
-            var wholeStatement = new StringBuilder();
-            var command = new NpgsqlCommand();
-
-            foreach (var handler in handlers)
-            {
-                // Maybe have it use a shared pool here.
-                using (var builder = new CommandBuilder(command))
-                {
-                    handler.ConfigureCommand(builder, null);
-                    if (wholeStatement.Length > 0)
-                    {
-                        wholeStatement.Append(";");
-                    }
-
-                    wholeStatement.Append(builder);
-                }
-            }
-
-            command.CommandText = wholeStatement.ToString();
-
-            command.AddTenancy(tenant);
-
-            return command;
-        }
-
         // TEMP -- will shift this to being pooled later
         private readonly StringBuilder _sql = new StringBuilder();
 

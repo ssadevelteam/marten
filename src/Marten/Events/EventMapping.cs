@@ -119,39 +119,6 @@ namespace Marten.Events
             _idType = parent.StreamIdentity == StreamIdentity.AsGuid ? typeof(Guid) : typeof(string);
         }
 
-        [Obsolete("Lot of methods removed in v4 we can remove")]
-        public Type TopLevelBaseType => DocumentType;
-
-        public NpgsqlCommand LoaderCommand(object id)
-        {
-            return new NpgsqlCommand($"select d.data, d.id from {_tableName} as d where id = :id and type = '{Alias}'").With("id", id);
-        }
-
-        public NpgsqlCommand LoadByArrayCommand<TKey>(TKey[] ids)
-        {
-            return new NpgsqlCommand($"select d.data, d.id from {_tableName} as d where id = ANY(:ids) and type = '{Alias}'").With("ids", ids);
-        }
-
-        public object Identity(object document)
-        {
-            return document.As<IEvent>().Id;
-        }
-
-        public IStorageOperation DeletionForId(object id)
-        {
-            throw new NotSupportedException("You cannot delete events at this time");
-        }
-
-        public IStorageOperation DeletionForEntity(object entity)
-        {
-            throw new NotSupportedException("You cannot delete events at this time");
-        }
-
-        public IStorageOperation DeletionForWhere(IWhereFragment @where)
-        {
-            throw new NotSupportedException("You cannot delete events at this time");
-        }
-
         public bool UseOptimisticConcurrency { get; } = false;
 
         string ISelectClause.FromObject => _tableName;
@@ -203,7 +170,7 @@ namespace Marten.Events
 
         ISelectClause ISelectClause.UseStatistics(QueryStatistics statistics)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         Type IDocumentStorage.SourceType => typeof(IEvent);
@@ -214,59 +181,59 @@ namespace Marten.Events
 
         object IDocumentStorage<T>.IdentityFor(T document)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         Type IDocumentStorage<T>.IdType => _idType;
 
         Guid? IDocumentStorage<T>.VersionFor(T document, IMartenSession session)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         void IDocumentStorage<T>.Store(IMartenSession session, T document)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         void IDocumentStorage<T>.Store(IMartenSession session, T document, Guid? version)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         void IDocumentStorage<T>.Eject(IMartenSession session, T document)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         IStorageOperation IDocumentStorage<T>.Update(T document, IMartenSession session, ITenant tenant)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         IStorageOperation IDocumentStorage<T>.Insert(T document, IMartenSession session, ITenant tenant)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         IStorageOperation IDocumentStorage<T>.Upsert(T document, IMartenSession session, ITenant tenant)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         IStorageOperation IDocumentStorage<T>.Overwrite(T document, IMartenSession session, ITenant tenant)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         IStorageOperation IDocumentStorage<T>.DeleteForDocument(T document)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         IStorageOperation IDocumentStorage<T>.DeleteForWhere(IWhereFragment @where)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         void IDocumentStorage<T>.EjectById(IMartenSession session, object id)
