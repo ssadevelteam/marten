@@ -3,6 +3,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Marten.V4Internals.Linq;
 using Remotion.Linq.Clauses;
+using Remotion.Linq.Clauses.Expressions;
 using Remotion.Linq.Parsing.Structure.IntermediateModel;
 
 namespace Marten.Linq
@@ -16,8 +17,7 @@ namespace Marten.Linq
             {
                 var argument = expression.Arguments.FirstOrDefault();
 
-                // TODO -- some other logic necessary to decide whether or not to proceed or not
-                if (argument != null) selectorVisitor.Visit(argument);
+                if (!(argument is QuerySourceReferenceExpression)) selectorVisitor.Visit(argument);
 
                 op = AsJsonResultOperator.Flyweight;
                 return true;
