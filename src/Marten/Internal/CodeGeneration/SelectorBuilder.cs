@@ -100,7 +100,7 @@ namespace Marten.Internal.CodeGeneration
 
                     break;
                 default:
-                    throw new NotImplementedException("Not yet supporting dirty checking");
+                    throw new InvalidOperationException();
             }
 
 
@@ -137,7 +137,7 @@ namespace Marten.Internal.CodeGeneration
                         .MakeGenericType(_mapping.DocumentType, _mapping.IdType);
 
                 default:
-                    throw new NotImplementedException("Not yet supporting dirty checking");
+                    throw new ArgumentOutOfRangeException();
             }
         }
     }

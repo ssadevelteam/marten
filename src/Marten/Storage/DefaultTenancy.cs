@@ -65,7 +65,7 @@ namespace Marten.Storage
 
         void ITenantStorage.MarkAllFeaturesAsChecked()
         {
-            throw new NotImplementedException();
+            _inner.MarkAllFeaturesAsChecked();
         }
 
         public void EnsureStorageExists(Type documentType)

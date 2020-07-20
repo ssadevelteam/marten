@@ -13,11 +13,11 @@ using Remotion.Linq.Clauses;
 
 namespace Marten.Internal.Linq
 {
-    public class V4QueryProvider: IQueryProvider
+    public class LinqQueryProvider: IQueryProvider
     {
         private readonly IMartenSession _session;
 
-        public V4QueryProvider(IMartenSession session)
+        public LinqQueryProvider(IMartenSession session)
         {
             _session = session;
         }
@@ -26,7 +26,7 @@ namespace Marten.Internal.Linq
 
         public IQueryable CreateQuery(Expression expression)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         public IQueryable<TElement> CreateQuery<TElement>(Expression expression)
@@ -36,7 +36,7 @@ namespace Marten.Internal.Linq
 
         public object Execute(Expression expression)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         public TResult Execute<TResult>(Expression expression)

@@ -12,7 +12,7 @@ namespace Marten
     {
         public static string AsJson<T>(this T target)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         public static IQueryable<string> AsJson<T>(this IMartenQueryable<T> queryable)

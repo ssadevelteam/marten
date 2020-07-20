@@ -5,7 +5,6 @@ using Marten.Schema;
 
 namespace Marten.Internal.CodeGeneration
 {
-    // TODO -- this isn't real yet
     public abstract class DocumentSelectorWithDirtyChecking<T, TId> : IDocumentSelector
     {
         protected readonly DocumentMapping _mapping;

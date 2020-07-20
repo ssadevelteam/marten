@@ -68,7 +68,7 @@ namespace Marten.Schema
 
         DuplicatedField[] IQueryableDocument.DuplicatedFields
         {
-            get { throw new NotImplementedException(); }
+            get { throw new NotSupportedException(); }
         }
 
         public PropertySearching PropertySearching => Parent.PropertySearching;

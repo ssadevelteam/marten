@@ -56,7 +56,7 @@ namespace Marten.Internal.Linq
 
                 if (!matched)
                 {
-                    throw new NotImplementedException($"Marten does not (yet) support the {method.DeclaringType.FullNameInCode()}.{method.Name}() method as a Linq selector");
+                    throw new NotSupportedException($"Marten does not (yet) support the {method.DeclaringType.FullNameInCode()}.{method.Name}() method as a Linq selector");
                 }
 
                 return null;

@@ -21,27 +21,27 @@ namespace Marten.Internal.Linq
 {
     public class MartenLinqQueryable<T>: QueryableBase<T>, IMartenQueryable<T>
     {
-        private readonly V4QueryProvider _provider;
+        private readonly LinqQueryProvider _provider;
         private readonly IMartenSession _session;
 
-        public MartenLinqQueryable(IMartenSession session, V4QueryProvider provider, Expression expression): base(provider,
+        public MartenLinqQueryable(IMartenSession session, LinqQueryProvider provider, Expression expression): base(provider,
             expression)
         {
             _session = session;
             _provider = provider;
         }
 
-        public MartenLinqQueryable(IMartenSession session): base(new V4QueryProvider(session))
+        public MartenLinqQueryable(IMartenSession session): base(new LinqQueryProvider(session))
         {
             _session = session;
-            _provider = Provider.As<V4QueryProvider>();
+            _provider = Provider.As<LinqQueryProvider>();
         }
 
-        public MartenLinqQueryable(IMartenSession session, Expression expression): base(new V4QueryProvider(session),
+        public MartenLinqQueryable(IMartenSession session, Expression expression): base(new LinqQueryProvider(session),
             expression)
         {
             _session = session;
-            _provider = Provider.As<V4QueryProvider>();
+            _provider = Provider.As<LinqQueryProvider>();
         }
 
         internal IQueryHandler<TResult> BuildHandler<TResult>(ResultOperatorBase op = null)

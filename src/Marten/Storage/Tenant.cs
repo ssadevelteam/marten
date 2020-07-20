@@ -92,7 +92,6 @@ namespace Marten.Storage
             if (_checks.ContainsKey(featureType))
                 return;
 
-            // TODO -- ensure the system type here too?
             var feature = _features.FindFeature(featureType);
 
             if (feature == null)

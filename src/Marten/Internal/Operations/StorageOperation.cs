@@ -40,7 +40,6 @@ namespace Marten.Internal.Operations
             return new ChangeTracker<T>(session, _document);
         }
 
-        // TODO -- improve Lamar to make it possible to use protected members
         public abstract string CommandText();
 
         public abstract NpgsqlDbType DbType();

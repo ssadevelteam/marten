@@ -71,7 +71,6 @@ namespace Marten.Events
             parameters[6].NpgsqlDbType = NpgsqlDbType.Array | NpgsqlDbType.Jsonb;
         }
 
-        // TODO -- this probably varies in v4
         public Type DocumentType => typeof(EventStream);
         public void Postprocess(DbDataReader reader, IList<Exception> exceptions)
         {

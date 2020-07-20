@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using Baseline;
 using Baseline.Dates;
 using LamarCodeGeneration;
+using Marten.Exceptions;
 using Marten.Internal.Linq;
 using Marten.Internal.Linq.Includes;
 using Marten.Linq;
@@ -205,8 +206,7 @@ namespace Marten.Internal.CompiledQueries
                     .Join(", ");
                 var message = $"Members {members} cannot be used as parameters to a compiled query";
 
-                // TODO -- use a specific Marten exception here
-                throw new InvalidOperationException(message);
+                throw new InvalidCompiledQueryException(message);
             }
         }
 

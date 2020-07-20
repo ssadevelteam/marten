@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using Baseline;
 using LamarCodeGeneration;
+using Marten.Exceptions;
 using Marten.Internal.Linq;
 using Marten.Internal.Linq.Includes;
 using Marten.Linq;
@@ -123,8 +124,7 @@ namespace Marten.Internal.CompiledQueries
             }
             catch (Exception e)
             {
-                // TODO -- throw a specific Marten exception for the
-                throw;
+                throw new InvalidCompiledQueryException("Unable to create a Compiled Query template", e);
             }
         }
 

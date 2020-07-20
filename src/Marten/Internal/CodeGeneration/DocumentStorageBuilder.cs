@@ -181,7 +181,6 @@ return new Marten.Generated.{operations.DeleteByWhere.TypeName}({{0}});
             method.Frames.Code("END");
         }
 
-        // TODO -- just inject the type alias and simplify the operation classes
         private void buildOperationMethod(GeneratedType type, DocumentOperations operations, string methodName)
         {
             var operationType = (GeneratedType)typeof(DocumentOperations).GetProperty(methodName).GetValue(operations);
