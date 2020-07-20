@@ -20,13 +20,14 @@ namespace Marten.V4Internals.Sessions
     public abstract class NewDocumentSession: QuerySession, IDocumentSession
     {
         // The current unit of work can be replaced
-        protected UnitOfWork _unitOfWork = new UnitOfWork();
+        protected UnitOfWork _unitOfWork ;
 
 
         protected NewDocumentSession(DocumentStore store, SessionOptions sessionOptions, IManagedConnection database,
             ITenant tenant) : base(store, sessionOptions, database, tenant)
         {
             Concurrency = sessionOptions.ConcurrencyChecks;
+            _unitOfWork = new UnitOfWork(this);
 
             Events = new EventStore(this, store, tenant);
         }
@@ -180,7 +181,7 @@ namespace Marten.V4Internals.Sessions
             }
 
             // Need to clear the unit of work here
-            _unitOfWork = new UnitOfWork();
+            _unitOfWork = new UnitOfWork(this);
         }
 
         protected virtual void processChangeTrackers()
@@ -234,7 +235,7 @@ namespace Marten.V4Internals.Sessions
             }
 
             // Need to clear the unit of work here
-            _unitOfWork = new UnitOfWork();
+            _unitOfWork = new UnitOfWork(this);
         }
 
         public void Store<T>(IEnumerable<T> entities)

@@ -12,7 +12,13 @@ namespace Marten.V4Internals
 {
     public class UnitOfWork : IUnitOfWork, IChangeSet
     {
+        private readonly IMartenSession _parent;
         private readonly List<IStorageOperation> _operations = new List<IStorageOperation>();
+
+        public UnitOfWork(IMartenSession parent)
+        {
+            _parent = parent;
+        }
 
         public void Add(IStorageOperation operation)
         {
@@ -122,11 +128,18 @@ namespace Marten.V4Internals
 
         IEnumerable<T> IUnitOfWork.UpdatesFor<T>()
         {
+            var fromTrackers = _parent.ChangeTrackers
+                .Where(x => x.Document.GetType().CanBeCastTo<T>())
+                .Where(x => x.DetectChanges(_parent, out var _))
+                .Select(x => x.Document).OfType<T>();
+
             return _operations
                 .OfType<IDocumentStorageOperation>()
                 .Where(x => x.Role() == StorageRole.Update || x.Role() == StorageRole.Upsert)
                 .Select(x => x.Document)
-                .OfType<T>();
+                .OfType<T>()
+                .Concat(fromTrackers)
+                .Distinct();
 
         }
 
@@ -141,10 +154,18 @@ namespace Marten.V4Internals
 
         IEnumerable<T> IUnitOfWork.AllChangedFor<T>()
         {
+            var fromTrackers = _parent.ChangeTrackers
+                .Where(x => x.Document.GetType().CanBeCastTo<T>())
+                .Where(x => x.DetectChanges(_parent, out var _))
+                .Select(x => x.Document).OfType<T>();
+
+
             return _operations
                 .OfType<IDocumentStorageOperation>()
                 .Select(x => x.Document)
-                .OfType<T>();
+                .OfType<T>()
+                .Concat(fromTrackers)
+                .Distinct();
         }
 
         IEnumerable<EventStream> IUnitOfWork.Streams()
