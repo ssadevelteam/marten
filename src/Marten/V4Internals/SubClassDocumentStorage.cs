@@ -141,12 +141,20 @@ namespace Marten.V4Internals
 
         public T Load(TId id, IMartenSession session)
         {
-            return (T) _parent.Load(id, session);
+            var doc = _parent.Load(id, session);
+
+            if (doc is T x) return x;
+
+            return default;
         }
 
         public async Task<T> LoadAsync(TId id, IMartenSession session, CancellationToken token)
         {
-            return (T) await _parent.LoadAsync(id, session, token);
+            var doc = await _parent.LoadAsync(id, session, token);
+
+            if (doc is T x) return x;
+
+            return default;
         }
 
         public IReadOnlyList<T> LoadMany(TId[] ids, IMartenSession session)
