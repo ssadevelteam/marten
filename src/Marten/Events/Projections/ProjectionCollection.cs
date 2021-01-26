@@ -155,8 +155,8 @@ namespace Marten.Events.Projections
             {
                 return _projections
                     .Where(x => x.Lifecycle == ProjectionLifecycle.Async)
-                    .SelectMany(x => x.AsyncProjectionShards(store, store.Tenancy))
-                    .ToDictionary(x => x.ProjectionOrShardName);
+                    .SelectMany(x => x.AsyncProjectionShards(store))
+                    .ToDictionary(x => x.Name.Identity);
 
             });
 

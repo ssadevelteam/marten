@@ -23,7 +23,7 @@ namespace Marten.Events.Projections
         public ProjectionLifecycle Lifecycle { get; set; } = ProjectionLifecycle.Inline;
 
         internal abstract IProjection Build(DocumentStore store);
-        internal abstract IReadOnlyList<IAsyncProjectionShard> AsyncProjectionShards(IDocumentStore store, ITenancy tenancy);
+        internal abstract IReadOnlyList<IAsyncProjectionShard> AsyncProjectionShards(DocumentStore store);
 
         public AsyncOptions Options { get; } = new AsyncOptions();
 

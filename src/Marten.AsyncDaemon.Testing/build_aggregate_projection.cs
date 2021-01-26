@@ -37,7 +37,7 @@ namespace Marten.AsyncDaemon.Testing
             var shard = theStore.Events.Projections.AllShards().Single();
             var waiter = agent.Tracker.WaitForShardState(new ShardState(shard, NumberOfEvents), 15.Seconds());
 
-            await agent.StartShard(shard.ProjectionOrShardName);
+            await agent.StartShard(shard.Name.Identity);
 
             await waiter;
 

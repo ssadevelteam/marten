@@ -26,7 +26,7 @@ namespace Marten.Events.Daemon.Progress
             var parameters =
                 builder.AppendWithParameters($"insert into {_events.ProgressionTable} (name, last_seq_id) values (?, ?)");
 
-            parameters[0].Value = _progress.ProjectionOrShardName;
+            parameters[0].Value = _progress.ShardName.Identity;
             parameters[0].NpgsqlDbType = NpgsqlDbType.Varchar;
             parameters[1].Value = _progress.SequenceCeiling;
             parameters[1].NpgsqlDbType = NpgsqlDbType.Bigint;

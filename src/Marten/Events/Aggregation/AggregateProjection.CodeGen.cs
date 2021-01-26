@@ -323,16 +323,16 @@ namespace Marten.Events.Aggregation
             }
         }
 
-        internal override IReadOnlyList<IAsyncProjectionShard> AsyncProjectionShards(IDocumentStore store, ITenancy tenancy)
+        internal override IReadOnlyList<IAsyncProjectionShard> AsyncProjectionShards(DocumentStore store)
         {
             // TODO -- support sharding
             // TODO -- use event filters!!!
 
-            var runtime = BuildRuntime((DocumentStore) store);
+            var runtime = BuildRuntime(store);
 
             var shardType = typeof(AggregationShard<,>).MakeGenericType(typeof(T), _aggregateMapping.IdType);
 
-            var shard = (IAsyncProjectionShard)Activator.CreateInstance(shardType, ProjectionName, new ISqlFragment[0], runtime, store, Options);
+            var shard = (IAsyncProjectionShard)Activator.CreateInstance(shardType, new ShardName(ProjectionName), new ISqlFragment[0], runtime, store, Options);
 
             return new List<IAsyncProjectionShard> {shard};
         }

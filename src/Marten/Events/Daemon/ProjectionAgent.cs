@@ -16,7 +16,7 @@ namespace Marten.Events.Daemon
         Task TryRestart();
 
         Task<long> Start(ShardStateTracker tracker);
-        string ProjectionOrShardName { get; }
+        ShardName ShardName { get; }
     }
 
     // TODO -- need a Drain() method
@@ -53,7 +53,7 @@ namespace Marten.Events.Daemon
             _commandBlock = new ActionBlock<Command>(processCommand, singleFile);
 
             _controller =
-                new ProjectionController(projectionShard.ProjectionOrShardName, this, projectionShard.Options);
+                new ProjectionController(projectionShard.Name, this, projectionShard.Options);
 
             _loader = new TransformBlock<EventRange, EventRange>(loadEvents, singleFile);
         }
@@ -115,7 +115,7 @@ namespace Marten.Events.Daemon
 
         public async Task<long> Start(ShardStateTracker tracker)
         {
-            _logger.LogInformation($"Starting projection agent for '{_projectionShard.ProjectionOrShardName}'");
+            _logger.LogInformation($"Starting projection agent for '{_projectionShard.Name}'");
 
             _tracker = tracker;
 
@@ -124,13 +124,13 @@ namespace Marten.Events.Daemon
             _hopper = _projectionShard.Start(this, _logger, _cancellationSource.Token);
             _loader.LinkTo(_hopper);
 
-            var lastCommitted = await _store.Events.ProjectionProgressFor(_projectionShard.ProjectionOrShardName);
+            var lastCommitted = await _store.Events.ProjectionProgressFor(_projectionShard.Name);
 
             _commandBlock.Post(Command.Started(tracker.HighWaterMark, lastCommitted));
 
             _subscription = _tracker.Subscribe(this);
 
-            _logger.LogInformation($"Projection agent for '{_projectionShard.ProjectionOrShardName}' has started from sequence {lastCommitted} and a high water mark of {tracker.HighWaterMark}");
+            _logger.LogInformation($"Projection agent for '{_projectionShard.Name}' has started from sequence {lastCommitted} and a high water mark of {tracker.HighWaterMark}");
 
             Status = AgentStatus.Running;
 
@@ -159,7 +159,7 @@ namespace Marten.Events.Daemon
             {
                 if (_logger.IsEnabled(LogLevel.Debug))
                 {
-                    _logger.LogDebug($"Projection Shard '{ProjectionOrShardName}' received high water mark at {value.Sequence}");
+                    _logger.LogDebug($"Projection Shard '{ShardName}' received high water mark at {value.Sequence}");
                 }
 
                 _commandBlock.Post(
@@ -167,7 +167,7 @@ namespace Marten.Events.Daemon
             }
         }
 
-        public string ProjectionOrShardName => _projectionShard.ProjectionOrShardName;
+        public ShardName ShardName => _projectionShard.Name;
 
         public ProjectionUpdateBatch StartNewBatch(EventRange range)
         {
@@ -185,11 +185,11 @@ namespace Marten.Events.Daemon
                 {
                     await session.ExecuteBatchAsync(batch, _cancellationSource.Token);
 
-                    _logger.LogInformation($"Shard '{ProjectionOrShardName}': Executed updates for {batch.Range}");
+                    _logger.LogInformation($"Shard '{ShardName}': Executed updates for {batch.Range}");
                 }
                 catch (Exception e)
                 {
-                    _logger.LogError(e, $"Failure in shard '{ProjectionOrShardName}' trying to execute an update batch for {batch.Range}");
+                    _logger.LogError(e, $"Failure in shard '{ShardName}' trying to execute an update batch for {batch.Range}");
                     // TODO -- error handling
 
                     throw;
@@ -202,7 +202,7 @@ namespace Marten.Events.Daemon
             Position = batch.Range.SequenceCeiling;
 
 
-            _tracker.Publish(new ShardState(ProjectionOrShardName, batch.Range.SequenceCeiling));
+            _tracker.Publish(new ShardState(ShardName, batch.Range.SequenceCeiling));
 
             _commandBlock.Post(Command.Completed(batch.Range));
         }

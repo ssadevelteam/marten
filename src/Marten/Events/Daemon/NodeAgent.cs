@@ -69,9 +69,9 @@ namespace Marten.Events.Daemon
             var agent = new ProjectionAgent(_store, shard, _logger);
             var position = await agent.Start(Tracker);
 
-            Tracker.Publish(new ShardState(shard.ProjectionOrShardName, position){Action = ShardAction.Started});
+            Tracker.Publish(new ShardState(shard.Name, position){Action = ShardAction.Started});
 
-            _agents[shard.ProjectionOrShardName] = agent;
+            _agents[shard.Name.Identity] = agent;
 
 
         }

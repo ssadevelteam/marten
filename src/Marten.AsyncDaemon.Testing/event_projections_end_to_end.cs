@@ -30,7 +30,7 @@ namespace Marten.AsyncDaemon.Testing
 
             var agent = await StartNodeAgent();
 
-            var waiter = agent.Tracker.WaitForShardState("Distance", NumberOfEvents, 15.Seconds());
+            var waiter = agent.Tracker.WaitForShardState("Distance:All", NumberOfEvents, 15.Seconds());
 
             await PublishSingleThreaded();
 

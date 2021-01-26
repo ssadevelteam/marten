@@ -21,9 +21,9 @@ namespace Marten.Events.Projections
             return _projection;
         }
 
-        internal override IReadOnlyList<IAsyncProjectionShard> AsyncProjectionShards(IDocumentStore store, ITenancy tenancy)
+        internal override IReadOnlyList<IAsyncProjectionShard> AsyncProjectionShards(DocumentStore store)
         {
-            var shard = new AsyncProjectionShard(ProjectionName, _projection, System.Array.Empty<ISqlFragment>(), (DocumentStore) store, Options);
+            var shard = new AsyncProjectionShard(new ShardName(ProjectionName), _projection, System.Array.Empty<ISqlFragment>(), (DocumentStore) store, Options);
             return new List<IAsyncProjectionShard> {shard};
         }
     }

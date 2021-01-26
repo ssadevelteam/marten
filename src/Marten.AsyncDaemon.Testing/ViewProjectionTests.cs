@@ -75,7 +75,7 @@ namespace Marten.AsyncDaemon.Testing
             NumberOfStreams = 10;
             await PublishSingleThreaded();
 
-            await agent.Tracker.WaitForShardState("Day", NumberOfEvents, 30.Seconds());
+            await agent.Tracker.WaitForShardState("Day:All", NumberOfEvents, 30.Seconds());
 
             var days = await theSession.Query<Day>().ToListAsync();
 
