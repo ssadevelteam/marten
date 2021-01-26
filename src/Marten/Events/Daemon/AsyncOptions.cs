@@ -14,12 +14,12 @@ namespace Marten.Events.Daemon
 
         public void DeleteViewTypeOnTeardown<T>()
         {
-
+            DeleteViewTypeOnTeardown(typeof(T));
         }
 
         public void DeleteViewTypeOnTeardown(Type type)
         {
-
+            _actions.Add(x => x.QueueOperation(new TruncateTable(type)));
         }
 
         private readonly IList<Action<IDocumentOperations>> _actions = new List<Action<IDocumentOperations>>();

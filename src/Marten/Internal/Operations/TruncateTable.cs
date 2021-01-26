@@ -44,5 +44,28 @@ namespace Marten.Internal.Operations
         {
             return OperationRole.Other;
         }
+
+        protected bool Equals(TruncateTable other)
+        {
+            return Equals(DocumentType, other.DocumentType);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((TruncateTable) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return (DocumentType != null ? DocumentType.GetHashCode() : 0);
+        }
+
+        public override string ToString()
+        {
+            return $"Truncate data for: {DocumentType}";
+        }
     }
 }
