@@ -18,8 +18,8 @@ namespace Marten.Events.Projections
         private readonly Dictionary<Type, object> _liveAggregateSources = new Dictionary<Type, object>();
         private ImHashMap<Type, object> _liveAggregators = ImHashMap<Type, object>.Empty;
 
-        private readonly IList<IProjectionSource> _inlineProjections = new List<IProjectionSource>();
-        private readonly IList<IProjectionSource> _asyncProjections = new List<IProjectionSource>();
+        private readonly IList<ProjectionSource> _inlineProjections = new List<ProjectionSource>();
+        private readonly IList<ProjectionSource> _asyncProjections = new List<ProjectionSource>();
 
         private Lazy<Dictionary<string, IAsyncProjectionShard>> _asyncShards;
 
@@ -75,7 +75,7 @@ namespace Marten.Events.Projections
         /// <param name="projection"></param>
         public void Inline(EventProjection projection)
         {
-            projection.As<IValidatedProjection>().AssertValidity();
+            projection.AssertValidity();
             _inlineProjections.Add(projection);
         }
 
@@ -85,7 +85,7 @@ namespace Marten.Events.Projections
         /// <param name="projection"></param>
         public void Async(EventProjection projection)
         {
-            projection.As<IValidatedProjection>().AssertValidity();
+            projection.AssertValidity();
             _asyncProjections.Add(projection);
         }
 
@@ -99,7 +99,7 @@ namespace Marten.Events.Projections
             // Make sure there's a DocumentMapping for the aggregate
             var expression = _options.Schema.For<T>();
             var source = new AggregateProjection<T>();
-            source.As<IValidatedProjection>().AssertValidity();
+            source.AssertValidity();
             _inlineProjections.Add(source);
 
             return expression;
@@ -115,7 +115,7 @@ namespace Marten.Events.Projections
             // Make sure there's a DocumentMapping for the aggregate
             var expression = _options.Schema.For<T>();
             var source = new AggregateProjection<T>();
-            source.As<IValidatedProjection>().AssertValidity();
+            source.AssertValidity();
             _asyncProjections.Add(source);
 
             return expression;
@@ -130,7 +130,7 @@ namespace Marten.Events.Projections
         public MartenRegistry.DocumentMappingExpression<T> Inline<T>(AggregateProjection<T> projection)
         {
             var expression = _options.Schema.For<T>();
-            projection.As<IValidatedProjection>().AssertValidity();
+            projection.AssertValidity();
             _inlineProjections.Add(projection);
 
             return expression;
@@ -145,7 +145,7 @@ namespace Marten.Events.Projections
         public MartenRegistry.DocumentMappingExpression<T> Async<T>(AggregateProjection<T> projection)
         {
             var expression = _options.Schema.For<T>();
-            projection.As<IValidatedProjection>().AssertValidity();
+            projection.AssertValidity();
             _asyncProjections.Add(projection);
 
             return expression;
@@ -166,7 +166,7 @@ namespace Marten.Events.Projections
             if (!_liveAggregateSources.TryGetValue(typeof(T), out var source))
             {
                 source = new AggregateProjection<T>();
-                source.As<IValidatedProjection>().AssertValidity();
+                source.As<ProjectionSource>().AssertValidity();
             }
 
             aggregator = source.As<ILiveAggregatorSource<T>>().Build(_options);
@@ -178,7 +178,8 @@ namespace Marten.Events.Projections
         internal void AssertValidity(DocumentStore store)
         {
             var messages = _asyncProjections.Concat(_inlineProjections).Concat(_liveAggregateSources.Values)
-                .OfType<IValidatedProjection>().Distinct().SelectMany(x => x.ValidateConfiguration(_options))
+                .OfType<ProjectionSource>()
+                .Distinct().SelectMany(x => x.ValidateConfiguration(_options))
                 .ToArray();
 
             _asyncShards = new Lazy<Dictionary<string, IAsyncProjectionShard>>(() =>

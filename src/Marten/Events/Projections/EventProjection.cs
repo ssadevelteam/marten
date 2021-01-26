@@ -25,21 +25,21 @@ namespace Marten.Events.Projections
     /// <summary>
     /// This is the "do anything" projection type
     /// </summary>
-    public abstract class EventProjection : IProjectionSource, IValidatedProjection
+    public abstract class EventProjection : ProjectionSource
     {
         private readonly ProjectMethodCollection _projectMethods;
         private readonly CreateMethodCollection _createMethods;
 
-        public EventProjection()
+        public EventProjection() : base("Projections")
         {
             _projectMethods = new ProjectMethodCollection(GetType());
             _createMethods = new CreateMethodCollection(GetType());
 
             // TODO -- get fancier later
-            ProjectionName = GetType().FullName;
+            ProjectionName = GetType().FullNameInCode();
         }
 
-        void IValidatedProjection.AssertValidity()
+        internal override void AssertValidity()
         {
             if (!_projectMethods.Methods.Any() && !_createMethods.Methods.Any())
             {
@@ -53,12 +53,6 @@ namespace Marten.Events.Projections
             {
                 throw new InvalidProjectionException(this, invalidMethods);
             }
-        }
-
-        IEnumerable<string> IValidatedProjection.ValidateConfiguration(StoreOptions options)
-        {
-            // Nothing
-            yield break;
         }
 
         [MartenIgnore]
@@ -195,7 +189,7 @@ namespace Marten.Events.Projections
         private GeneratedAssembly _assembly;
         private bool _isAsync;
 
-        IProjection IProjectionSource.Build(DocumentStore store)
+        internal override IProjection Build(DocumentStore store)
         {
             if (_inlineType == null)
             {
@@ -210,7 +204,7 @@ namespace Marten.Events.Projections
             return inline;
         }
 
-        IReadOnlyList<IAsyncProjectionShard> IProjectionSource.AsyncProjectionShards(IDocumentStore store, ITenancy tenancy)
+        internal override IReadOnlyList<IAsyncProjectionShard> AsyncProjectionShards(IDocumentStore store, ITenancy tenancy)
         {
             // TODO -- an actual sharding strategy!!!
             if (_inlineType == null)
@@ -218,12 +212,11 @@ namespace Marten.Events.Projections
                 Compile();
             }
 
-            var projection = this.As<IProjectionSource>().Build((DocumentStore) store);
+            var projection = Build((DocumentStore) store);
 
-            // TODO -- how do users specify AsyncOptions config?
             // TODO -- sharding behavior
             var shard = new AsyncProjectionShard(ProjectionName, projection, new ISqlFragment[0], (DocumentStore) store,
-                new AsyncOptions());
+                Options);
 
             return new List<IAsyncProjectionShard> {shard};
         }

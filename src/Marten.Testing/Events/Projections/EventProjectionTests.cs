@@ -137,7 +137,7 @@ namespace Marten.Testing.Events.Projections
             var projection = new EmptyProjection();
             Should.Throw<InvalidProjectionException>(() =>
             {
-                projection.As<IValidatedProjection>().AssertValidity();
+                projection.AssertValidity();
             });
         }
     }

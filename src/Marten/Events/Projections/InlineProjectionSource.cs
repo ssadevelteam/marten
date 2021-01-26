@@ -1,30 +1,29 @@
 using System.Collections.Generic;
+using LamarCodeGeneration;
 using Marten.Events.Daemon;
+using Marten.Linq.SqlGeneration;
 using Marten.Storage;
 
 namespace Marten.Events.Projections
 {
-    internal class InlineProjectionSource: IProjectionSource
+    internal class InlineProjectionSource: ProjectionSource
     {
         private readonly IProjection _projection;
 
-        public InlineProjectionSource(IProjection projection)
+        public InlineProjectionSource(IProjection projection) : base(projection.GetType().FullNameInCode())
         {
             _projection = projection;
-
-            // TODO -- this probably gets fancier later
-            ProjectionName = projection.GetType().FullName;
         }
 
-        public string ProjectionName { get; }
-        public IProjection Build(DocumentStore store)
+        internal override IProjection Build(DocumentStore store)
         {
             return _projection;
         }
 
-        public IReadOnlyList<IAsyncProjectionShard> AsyncProjectionShards(IDocumentStore store, ITenancy tenancy)
+        internal override IReadOnlyList<IAsyncProjectionShard> AsyncProjectionShards(IDocumentStore store, ITenancy tenancy)
         {
-            throw new System.NotImplementedException();
+            var shard = new AsyncProjectionShard(ProjectionName, _projection, System.Array.Empty<ISqlFragment>(), (DocumentStore) store, Options);
+            return new List<IAsyncProjectionShard> {shard};
         }
     }
 }
