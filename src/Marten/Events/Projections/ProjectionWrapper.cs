@@ -6,13 +6,14 @@ using Marten.Storage;
 
 namespace Marten.Events.Projections
 {
-    internal class InlineProjectionSource: ProjectionSource
+    internal class ProjectionWrapper: ProjectionSource
     {
         private readonly IProjection _projection;
 
-        public InlineProjectionSource(IProjection projection) : base(projection.GetType().FullNameInCode())
+        public ProjectionWrapper(IProjection projection, ProjectionLifecycle lifecycle) : base(projection.GetType().FullNameInCode())
         {
             _projection = projection;
+            Lifecycle = lifecycle;
         }
 
         internal override IProjection Build(DocumentStore store)

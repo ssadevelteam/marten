@@ -84,7 +84,7 @@ namespace Marten.AsyncDaemon.Testing.TestingSupport
 
         protected async Task BuildAllExpectedAggregates()
         {
-            StoreOptions(opts => opts.Events.Projections.Inline(new TripAggregation()));
+            StoreOptions(opts => opts.Events.Projections.Add(new TripAggregation()));
 
             await PublishSingleThreaded();
 

@@ -4,6 +4,13 @@ using Marten.Storage;
 
 namespace Marten.Events.Projections
 {
+    public enum ProjectionLifecycle
+    {
+        Inline,
+        Async,
+        Live
+    }
+
     public abstract class ProjectionSource
     {
         public string ProjectionName { get; protected set; }
@@ -12,6 +19,8 @@ namespace Marten.Events.Projections
         {
             ProjectionName = projectionName;
         }
+
+        public ProjectionLifecycle Lifecycle { get; set; } = ProjectionLifecycle.Inline;
 
         internal abstract IProjection Build(DocumentStore store);
         internal abstract IReadOnlyList<IAsyncProjectionShard> AsyncProjectionShards(IDocumentStore store, ITenancy tenancy);

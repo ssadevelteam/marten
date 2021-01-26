@@ -17,7 +17,6 @@ namespace Marten.Events.Daemon
         private readonly CancellationTokenSource _cancellation;
         private readonly HighWaterAgent _highWater;
         private bool _hasStarted;
-        private INodeCoordinator _coordinator;
 
         // ReSharper disable once ContextualLoggerProblem
         public NodeAgent(DocumentStore store, ILogger<IProjection> logger)
@@ -30,12 +29,6 @@ namespace Marten.Events.Daemon
             Tracker = new ShardStateTracker();
             _highWater = new HighWaterAgent(detector, Tracker, logger, store.Events.Daemon, _cancellation.Token);
 
-        }
-
-        public async Task RegisterCoordinator(INodeCoordinator coordinator)
-        {
-            await coordinator.Start(this, _cancellation.Token);
-            _coordinator = coordinator;
         }
 
         public ShardStateTracker Tracker { get; }

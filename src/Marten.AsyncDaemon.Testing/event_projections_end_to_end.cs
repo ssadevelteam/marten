@@ -24,7 +24,7 @@ namespace Marten.AsyncDaemon.Testing
         [Fact]
         public async Task run_simultaneously()
         {
-            StoreOptions(x => x.Events.Projections.Async(new DistanceProjection()));
+            StoreOptions(x => x.Events.Projections.Add(new DistanceProjection(), ProjectionLifecycle.Async));
 
             NumberOfStreams = 10;
 

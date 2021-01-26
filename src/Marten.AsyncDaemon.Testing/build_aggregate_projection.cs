@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Baseline.Dates;
 using Marten.AsyncDaemon.Testing.TestingSupport;
 using Marten.Events.Daemon;
+using Marten.Events.Projections;
 using Microsoft.Extensions.Logging;
 using Xunit;
 using Xunit.Abstractions;
@@ -24,7 +25,7 @@ namespace Marten.AsyncDaemon.Testing
 
             await BuildAllExpectedAggregates();
 
-            StoreOptions(x => x.Events.Projections.Async(new TripAggregation()));
+            StoreOptions(x => x.Events.Projections.Add(new TripAggregation(), ProjectionLifecycle.Async));
 
             theStore.Advanced.Clean.DeleteDocumentsFor(typeof(Trip));
 

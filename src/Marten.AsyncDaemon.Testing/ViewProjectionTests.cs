@@ -22,6 +22,12 @@ namespace Marten.AsyncDaemon.Testing
         }
 
         [Fact]
+        public void lifecycle_is_async_by_default()
+        {
+            new DayProjection().Lifecycle.ShouldBe(ProjectionLifecycle.Async);
+        }
+
+        [Fact]
         public async Task splicing_events()
         {
             NumberOfStreams = 10;
@@ -60,7 +66,7 @@ namespace Marten.AsyncDaemon.Testing
         {
 
 
-            StoreOptions(x => x.Events.Projections.Async(new DayProjection()));
+            StoreOptions(x => x.Events.Projections.Add(new DayProjection()));
 
             theStore.Tenancy.Default.EnsureStorageExists(typeof(Day));
 
