@@ -131,16 +131,29 @@ namespace Marten.Events.Projections
                 return (ILiveAggregator<T>) aggregator;
             }
 
-            if (!_liveAggregateSources.TryGetValue(typeof(T), out var source))
-            {
-                source = new AggregateProjection<T>();
-                source.As<ProjectionSource>().AssertValidity();
-            }
+            var source = tryFindProjectionSourceForAggregateType<T>();
+            source.AssertValidity();
 
             aggregator = source.As<ILiveAggregatorSource<T>>().Build(_options);
             _liveAggregators = _liveAggregators.AddOrUpdate(typeof(T), aggregator);
 
             return (ILiveAggregator<T>) aggregator;
+        }
+
+        private AggregateProjection<T> tryFindProjectionSourceForAggregateType<T>() where T : class
+        {
+            var candidate = _projections.OfType<AggregateProjection<T>>().FirstOrDefault();
+            if (candidate != null)
+            {
+                return candidate;
+            }
+
+            if (!_liveAggregateSources.TryGetValue(typeof(T), out var source))
+            {
+                return new AggregateProjection<T>();
+            }
+
+            return source as AggregateProjection<T>;
         }
 
         internal void AssertValidity(DocumentStore store)

@@ -45,7 +45,12 @@ namespace Marten.Events.Daemon
             HighWaterMark = highWaterMark;
             LastCommitted = LastEnqueued = lastCommitted;
 
-            enqueueNewEventRanges();
+
+
+            if (HighWaterMark > 0)
+            {
+                enqueueNewEventRanges();
+            }
         }
 
         private void enqueueNewEventRanges()

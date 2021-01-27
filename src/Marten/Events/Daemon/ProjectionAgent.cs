@@ -19,13 +19,14 @@ namespace Marten.Events.Daemon
         ShardName ShardName { get; }
     }
 
-    // TODO -- need a Drain() method
+    // TODO -- need a separate Drain() v. Stop() method
     // TODO -- need a Dispose that really cleans things off. May need/want IAsyncDisposable
     internal class ProjectionAgent : IProjectionUpdater, IObserver<ShardState>, IProjectionAgent
     {
         private readonly DocumentStore _store;
         private readonly IAsyncProjectionShard _projectionShard;
         private readonly ILogger<IProjection> _logger;
+        private readonly CancellationToken _cancellation;
         private ITargetBlock<EventRange> _hopper;
         private readonly ProjectionController _controller;
         private readonly ActionBlock<Command> _commandBlock;
@@ -33,21 +34,20 @@ namespace Marten.Events.Daemon
         private EventFetcher _fetcher;
         private ShardStateTracker _tracker;
         private IDisposable _subscription;
-        private readonly CancellationTokenSource _cancellationSource = new CancellationTokenSource();
 
         // ReSharper disable once ContextualLoggerProblem
-        public ProjectionAgent(DocumentStore store, IAsyncProjectionShard projectionShard, ILogger<IProjection> logger)
+        public ProjectionAgent(DocumentStore store, IAsyncProjectionShard projectionShard, ILogger<IProjection> logger, CancellationToken cancellation)
         {
-
             _store = store;
             _projectionShard = projectionShard;
             _logger = logger;
+            _cancellation = cancellation;
 
             var singleFile = new ExecutionDataflowBlockOptions
             {
                 EnsureOrdered = true,
                 MaxDegreeOfParallelism = 1,
-                CancellationToken = _cancellationSource.Token
+                CancellationToken = _cancellation
             };
 
             _commandBlock = new ActionBlock<Command>(processCommand, singleFile);
@@ -61,17 +61,26 @@ namespace Marten.Events.Daemon
         // TODO -- use IAsyncDisposable
         public async Task Stop()
         {
-            _cancellationSource.Cancel();
+            _logger.LogInformation($"Shutting down projection shard {_projectionShard.Name}");
+
+
             _commandBlock.Complete();
             await _commandBlock.Completion;
+            _logger.LogDebug("Shut down the command block");
 
             _loader.Complete();
             await _loader.Completion;
 
+            _logger.LogDebug("Shut down the loader block");
+
             _hopper.Complete();
             await _hopper.Completion;
 
+            _logger.LogDebug("Shut down the hopper block");
+
             await _projectionShard.Stop();
+
+            _logger.LogDebug("Shut down the shard itself");
 
             _subscription.Dispose();
 
@@ -79,10 +88,12 @@ namespace Marten.Events.Daemon
 
         private async Task<EventRange> loadEvents(EventRange range)
         {
+            if (_cancellation.IsCancellationRequested) return null;
+
             try
             {
                 // TODO -- resiliency here.
-                await _fetcher.Load(range, _cancellationSource.Token);
+                await _fetcher.Load(range, _cancellation);
             }
             catch (Exception e)
             {
@@ -105,6 +116,8 @@ namespace Marten.Events.Daemon
 
         public void StartRange(EventRange range)
         {
+            if (_cancellation.IsCancellationRequested) return;
+
             if (_logger.IsEnabled(LogLevel.Debug))
             {
                 _logger.LogDebug("Enqueued processing of " + range);
@@ -121,7 +134,7 @@ namespace Marten.Events.Daemon
 
 
             _fetcher = new EventFetcher(_store, _projectionShard.EventFilters);
-            _hopper = _projectionShard.Start(this, _logger, _cancellationSource.Token);
+            _hopper = _projectionShard.Start(this, _logger, _cancellation);
             _loader.LinkTo(_hopper);
 
             var lastCommitted = await _store.Events.ProjectionProgressFor(_projectionShard.Name);
@@ -177,13 +190,15 @@ namespace Marten.Events.Daemon
 
         public async Task ExecuteBatch(ProjectionUpdateBatch batch)
         {
+            if (_cancellation.IsCancellationRequested) return;
+
             await batch.Queue.Completion;
 
             using (var session = (DocumentSessionBase)_store.LightweightSession())
             {
                 try
                 {
-                    await session.ExecuteBatchAsync(batch, _cancellationSource.Token);
+                    await session.ExecuteBatchAsync(batch, _cancellation);
 
                     _logger.LogInformation($"Shard '{ShardName}': Executed updates for {batch.Range}");
                 }

@@ -41,6 +41,8 @@ namespace Marten.Events.Aggregation
             _shouldDeleteMethods = new ShouldDeleteMethodCollection(GetType(), typeof(T));
 
             ProjectionName = typeof(T).Name;
+
+            Options.DeleteViewTypeOnTeardown<T>();
         }
 
         Type IAggregateProjection.AggregateType => typeof(T);

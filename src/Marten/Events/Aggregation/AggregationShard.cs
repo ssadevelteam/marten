@@ -29,6 +29,11 @@ namespace Marten.Events.Aggregation
             _tenancy = store.Tenancy;
         }
 
+        protected override void ensureStorageExists()
+        {
+            Store.Tenancy.Default.EnsureStorageExists(typeof(TDoc));
+        }
+
         protected override Task configureUpdateBatch(ProjectionUpdateBatch batch, TenantSliceRange<TDoc, TId> sliceGroup, CancellationToken token)
         {
             return _runtime.Configure(batch.Queue, sliceGroup.Groups, _token);

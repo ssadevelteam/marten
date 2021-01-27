@@ -1,15 +1,18 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Baseline.Dates;
 using Marten.Events.Daemon.HighWater;
+using Marten.Events.Daemon.Progress;
 using Marten.Events.Projections;
 using Microsoft.Extensions.Logging;
 
 namespace Marten.Events.Daemon
 {
     // TODO -- implement IAsyncDisposable
-    public class NodeAgent : INodeAgent, IDisposable
+    public class NodeAgent : IDaemon, IDisposable
     {
         private readonly DocumentStore _store;
         private readonly ILogger<IProjection> _logger;
@@ -47,26 +50,28 @@ namespace Marten.Events.Daemon
             var shards = _store.Events.Projections.AllShards();
             foreach (var shard in shards)
             {
-                await StartShard(shard);
+                await StartShard(shard, _cancellation.Token);
             }
 
         }
 
-        public async Task StartShard(string shardName)
+        public async Task StartShard(string shardName, CancellationToken token)
         {
+            // Latch it so it doesn't double start
+            if (_agents.ContainsKey(shardName)) return;
 
             if (_store.Events.Projections.TryFindAsyncShard(shardName, out var shard))
             {
-                await StartShard(shard);
+                await StartShard(shard, token);
             }
         }
 
-        public async Task StartShard(IAsyncProjectionShard shard)
+        public async Task StartShard(IAsyncProjectionShard shard, CancellationToken cancellationToken)
         {
             if (!_hasStarted) StartNode();
 
             // TODO -- log the start, or error if it fails
-            var agent = new ProjectionAgent(_store, shard, _logger);
+            var agent = new ProjectionAgent(_store, shard, _logger, cancellationToken);
             var position = await agent.Start(Tracker);
 
             Tracker.Publish(new ShardState(shard.Name, position){Action = ShardAction.Started});
@@ -109,6 +114,73 @@ namespace Marten.Events.Daemon
             _highWater?.Dispose();
         }
 
+
+        public Task RebuildProjection(string projectionName, CancellationToken token)
+        {
+            if (!_store.Events.Projections.TryFindProjection(projectionName, out var projection))
+            {
+                throw new ArgumentOutOfRangeException(nameof(projectionName),
+                    $"No registered projection matches that name");
+            }
+
+            return RebuildProjection(projection, token);
+
+        }
+
+
+
+        internal async Task RebuildProjection(ProjectionSource source, CancellationToken token)
+        {
+            _logger.LogInformation($"Starting to rebuild Projection {source.ProjectionName}");
+
+            var running = _agents.Values.Where(x => x.ShardName.ProjectionName == source.ProjectionName).ToArray();
+            foreach (var agent in running)
+            {
+                await agent.Stop();
+            }
+
+            if (token.IsCancellationRequested) return;
+
+            if (Tracker.HighWaterMark == 0)
+            {
+                await _highWater.CheckNow();
+            }
+
+            if (token.IsCancellationRequested) return;
+
+            var shards = source.AsyncProjectionShards(_store);
+
+            // Teardown the current state
+            await using (var session = _store.LightweightSession())
+            {
+                source.Options.Teardown(session);
+
+                foreach (var shard in shards)
+                {
+                    session.QueueOperation(new DeleteProjectionProgress(_store.Events, shard.Name.Identity));
+                }
+
+                await session.SaveChangesAsync(token);
+            }
+
+            if (token.IsCancellationRequested) return;
+
+
+            var waiters = shards.Select(async x =>
+            {
+                await StartShard(x, token);
+
+                // TODO -- need to watch the CancellationToken here!!!!
+                return Tracker.WaitForShardState(x.Name, Tracker.HighWaterMark, 5.Minutes());
+            });
+
+            await Task.WhenAll(waiters);
+
+            foreach (var shard in shards)
+            {
+                await StopShard(shard.Name.Identity);
+            }
+        }
 
     }
 }

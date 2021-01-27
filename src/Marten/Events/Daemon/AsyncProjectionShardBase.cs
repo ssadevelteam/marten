@@ -55,7 +55,14 @@ namespace Marten.Events.Daemon
 
             _slicing.LinkTo(_building);
 
+            ensureStorageExists();
+
             return _slicing;
+        }
+
+        protected virtual void ensureStorageExists()
+        {
+            // Nothing
         }
 
         private async Task processRange(T group)
@@ -110,11 +117,11 @@ namespace Marten.Events.Daemon
         {
             if (_slicing == null) return;
 
-            await _slicing.Completion;
-            await _building.Completion;
-
             _slicing.Complete();
             _building.Complete();
+
+            await _slicing.Completion;
+            await _building.Completion;
 
             _logger?.LogInformation($"Shard '{Name}': Stopped");
         }
