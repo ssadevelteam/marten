@@ -6,7 +6,7 @@ using Baseline;
 using Marten.Storage;
 using Weasel.Postgresql;
 
-namespace Marten.Transforms
+namespace Marten.PLv8.Transforms
 {
     public interface ITransforms
     {
@@ -35,14 +35,6 @@ namespace Marten.Transforms
             _options = options;
         }
 
-        private void assertAvailable()
-        {
-            if (!_options.PLV8Enabled)
-            {
-                throw new InvalidOperationException("Marten has been configured to disable PLV8");
-            }
-        }
-
         private void AddFunction(TransformFunction function)
         {
             if (!_functions.ContainsKey(function.Name))
@@ -53,7 +45,6 @@ namespace Marten.Transforms
 
         public void LoadFile(string file, string name = null)
         {
-            assertAvailable();
 
             if (!Path.IsPathRooted(file))
             {
@@ -66,7 +57,6 @@ namespace Marten.Transforms
 
         public void LoadDirectory(string directory)
         {
-            assertAvailable();
 
             if (!Path.IsPathRooted(directory))
             {
@@ -81,15 +71,12 @@ namespace Marten.Transforms
 
         public void LoadJavascript(string name, string script)
         {
-            assertAvailable();
-
             var func = new TransformFunction(_options, name, script);
             AddFunction(func);
         }
 
         public void Load(TransformFunction function)
         {
-            assertAvailable();
             AddFunction(function);
         }
 
@@ -105,7 +92,6 @@ namespace Marten.Transforms
 
         public IEnumerable<TransformFunction> AllFunctions()
         {
-            assertAvailable();
             return _functions.Values;
         }
 
@@ -116,14 +102,13 @@ namespace Marten.Transforms
 
         public bool IsActive(StoreOptions options)
         {
-            return options.PLV8Enabled && _functions.Any();
+            return _functions.Any();
         }
 
         public ISchemaObject[] Objects
         {
             get
             {
-                assertAvailable();
                 return _functions.Values.OfType<ISchemaObject>().ToArray();
             }
         }

@@ -5,17 +5,18 @@ using System.Threading.Tasks;
 using Marten.Linq;
 using Marten.Testing.Documents;
 using Marten.Testing.Harness;
-using Marten.Transforms;
 using Shouldly;
 using Xunit;
 
-namespace Marten.Testing.Acceptance
+namespace Marten.PLv8.Testing.Transforms
 {
     public class select_with_transformation: IntegrationContext
     {
         public select_with_transformation(DefaultStoreFixture fixture) : base(fixture)
         {
-            StoreOptions(_ => _.Transforms.LoadFile("get_fullname.js"));
+            throw new NotImplementedException();
+
+            //StoreOptions(_ => _.Transforms.LoadFile("get_fullname.js"));
         }
 
 
@@ -24,8 +25,9 @@ namespace Marten.Testing.Acceptance
         {
             public Expression<Func<IMartenQueryable<User>, string>> QueryIs()
             {
-                return _ => _.Where(x => x.FirstName == FirstName)
-                .TransformToJson("get_fullname").Single();
+                throw new NotImplementedException();
+                // return _ => _.Where(x => x.FirstName == FirstName)
+                // .TransformToJson("get_fullname").Single();
             }
 
             public string FirstName { get; set; }
@@ -71,19 +73,20 @@ namespace Marten.Testing.Acceptance
         [Fact]
         public void can_transform_to_json()
         {
-            var user = new User { FirstName = "Eric", LastName = "Berry" };
-
-            using (var session = theStore.OpenSession())
-            {
-                session.Store(user);
-                session.SaveChanges();
-
-                var json = session.Query<User>()
-                    .Where(x => x.Id == user.Id)
-                    .TransformToJson("get_fullname").Single();
-
-                json.ShouldBe("{\"fullname\": \"Eric Berry\"}");
-            }
+            throw new NotImplementedException();
+            // var user = new User { FirstName = "Eric", LastName = "Berry" };
+            //
+            // using (var session = theStore.OpenSession())
+            // {
+            //     session.Store(user);
+            //     session.SaveChanges();
+            //
+            //     var json = session.Query<User>()
+            //         .Where(x => x.Id == user.Id)
+            //         .TransformToJson("get_fullname").Single();
+            //
+            //     json.ShouldBe("{\"fullname\": \"Eric Berry\"}");
+            // }
         }
 
         #endregion sample_using_transform_to_json
@@ -91,19 +94,20 @@ namespace Marten.Testing.Acceptance
         [Fact]
         public async Task can_transform_to_json_async()
         {
-            var user = new User { FirstName = "Eric", LastName = "Berry" };
-
-            using (var session = theStore.OpenSession())
-            {
-                session.Store(user);
-                await session.SaveChangesAsync();
-
-                var json = await session.Query<User>()
-                    .Where(x => x.Id == user.Id)
-                    .TransformToJson("get_fullname").SingleAsync();
-
-                json.ShouldBe("{\"fullname\": \"Eric Berry\"}");
-            }
+            throw new NotImplementedException();
+            // var user = new User { FirstName = "Eric", LastName = "Berry" };
+            //
+            // using (var session = theStore.OpenSession())
+            // {
+            //     session.Store(user);
+            //     await session.SaveChangesAsync();
+            //
+            //     var json = await session.Query<User>()
+            //         .Where(x => x.Id == user.Id)
+            //         .TransformToJson("get_fullname").SingleAsync();
+            //
+            //     json.ShouldBe("{\"fullname\": \"Eric Berry\"}");
+            // }
         }
 
         #region sample_transform_to_another_type
@@ -115,19 +119,20 @@ namespace Marten.Testing.Acceptance
         [Fact]
         public void can_transform_to_another_doc()
         {
-            var user = new User { FirstName = "Eric", LastName = "Berry" };
-
-            using (var session = theStore.OpenSession())
-            {
-                session.Store(user);
-                session.SaveChanges();
-
-                var view = session.Query<User>()
-                    .Where(x => x.Id == user.Id)
-                    .TransformTo<FullNameView>("get_fullname").Single();
-
-                view.fullname.ShouldBe("Eric Berry");
-            }
+            throw new NotImplementedException();
+            // var user = new User { FirstName = "Eric", LastName = "Berry" };
+            //
+            // using (var session = theStore.OpenSession())
+            // {
+            //     session.Store(user);
+            //     session.SaveChanges();
+            //
+            //     var view = session.Query<User>()
+            //         .Where(x => x.Id == user.Id)
+            //         .TransformTo<FullNameView>("get_fullname").Single();
+            //
+            //     view.fullname.ShouldBe("Eric Berry");
+            // }
         }
 
         #endregion sample_transform_to_another_type
@@ -135,26 +140,28 @@ namespace Marten.Testing.Acceptance
         [Fact]
         public async Task can_transform_to_another_doc_async()
         {
-            var user = new User { FirstName = "Eric", LastName = "Berry" };
-
-            using (var session = theStore.OpenSession())
-            {
-                session.Store(user);
-                await session.SaveChangesAsync();
-
-                var view = await session.Query<User>()
-                    .Where(x => x.Id == user.Id)
-                    .TransformTo<FullNameView>("get_fullname").SingleAsync();
-
-                view.fullname.ShouldBe("Eric Berry");
-            }
+            throw new NotImplementedException();
+            // var user = new User { FirstName = "Eric", LastName = "Berry" };
+            //
+            // using (var session = theStore.OpenSession())
+            // {
+            //     session.Store(user);
+            //     await session.SaveChangesAsync();
+            //
+            //     var view = await session.Query<User>()
+            //         .Where(x => x.Id == user.Id)
+            //         .TransformTo<FullNameView>("get_fullname").SingleAsync();
+            //
+            //     view.fullname.ShouldBe("Eric Berry");
+            // }
         }
 
         public class FullNameViewQuery: ICompiledQuery<User, FullNameView>
         {
             public Expression<Func<IMartenQueryable<User>, FullNameView>> QueryIs()
             {
-                return _ => _.Where(x => x.FirstName == FirstName).TransformTo<FullNameView>("get_fullname").Single();
+                throw new NotImplementedException();
+                //return _ => _.Where(x => x.FirstName == FirstName).TransformTo<FullNameView>("get_fullname").Single();
             }
 
             public string FirstName { get; set; }

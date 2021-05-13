@@ -1,25 +1,54 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
 using Baseline;
-using Weasel.Postgresql;
-using Marten.Schema;
+using Marten.PLv8.Transforms;
 using Marten.Services;
-using Marten.Storage;
+using Marten.Testing;
 using Marten.Testing.Documents;
+using Marten.Testing.Events;
 using Marten.Testing.Harness;
-using Marten.Transforms;
-using Marten.Util;
 using Npgsql;
-using NSubstitute;
 using Shouldly;
+using Weasel.Postgresql;
 using Xunit;
+using Issue = Marten.Testing.Documents.Issue;
 
-namespace Marten.Testing.Transforms
+namespace Marten.PLv8.Testing.Transforms
 {
     public class TransformFunctionTests : IntegrationContext
     {
         private readonly string _getFullnameJs = AppContext.BaseDirectory.AppendPath("get_fullname.js");
+
+        private readonly string _binAllsql = AppContext.BaseDirectory.AppendPath("bin", "allsql");
+        private readonly string _binAllsql2 = AppContext.BaseDirectory.AppendPath("bin", "allsql2");
+
+
+        [Fact]
+        public void writes_transform_function()
+        {
+            using (var store = DocumentStore.For(_ =>
+            {
+                _.RegisterDocumentType<User>();
+                _.RegisterDocumentType<Company>();
+                _.RegisterDocumentType<Issue>();
+
+                _.Events.AddEventType(typeof(MembersJoined));
+
+                _.Connection(ConnectionSource.ConnectionString);
+
+            }))
+            {
+                store.Schema.WriteDatabaseCreationScriptByType(_binAllsql);
+            }
+
+            var file = _binAllsql.AppendPath("transforms.sql");
+            var lines = new FileSystem().ReadStringFromFile(file).ReadLines().ToArray();
+
+
+            lines.ShouldContain(
+                "CREATE OR REPLACE FUNCTION public.mt_transform_get_fullname(doc JSONB) RETURNS JSONB AS $$");
+        }
+
 
         [Fact]
         public void derive_function_name_from_logical_name()

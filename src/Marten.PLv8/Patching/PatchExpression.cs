@@ -219,28 +219,29 @@ namespace Marten.PLv8.Patching
 
         private void apply()
         {
-            var transform = _session.Tenant.TransformFor(StoreOptions.PatchDoc);
-            var storage = _session.StorageFor(typeof(T));
-
-            ISqlFragment where;
-            if (_filter == null)
-            {
-                var statement = new StatementOperation(storage, null);
-                statement.ApplyFiltering(_session, _filterExpression);
-
-                where = statement.Where;
-            }
-            else
-            {
-                where = storage.FilterDocuments(null, _filter);
-            }
-
-            var operation = new PatchOperation(transform, storage, where, Patch, _session.Serializer)
-            {
-                PossiblyPolymorhpic = PossiblyPolymorphic
-            };
-
-            _session.QueueOperation(operation);
+            throw new NotImplementedException();
+            // var transform = _session.Tenant.TransformFor(StoreOptions.PatchDoc);
+            // var storage = _session.StorageFor(typeof(T));
+            //
+            // ISqlFragment where;
+            // if (_filter == null)
+            // {
+            //     var statement = new StatementOperation(storage, null);
+            //     statement.ApplyFiltering(_session, _filterExpression);
+            //
+            //     where = statement.Where;
+            // }
+            // else
+            // {
+            //     where = storage.FilterDocuments(null, _filter);
+            // }
+            //
+            // var operation = new PatchOperation(transform, storage, where, Patch, _session.Serializer)
+            // {
+            //     PossiblyPolymorhpic = PossiblyPolymorphic
+            // };
+            //
+            // _session.QueueOperation(operation);
         }
     }
 }

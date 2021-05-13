@@ -1,13 +1,12 @@
 ﻿using System;
+using System.Linq.Expressions;
 using Marten.PLv8.Patching;
 using Marten.Schema;
 using Marten.Testing.Harness;
 using Xunit;
 
-namespace Marten.Testing.CoreFunctionality
+namespace Marten.PLv8.Testing.Patching
 {
-    using System.Linq.Expressions;
-
     public sealed class document_session_sort_large_operation_bundle_including_patches_Tests: IntegrationContext
     {
         public document_session_sort_large_operation_bundle_including_patches_Tests(DefaultStoreFixture fixture): base(fixture)

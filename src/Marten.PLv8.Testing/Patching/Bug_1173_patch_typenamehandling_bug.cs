@@ -4,7 +4,7 @@ using Marten.Testing.Harness;
 using Weasel.Postgresql;
 using Xunit;
 
-namespace Marten.Testing.Bugs
+namespace Marten.PLv8.Testing.Patching
 {
     public class PatchTypeA
     {

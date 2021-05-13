@@ -5,7 +5,7 @@ using Baseline;
 using Weasel.Postgresql;
 using Weasel.Postgresql.Functions;
 
-namespace Marten.Transforms
+namespace Marten.PLv8.Transforms
 {
     public class TransformFunction: Function
     {

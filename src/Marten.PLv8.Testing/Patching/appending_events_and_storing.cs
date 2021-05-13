@@ -7,12 +7,13 @@ using Marten.Events;
 using Marten.Events.Projections;
 using Marten.PLv8.Patching;
 using Marten.Storage;
+using Marten.Testing.Events;
 using Marten.Testing.Harness;
 using Shouldly;
 using Weasel.Postgresql;
 using Xunit;
 
-namespace Marten.Testing.Events.Projections
+namespace Marten.PLv8.Testing.Patching
 {
     public class appending_events_and_storing: IntegrationContext
     {

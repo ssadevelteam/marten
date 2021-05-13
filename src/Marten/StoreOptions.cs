@@ -17,7 +17,6 @@ using Marten.Schema;
 using Marten.Schema.Identity.Sequences;
 using Marten.Services.Json;
 using Marten.Storage;
-using Marten.Transforms;
 using Npgsql;
 using Weasel.Postgresql;
 
@@ -80,7 +79,6 @@ namespace Marten
         {
             EventGraph = new EventGraph(this);
             Schema = new MartenRegistry(this);
-            Transforms = new Transforms.Transforms(this);
             Storage = new StorageFeatures(this);
 
             Providers = new ProviderGraph(this);
@@ -113,9 +111,6 @@ namespace Marten
         ///     Extension point to add custom Linq query parsers
         /// </summary>
         public LinqParsing Linq { get; } = new();
-
-        [Obsolete("Will need to move out as part of the PLv8 isolation")]
-        public ITransforms Transforms { get; }
 
         /// <summary>
         ///     Apply conventional policies to how documents are mapped
@@ -196,17 +191,9 @@ namespace Marten
         /// </summary>
         public ITenancy Tenancy { get; set; } = null!;
 
-        [Obsolete("Remove when PLv8 is isolated")]
-        public bool PLV8Enabled { get; set; } = true;
-
         IReadOnlyEventStoreOptions IReadOnlyStoreOptions.Events => EventGraph;
 
         IReadOnlyLinqParsing IReadOnlyStoreOptions.Linq => Linq;
-
-        IReadOnlyList<TransformFunction> IReadOnlyStoreOptions.Transforms()
-        {
-            return Transforms.AllFunctions().ToList();
-        }
 
         /// <summary>
         ///     Configure Marten to create databases for tenants in case databases do not exist or need to be dropped & re-created
@@ -217,17 +204,6 @@ namespace Marten
             CreateDatabases = configure ?? throw new ArgumentNullException(nameof(configure));
         }
 
-
-        internal void CreatePatching()
-        {
-            if (PLV8Enabled)
-            {
-                var patching = new TransformFunction(this, PatchDoc, SchemaBuilder.GetJavascript(this, "mt_patching"));
-                patching.OtherArgs.Add("patch");
-
-                Transforms.Load(patching);
-            }
-        }
 
         /// <summary>
         ///     Supply the connection string to the Postgresql database

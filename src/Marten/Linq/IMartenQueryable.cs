@@ -39,33 +39,6 @@ namespace Marten.Linq
 
         /// <param name="configureExplain">Configure EXPLAIN options as documented in <see href="https://www.postgresql.org/docs/9.6/static/sql-explain.html">EXPLAIN documentation</see></param>
         QueryPlan Explain(FetchType fetchType = FetchType.FetchMany, Action<IConfigureExplainExpressions>? configureExplain = null);
-
-        /// <summary>
-        ///     Applies a pre-loaded Javascript transformation to the documents
-        ///     returned by this query
-        /// </summary>
-        /// <typeparam name="TDoc"></typeparam>
-        /// <param name="transformName"></param>
-        /// <returns></returns>
-        IQueryable<TDoc> TransformTo<TDoc>(string transformName);
-
-        /// <summary>
-        /// Retrieve the document data as a JSON array string
-        /// </summary>
-        /// <returns></returns>
-        string ToJsonArray();
-
-        /// <summary>
-        /// Retrieve the document data as a JSON array string
-        /// </summary>
-        /// <returns></returns>
-        Task<string> ToJsonArrayAsync(CancellationToken token);
-
-        /// <summary>
-        /// Retrieve the document data as a JSON array string
-        /// </summary>
-        /// <returns></returns>
-        Task<string> ToJsonArrayAsync();
     }
 
     public interface IMartenQueryable<T>: IQueryable<T>, IMartenQueryable

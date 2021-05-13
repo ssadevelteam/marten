@@ -10,37 +10,6 @@ using Xunit;
 
 namespace Marten.Testing.Linq
 {
-    public class Address
-    {
-        public string HouseNumber { get; set; }
-        public string Street { get; set; }
-    }
-    public class SimpleUser
-    {
-        public SimpleUser()
-        {
-            Id = Guid.NewGuid();
-        }
-
-        public Guid Id { get; set; }
-        public string UserName { get; set; }
-        public DateTime Birthdate { get; set; }
-        public int Number { get; set; }
-        public Address Address { get; set; }
-
-        public string ToJson()
-        {
-            return $@"
-{{
-""Id"": ""{Id}"", ""Number"": {Number}, ""Address"":
-{{
-""Street"": ""{Address.Street}"", ""HouseNumber"": ""{Address.HouseNumber}""
-}},
-""UserName"": ""{UserName}"",
-""Birthdate"": ""{Birthdate.ToString("s")}""
-}}".Replace("\r\n", "").Replace("\n", "");
-        }
-    }
 
     public class query_for_json_format : IntegrationContext
     {
@@ -102,7 +71,7 @@ namespace Marten.Testing.Linq
                 Address = new Address {HouseNumber = "12bis", Street = "rue de la martre"}
             };
             theSession.Store(user0,user1,user2);
-            theSession.SaveChanges();
+            await theSession.SaveChangesAsync();
 
             var listJson = await theSession.Query<SimpleUser>().Where(x=>x.Number>=5).ToJsonArrayAsync();
             listJson.ShouldBeSemanticallySameJsonAs($@"[{user1.ToJson()},{user2.ToJson()}]");

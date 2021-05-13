@@ -11,7 +11,6 @@ using Marten.Internal.Storage;
 using Marten.Schema;
 using Marten.Schema.Identity.Sequences;
 using Marten.Services;
-using Marten.Transforms;
 using Npgsql;
 using Weasel.Postgresql;
 using Weasel.Postgresql.Functions;
@@ -77,12 +76,6 @@ namespace Marten.Storage
         }
 
         public ISequences Sequences => _sequences.Value;
-
-        public TransformFunction TransformFor(string name)
-        {
-            EnsureStorageExists(typeof(Transforms.Transforms));
-            return _features.Transforms.For(name);
-        }
 
         public void MarkAllFeaturesAsChecked()
         {

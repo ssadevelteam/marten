@@ -12,7 +12,9 @@ namespace Marten.Testing.Acceptance
         public JsTransformsFixture() : base("js")
         {
             Options.DatabaseSchemaName = "js";
-            Options.Transforms.LoadFile("default_username.js");
+
+            throw new NotImplementedException();
+            //Options.Transforms.LoadFile("default_username.js");
             Options.Schema.For<MultiTenantUser>().MultiTenanted();
         }
     }
@@ -36,11 +38,12 @@ namespace Marten.Testing.Acceptance
             {
                 _.Connection(ConnectionSource.ConnectionString);
 
-                // Let Marten derive the transform name from the filename
-                _.Transforms.LoadFile("get_fullname.js");
-
-                // Explicitly define the transform name yourself
-                _.Transforms.LoadFile("default_username.js", "set_default_username");
+                throw new NotImplementedException();
+                // // Let Marten derive the transform name from the filename
+                // _.Transforms.LoadFile("get_fullname.js");
+                //
+                // // Explicitly define the transform name yourself
+                // _.Transforms.LoadFile("default_username.js", "set_default_username");
             });
             #endregion sample_loading_js_transform_files
 
@@ -52,20 +55,21 @@ namespace Marten.Testing.Acceptance
         #region sample_transform_example
         private static void transform_example(IDocumentStore store)
         {
-            // Transform User documents with a filter
-            store.Transform.Where<User>("default_username", x => x.UserName == null);
-
-            // Transform a single User document by Id
-            store.Transform.Document<User>("default_username", Guid.NewGuid());
-
-            // Transform all User documents
-            store.Transform.All<User>("default_username");
-
-            // Only transform documents from the "tenant1" tenant
-            store.Transform.Tenant<User>("default_username", "tenant1");
-
-            // Only transform documents from the named tenants
-            store.Transform.Tenants<User>("default_username", "tenant1", "tenant2");
+            throw new NotImplementedException();
+            // // Transform User documents with a filter
+            // store.Transform.Where<User>("default_username", x => x.UserName == null);
+            //
+            // // Transform a single User document by Id
+            // store.Transform.Document<User>("default_username", Guid.NewGuid());
+            //
+            // // Transform all User documents
+            // store.Transform.All<User>("default_username");
+            //
+            // // Only transform documents from the "tenant1" tenant
+            // store.Transform.Tenant<User>("default_username", "tenant1");
+            //
+            // // Only transform documents from the named tenants
+            // store.Transform.Tenants<User>("default_username", "tenant1", "tenant2");
         }
 
         #endregion sample_transform_example
@@ -76,7 +80,8 @@ namespace Marten.Testing.Acceptance
             theStore.Tenancy.Default.EnsureStorageExists(typeof(User));
             await theStore.Schema.ApplyAllConfiguredChangesToDatabase();
 
-            theStore.Transform.All<User>("default_username");
+            throw new NotImplementedException();
+            //theStore.Transform.All<User>("default_username");
 
         }
 
@@ -89,7 +94,8 @@ namespace Marten.Testing.Acceptance
 
             theStore.BulkInsert(new User[] { user1, user2, user3 });
 
-            theStore.Transform.All<User>("default_username");
+            throw new NotImplementedException();
+            //theStore.Transform.All<User>("default_username");
 
             using (var session = theStore.QuerySession())
             {
@@ -110,17 +116,18 @@ namespace Marten.Testing.Acceptance
             theStore.BulkInsert("Purple", new MultiTenantUser[] { user1, user2 });
             theStore.BulkInsert("Orange", new MultiTenantUser[] { user3 });
 
-            theStore.Transform.Tenant<MultiTenantUser>("default_username", "Purple");
-
-            using (var query = theStore.QuerySession("Purple"))
-            {
-                query.Load<MultiTenantUser>(user1.Id).UserName.ShouldBe("jeremy.miller");
-            }
-
-            using (var query = theStore.QuerySession("Orange"))
-            {
-                query.Load<MultiTenantUser>(user3.Id).UserName.ShouldBe("NotTransformed");
-            }
+            throw new NotImplementedException();
+            // theStore.Transform.Tenant<MultiTenantUser>("default_username", "Purple");
+            //
+            // using (var query = theStore.QuerySession("Purple"))
+            // {
+            //     query.Load<MultiTenantUser>(user1.Id).UserName.ShouldBe("jeremy.miller");
+            // }
+            //
+            // using (var query = theStore.QuerySession("Orange"))
+            // {
+            //     query.Load<MultiTenantUser>(user3.Id).UserName.ShouldBe("NotTransformed");
+            // }
         }
 
         [Fact]
@@ -132,7 +139,8 @@ namespace Marten.Testing.Acceptance
 
             theStore.BulkInsert(new User[] { user1, user2, user3 });
 
-            theStore.Transform.Document<User>("default_username", user1.Id);
+            throw new NotImplementedException();
+            //theStore.Transform.Document<User>("default_username", user1.Id);
 
             using (var session = theStore.QuerySession())
             {
@@ -153,7 +161,8 @@ namespace Marten.Testing.Acceptance
 
             theStore.BulkInsert(new User[] { user1, user2, user3 });
 
-            theStore.Transform.Where<User>("default_username", x => x.FirstName == user1.FirstName);
+            throw new NotImplementedException();
+            //theStore.Transform.Where<User>("default_username", x => x.FirstName == user1.FirstName);
 
             using (var session = theStore.QuerySession())
             {

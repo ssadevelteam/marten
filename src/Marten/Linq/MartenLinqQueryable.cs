@@ -14,8 +14,6 @@ using Marten.Linq.Parsing;
 using Marten.Linq.QueryHandlers;
 using Weasel.Postgresql;
 using Marten.Services;
-using Marten.Transforms;
-using Marten.Util;
 using Npgsql;
 using Remotion.Linq;
 using Remotion.Linq.Clauses;
@@ -139,32 +137,12 @@ namespace Marten.Linq
             return MartenProvider.ExecuteAsync<double>(Expression, token, LinqConstants.AverageOperator);
         }
 
-        public string ToJsonArray()
-        {
-            return MartenProvider.Execute<string>(Expression, LinqConstants.AsJsonOperator);
-        }
-
-        public Task<string> ToJsonArrayAsync(CancellationToken token)
-        {
-            return MartenProvider.ExecuteAsync<string>(Expression, token, LinqConstants.AsJsonOperator);
-        }
-
-        public Task<string> ToJsonArrayAsync()
-        {
-            return MartenProvider.ExecuteAsync<string>(Expression, CancellationToken.None, LinqConstants.AsJsonOperator);
-        }
-
         public QueryPlan Explain(FetchType fetchType = FetchType.FetchMany,
             Action<IConfigureExplainExpressions>? configureExplain = null)
         {
             var command = ToPreviewCommand(fetchType);
 
             return _session.Database.ExplainQuery(_session.Serializer, command, configureExplain)!;
-        }
-
-        public IQueryable<TDoc> TransformTo<TDoc>(string transformName)
-        {
-            return this.Select(x => x.TransformTo<T, TDoc>(transformName));
         }
 
        public IMartenQueryable<T> Include<TInclude>(Expression<Func<T, object>> idSource, Action<TInclude> callback) where TInclude : notnull

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Marten.Linq.Filters;
 using Marten.PLv8.Patching;
 using Marten.Testing.Documents;
 using Marten.Testing.Harness;
@@ -11,7 +10,7 @@ using Weasel.Postgresql;
 using Weasel.Postgresql.SqlGeneration;
 using Xunit;
 
-namespace Marten.Testing.Acceptance
+namespace Marten.PLv8.Testing.Patching
 {
     [Collection("patching_api")]
     public class patching_api: OneOffConfigurationsContext

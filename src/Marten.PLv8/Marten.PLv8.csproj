@@ -8,4 +8,8 @@
       <ProjectReference Include="..\Marten\Marten.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <EmbeddedResource Include="mt_patching.js" />
+    </ItemGroup>
+
 </Project>
