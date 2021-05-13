@@ -3,7 +3,7 @@ using System.Linq.Expressions;
 using Marten.Internal.Sessions;
 using Weasel.Postgresql.SqlGeneration;
 
-namespace Marten.Patching
+namespace Marten.PLv8.Patching
 {
     public static class PatchingExtensions
     {

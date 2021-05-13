@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Marten.Events;
 using Marten.Events.Projections;
-using Marten.Patching;
+using Marten.PLv8.Patching;
 using Marten.Storage;
 using Marten.Testing.Harness;
 using Shouldly;

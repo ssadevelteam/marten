@@ -4,14 +4,13 @@ using System.Linq;
 using System.Linq.Expressions;
 using Baseline;
 using Marten.Internal.Sessions;
-using Marten.Linq;
 using Marten.Linq.Parsing;
 using Marten.Linq.SqlGeneration;
 using Marten.Util;
 using Weasel.Postgresql.SqlGeneration;
 
 #nullable enable
-namespace Marten.Patching
+namespace Marten.PLv8.Patching
 {
     internal class PatchExpression<T>: IPatchExpression<T>
     {

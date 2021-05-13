@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Marten.Patching;
+using Marten.PLv8.Patching;
 using Marten.Testing.Harness;
 using Shouldly;
 using Xunit;
 
-namespace Marten.Testing.Patching
+namespace Marten.PLv8.Testing.Patching
 {
     public class PatchingTests: IntegrationContext
     {

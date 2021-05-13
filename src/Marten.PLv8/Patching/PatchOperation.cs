@@ -7,18 +7,14 @@ using System.Threading.Tasks;
 using Marten.Internal;
 using Marten.Internal.Operations;
 using Marten.Internal.Storage;
-using Marten.Linq;
-using Marten.Linq.SqlGeneration;
-using Weasel.Postgresql;
 using Marten.Schema;
 using Marten.Schema.Identity;
 using Marten.Services;
 using Marten.Transforms;
-using Marten.Util;
-using NpgsqlTypes;
+using Weasel.Postgresql;
 using Weasel.Postgresql.SqlGeneration;
 
-namespace Marten.Patching
+namespace Marten.PLv8.Patching
 {
     public class PatchOperation: IStorageOperation, NoDataReturnedCall
     {

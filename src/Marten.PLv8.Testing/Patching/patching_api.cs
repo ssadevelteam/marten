@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Marten.Linq.Filters;
-using Marten.Patching;
+using Marten.PLv8.Patching;
 using Marten.Testing.Documents;
 using Marten.Testing.Harness;
 using Shouldly;

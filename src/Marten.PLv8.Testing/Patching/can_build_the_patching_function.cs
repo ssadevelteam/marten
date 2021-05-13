@@ -3,7 +3,7 @@ using Marten.Testing.Harness;
 using Shouldly;
 using Xunit;
 
-namespace Marten.Testing.Patching
+namespace Marten.PLv8.Testing.Patching
 {
     public class can_build_the_patching_function : IntegrationContext
     {

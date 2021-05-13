@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using Marten.Internal.Sessions;
 using Marten.Internal.Storage;
 using Marten.Linq.Filters;
-using Marten.Patching;
-using Marten.Schema;
-using Marten.Services;
+using Marten.PLv8.Patching;
 using Marten.Services.Json;
 using Marten.Storage;
 using Marten.Testing.Documents;
@@ -14,7 +12,7 @@ using NSubstitute;
 using Shouldly;
 using Xunit;
 
-namespace Marten.Testing.Patching
+namespace Marten.PLv8.Testing.Patching
 {
     public class PatchExpressionTests : IntegrationContext
     {

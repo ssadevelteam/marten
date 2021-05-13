@@ -1,5 +1,5 @@
 ﻿using System;
-using Marten.Patching;
+using Marten.PLv8.Patching;
 using Marten.Schema;
 using Marten.Testing.Harness;
 using Xunit;
@@ -8,9 +8,9 @@ namespace Marten.Testing.CoreFunctionality
 {
     using System.Linq.Expressions;
 
-    public sealed class document_session_sort_large_operation_bundle_Tests: IntegrationContext
+    public sealed class document_session_sort_large_operation_bundle_including_patches_Tests: IntegrationContext
     {
-        public document_session_sort_large_operation_bundle_Tests(DefaultStoreFixture fixture): base(fixture)
+        public document_session_sort_large_operation_bundle_including_patches_Tests(DefaultStoreFixture fixture): base(fixture)
         {
         }
 
