@@ -344,6 +344,11 @@ namespace Marten
         string? CorrelationId { get; set; }
 
         /// <summary>
+        /// Writeable list of the interceptors for this session
+        /// </summary>
+        IList<IDbCommandInterceptor> Interceptors { get; }
+
+        /// <summary>
         /// Retrieve the current known version of the given document
         /// according to this session. Will return null if the document is
         /// not part of this session

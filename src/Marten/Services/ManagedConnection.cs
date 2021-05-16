@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
@@ -77,6 +78,8 @@ namespace Marten.Services
         }
 
         public IMartenSessionLogger Logger { get; set; } = NulloMartenLogger.Flyweight;
+
+        public IList<IDbCommandInterceptor> Interceptors { get; set; } = new List<IDbCommandInterceptor>();
 
         public int RequestCount { get; private set; }
 
@@ -236,6 +239,11 @@ namespace Marten.Services
 
             try
             {
+                foreach (var interceptor in Interceptors)
+                {
+                    interceptor.NonQueryExecuting(cmd);
+                }
+
                 var returnValue = _retryPolicy.Execute(cmd.ExecuteNonQuery);
                 Logger.LogSuccess(cmd);
 
@@ -258,6 +266,11 @@ namespace Marten.Services
 
             try
             {
+                foreach (var interceptor in Interceptors)
+                {
+                    interceptor.ReaderExecuting(command);
+                }
+
                 var returnValue = _retryPolicy.Execute<DbDataReader>(command.ExecuteReader);
                 Logger.LogSuccess(command);
                 return returnValue;
@@ -281,6 +294,11 @@ namespace Marten.Services
 
             try
             {
+                foreach (var interceptor in Interceptors)
+                {
+                    await interceptor.ReaderExecutingAsync(command);
+                }
+
                 var reader = await _retryPolicy.ExecuteAsync(() => command.ExecuteReaderAsync(token), token);
                 Logger.LogSuccess(command);
 
@@ -306,6 +324,11 @@ namespace Marten.Services
 
             try
             {
+                foreach (var interceptor in Interceptors)
+                {
+                    await interceptor.NonQueryExecutingAsync(command);
+                }
+
                 var returnValue = await _retryPolicy.ExecuteAsync(() => command.ExecuteNonQueryAsync(token), token);
                 Logger.LogSuccess(command);
 

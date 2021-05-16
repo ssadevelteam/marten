@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,6 +24,8 @@ namespace Marten.Services
 
         int RequestCount { get; }
         IMartenSessionLogger Logger { get; set; }
+
+        IList<IDbCommandInterceptor> Interceptors { get; set; }
 
         void BeginTransaction();
 

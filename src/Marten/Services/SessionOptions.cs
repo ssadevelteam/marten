@@ -26,6 +26,8 @@ namespace Marten.Services
         /// </summary>
         public readonly IList<IDocumentSessionListener> Listeners = new List<IDocumentSessionListener>();
 
+        public readonly IList<IDbCommandInterceptor> Interceptors = new List<IDbCommandInterceptor>();
+
         /// <summary>
         /// Override the tenant id for the requested session
         /// </summary>

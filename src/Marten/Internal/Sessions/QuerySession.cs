@@ -56,6 +56,8 @@ namespace Marten.Internal.Sessions
 
         public IList<IDocumentSessionListener> Listeners { get; } = new List<IDocumentSessionListener>();
 
+        public IList<IDbCommandInterceptor> Interceptors { get; } = new List<IDbCommandInterceptor>();
+
         internal SessionOptions? SessionOptions { get; }
 
         public QuerySession(DocumentStore store, SessionOptions? sessionOptions, IManagedConnection database,
@@ -74,11 +76,13 @@ namespace Marten.Internal.Sessions
                 }
 
                 Listeners.AddRange(sessionOptions.Listeners);
+                Interceptors.AddRange(sessionOptions.Interceptors);
             }
 
             _providers = tenant.Providers ?? throw new ArgumentNullException(nameof(ITenant.Providers));
 
             Database = database;
+            Database.Interceptors = Interceptors;
             Serializer = store.Serializer;
             Tenant = tenant;
             Options = store.Options;
